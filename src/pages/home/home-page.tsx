@@ -21,6 +21,7 @@ export const HomePage = () => {
 
       <nav className="flex flex-wrap gap-2">
         <Button render={<Link to={STATIC_ROUTES.ABOUT} />}>About</Button>
+        <Button render={<Link to={STATIC_ROUTES.VOICE} />}>🎙 Голос</Button>
         <Button variant="outline" render={<Link to={DYNAMIC_ROUTES.POST(1)} />}>
           Sample post
         </Button>
