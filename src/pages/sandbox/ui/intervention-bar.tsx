@@ -23,15 +23,33 @@ export const InterventionBar = ({
         </small>
       </span>
     </div>
-    <Button type="button" variant="outline" size="xs" onClick={onPulse}>
+    <Button
+      className="cursor-pointer"
+      type="button"
+      variant="outline"
+      size="xs"
+      onClick={onPulse}
+    >
       <Sparkles size={14} />
       Импульс
     </Button>
-    <Button type="button" variant="outline" size="xs" onClick={onStorm}>
+    <Button
+      className="cursor-pointer"
+      type="button"
+      variant="outline"
+      size="xs"
+      onClick={onStorm}
+    >
       <Waves size={14} />
       Возмущение
     </Button>
-    <Button type="button" variant="outline" size="xs" onClick={onScarcity}>
+    <Button
+      className="cursor-pointer"
+      type="button"
+      variant="outline"
+      size="xs"
+      onClick={onScarcity}
+    >
       <ShieldAlert size={14} />
       Истощение
     </Button>

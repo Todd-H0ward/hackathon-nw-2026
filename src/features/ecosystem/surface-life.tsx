@@ -11,6 +11,7 @@ import { Html, Line } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   Color,
+  type Group,
   type InstancedMesh,
   type Mesh,
   MeshBasicMaterial,
@@ -33,7 +34,7 @@ type Vec3 = [number, number, number];
 const ARC_STEPS = 20;
 const DEFAULT_RADIUS = 2.33;
 const BOUNDARY_RADIUS = 2.35;
-const LABEL_RADIUS = 2.45;
+const LABEL_RADIUS = 2.46;
 
 /** Spherical → cartesian into a reusable tuple (no per-call array alloc). */
 const writePosition = (
@@ -59,9 +60,9 @@ const makeArcBuffer = (): Vec3[] =>
 const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
   for (let i = 0; i < ARC_STEPS; i++) {
     const t = i / (ARC_STEPS - 1);
-    let x = a[0] + (b[0] - a[0]) * t;
-    let y = a[1] + (b[1] - a[1]) * t;
-    let z = a[2] + (b[2] - a[2]) * t;
+    const x = a[0] + (b[0] - a[0]) * t;
+    const y = a[1] + (b[1] - a[1]) * t;
+    const z = a[2] + (b[2] - a[2]) * t;
     const len = Math.hypot(x, y, z) || 1;
     const r = 2.36 + Math.sin(t * Math.PI) * 0.12;
     const point = out[i];
@@ -111,9 +112,9 @@ const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
   return <Line points={stable.current} {...rest} />;
 };
 
-const PACKET_GEOMETRY = new SphereGeometry(0.017, 6, 6);
+const PACKET_GEOMETRY = new SphereGeometry(0.028, 8, 8);
 const PACKET_MATERIAL = new MeshBasicMaterial({
-  color: '#fff4c4',
+  color: '#ffffff',
   toneMapped: false,
 });
 
@@ -121,6 +122,7 @@ type ColonyView = {
   colony: Colony;
   group: Individual[];
   center: { lat: number; lon: number };
+  centerPos: Vec3;
   boundary: Vec3[];
   links: { id: number; points: Vec3[] }[];
   labelPosition: Vec3;
@@ -148,6 +150,7 @@ type SurfaceLifeProps = {
 const buildSceneViews = (
   simulation: Simulation,
   showLinks: boolean,
+  selected: number | null,
 ): { colonyViews: ColonyView[]; packetViews: PacketView[] } => {
   const alive = simulation.individuals.filter((i) => i.dead === null);
   const byColony = new Map<number, Individual[]>();
@@ -180,6 +183,9 @@ const buildSceneViews = (
       lon: lonSum / group.length,
     };
 
+    const centerPos: Vec3 = [0, 0, 0];
+    writePosition(centerPos, center.lat, center.lon, BOUNDARY_RADIUS);
+
     const boundary: Vec3[] = Array.from({ length: 49 }, (_, k) => {
       const point: Vec3 = [0, 0, 0];
       writePosition(
@@ -193,7 +199,9 @@ const buildSceneViews = (
 
     const links: ColonyView['links'] = [];
     if (showLinks) {
-      for (let j = 1; j < group.length; j++) {
+      const maxLinks = selected === colony.id ? 16 : 5;
+      const linkCount = Math.min(group.length - 1, maxLinks);
+      for (let j = 1; j <= linkCount; j++) {
         writePosition(scratchA, group[j - 1].lat, group[j - 1].lon);
         writePosition(scratchB, group[j].lat, group[j].lon);
         writeArc(scratchArc, scratchA, scratchB);
@@ -213,6 +221,7 @@ const buildSceneViews = (
       colony,
       group,
       center,
+      centerPos,
       boundary,
       links,
       labelPosition,
@@ -239,7 +248,9 @@ const buildSceneViews = (
           ? 0
           : Math.min(
               ARC_STEPS - 1,
-              Math.floor(((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1)),
+              Math.floor(
+                ((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1),
+              ),
             );
 
       packetViews.push({
@@ -251,6 +262,137 @@ const buildSceneViews = (
   }
 
   return { colonyViews, packetViews };
+};
+
+type ColonyOverlayProps = {
+  view: ColonyView;
+  selected: boolean;
+  showLinks: boolean;
+  showLabels: boolean;
+  occluder: RefObject<Mesh | null>;
+  onSelect: (id: number) => void;
+};
+
+/** Horizon occlusion + bright colony chrome; geometry comes from the parent memo. */
+const ColonyOverlay = ({
+  view,
+  selected,
+  showLinks,
+  showLabels,
+  occluder,
+  onSelect,
+}: ColonyOverlayProps) => {
+  const { colony, group, centerPos, boundary, links, labelPosition } = view;
+  const groupRef = useRef<Group>(null);
+  const htmlRef = useRef<HTMLButtonElement>(null);
+  const centerVec = useMemo(
+    () => new Vector3(centerPos[0], centerPos[1], centerPos[2]),
+    [centerPos],
+  );
+
+  useFrame(({ camera }) => {
+    if (!groupRef.current) return;
+    // Horizon occlusion: P · C − |P|² > −0.35 (margin so edges don't clip early).
+    const pDotC = centerVec.dot(camera.position);
+    const isVisible = pDotC - centerVec.lengthSq() > -0.35;
+
+    if (groupRef.current.visible !== isVisible) {
+      groupRef.current.visible = isVisible;
+    }
+    if (htmlRef.current) {
+      const targetDisplay = isVisible ? 'flex' : 'none';
+      if (htmlRef.current.style.display !== targetDisplay) {
+        htmlRef.current.style.display = targetDisplay;
+      }
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <StableLine
+        points={boundary}
+        color={colony.color}
+        transparent
+        opacity={selected ? 0.95 : 0.65}
+        lineWidth={selected ? 2.8 : 1.8}
+      />
+      {showLinks &&
+        links.map((link) => (
+          <StableLine
+            key={link.id}
+            points={link.points}
+            color={colony.color}
+            transparent
+            opacity={selected ? 0.9 : 0.6}
+            lineWidth={selected ? 2.2 : 1.4}
+          />
+        ))}
+      {showLabels && (
+        <Html
+          position={labelPosition}
+          center
+          occlude={[occluder as RefObject<Object3D>]}
+          zIndexRange={[9, 0]}
+        >
+          <button
+            ref={htmlRef}
+            type="button"
+            className={cn(
+              '[font:10px_monospace] font-semibold tracking-[1.2px] text-[var(--colony-color)] border border-[var(--colony-color)]/60 bg-[#050b11f5] rounded-[5px] whitespace-nowrap py-1.5 px-[9px] flex items-center gap-2 shadow-[0_4px_25px_#000000dd] backdrop-blur-md transition-all hover:scale-105',
+              selected &&
+                'border-[var(--colony-color)] bg-[#0d221ffc] ring-1 ring-[var(--colony-color)]/90 scale-110',
+            )}
+            style={{ '--colony-color': colony.color } as CSSProperties}
+            onClick={() => onSelect(colony.id)}
+          >
+            <span className="size-1.5 bg-[var(--colony-color)] rounded-full shadow-[0_0_10px_var(--colony-color)]" />{' '}
+            C—{String(colony.id).padStart(2, '0')}{' '}
+            <small className="text-[#b0c4cf] border-l border-[#ffffff35] pl-[6px] text-[9px] font-normal">
+              {group.length}
+            </small>
+          </button>
+        </Html>
+      )}
+    </group>
+  );
+};
+
+type PacketOverlayProps = {
+  view: PacketView;
+};
+
+const PacketOverlay = ({ view }: PacketOverlayProps) => {
+  const groupRef = useRef<Group>(null);
+  const headVec = useMemo(
+    () => new Vector3(view.head[0], view.head[1], view.head[2]),
+    [view.head],
+  );
+
+  useFrame(({ camera }) => {
+    if (!groupRef.current) return;
+    const pDotC = headVec.dot(camera.position);
+    const isVisible = pDotC - headVec.lengthSq() > -0.1;
+    if (groupRef.current.visible !== isVisible) {
+      groupRef.current.visible = isVisible;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <StableLine
+        points={view.points}
+        color="#ffffff"
+        transparent
+        opacity={0.8}
+        lineWidth={1.6}
+      />
+      <mesh
+        position={view.head}
+        geometry={PACKET_GEOMETRY}
+        material={PACKET_MATERIAL}
+      />
+    </group>
+  );
 };
 
 export const SurfaceLife = ({
@@ -278,8 +420,8 @@ export const SurfaceLife = ({
   }, [simulation.colonies]);
 
   const { colonyViews, packetViews } = useMemo(
-    () => buildSceneViews(simulation, showLinks),
-    [simulation, showLinks],
+    () => buildSceneViews(simulation, showLinks, selected),
+    [simulation, showLinks, selected],
   );
 
   useEffect(() => {
@@ -304,7 +446,7 @@ export const SurfaceLife = ({
     if (target.instanceColor) target.instanceColor.needsUpdate = true;
   }, [visible, colonyColorById, color]);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
     const target = mesh.current;
     if (!target) return;
     const tick = simulation.tick;
@@ -317,6 +459,16 @@ export const SurfaceLife = ({
         DEFAULT_RADIUS * Math.sin(individual.lat),
         DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
       );
+
+      // Back-face cull: hide individuals on the far side of the sphere.
+      const pDotC = dummy.position.dot(camera.position);
+      if (pDotC - dummy.position.lengthSq() <= -0.05) {
+        dummy.scale.set(0, 0, 0);
+        dummy.updateMatrix();
+        target.setMatrixAt(index, dummy.matrix);
+        continue;
+      }
+
       dummy.lookAt(outward.copy(dummy.position).multiplyScalar(2));
       const age = tick - individual.born;
       const birthScale = Math.min(1, (age + 1) / 8);
@@ -330,7 +482,7 @@ export const SurfaceLife = ({
         birthScale *
         deathScale *
         pulse;
-      dummy.scale.set(0.027 * scale, 0.027 * scale, 0.048 * scale);
+      dummy.scale.set(0.052 * scale, 0.052 * scale, 0.088 * scale);
       dummy.updateMatrix();
       target.setMatrixAt(index, dummy.matrix);
     }
@@ -349,82 +501,43 @@ export const SurfaceLife = ({
       {/* biome-ignore lint/a11y/noStaticElementInteractions: Three.js mesh; equivalent keyboard controls are the colony list buttons. */}
       <instancedMesh
         ref={mesh}
-        args={[undefined, undefined, 220]}
+        args={[undefined, undefined, 2500]}
         frustumCulled={false}
         onClick={(e) => {
           e.stopPropagation();
           const individual = visible[e.instanceId ?? -1];
-          if (individual) onSelect(individual.colony);
+          if (!individual) return;
+          const cosLat = Math.cos(individual.lat);
+          dummy.position.set(
+            DEFAULT_RADIUS * cosLat * Math.sin(individual.lon),
+            DEFAULT_RADIUS * Math.sin(individual.lat),
+            DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
+          );
+          if (
+            dummy.position.dot(e.camera.position) - dummy.position.lengthSq() >
+            -0.05
+          ) {
+            onSelect(individual.colony);
+          }
         }}
       >
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
-      {colonyViews.map(
-        ({ colony, group, boundary, links, labelPosition }) => (
-          <group key={colony.id}>
-            <StableLine
-              points={boundary}
-              color={colony.color}
-              transparent
-              opacity={selected === colony.id ? 0.6 : 0.17}
-              lineWidth={selected === colony.id ? 1.3 : 0.6}
-            />
-            {showLinks &&
-              links.map((link) => (
-                <StableLine
-                  key={link.id}
-                  points={link.points}
-                  color={colony.color}
-                  transparent
-                  opacity={selected === colony.id ? 0.43 : 0.18}
-                  lineWidth={0.7}
-                />
-              ))}
-            {showLabels && (
-              <Html
-                position={labelPosition}
-                center
-                occlude={[occluder as RefObject<Object3D>]}
-                zIndexRange={[9, 0]}
-              >
-                <button
-                  type="button"
-                  className={cn(
-                    '[font:8px_monospace] tracking-[1px] text-[var(--colony-color)] border border-[#65868355] bg-[#0b161ee8] rounded-[4px] whitespace-nowrap py-1.5 px-[7px] flex items-center gap-1.5 shadow-[0_2px_15px_#0005]',
-                    selected === colony.id &&
-                      'border-[var(--colony-color)] bg-[#19312cf0]',
-                  )}
-                  style={{ '--colony-color': colony.color } as CSSProperties}
-                  onClick={() => onSelect(colony.id)}
-                >
-                  <span className="size-1 bg-[var(--colony-color)] rounded-full" />{' '}
-                  C—{String(colony.id).padStart(2, '0')}{' '}
-                  <small className="text-[#9dafb8] border-l border-[#ffffff25] pl-[5px]">
-                    {group.length}
-                  </small>
-                </button>
-              </Html>
-            )}
-          </group>
-        ),
-      )}
+      {colonyViews.map((view) => (
+        <ColonyOverlay
+          key={view.colony.id}
+          view={view}
+          selected={selected === view.colony.id}
+          showLinks={showLinks}
+          showLabels={showLabels}
+          occluder={occluder}
+          onSelect={onSelect}
+        />
+      ))}
       {showLinks &&
-        packetViews.map((packet) => (
-          <group key={packet.key}>
-            <StableLine
-              points={packet.points}
-              color="#ffffff"
-              transparent
-              opacity={0.45}
-              lineWidth={1}
-            />
-            <mesh
-              position={packet.head}
-              geometry={PACKET_GEOMETRY}
-              material={PACKET_MATERIAL}
-            />
-          </group>
+        packetViews.map((view) => (
+          <PacketOverlay key={view.key} view={view} />
         ))}
     </group>
   );
