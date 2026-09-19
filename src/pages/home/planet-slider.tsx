@@ -77,6 +77,13 @@ export const PlanetSlider = ({
     body: GlobeBodyId,
     pose: PlanetScreenPose | null,
   ) => {
+    // If the clicked planet is not the active (centered) one — just select it.
+    if (body !== activeSlide) {
+      setActiveSlide(body);
+      cursorRef.current?.hide();
+      return;
+    }
+
     cursorRef.current?.hide();
     setBody(body);
 

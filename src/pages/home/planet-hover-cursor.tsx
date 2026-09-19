@@ -89,9 +89,6 @@ export const PlanetHoverCursor = forwardRef<
             className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent"
             aria-hidden
           />
-          <p className="line-clamp-2 text-[12px] leading-snug text-white/55">
-            {info.summary}
-          </p>
           <p
             className="mt-2 text-[1.45rem] leading-none font-light tracking-[-0.04em] text-white"
             style={{ textShadow: '0 0 20px rgba(180, 210, 255, 0.28)' }}
