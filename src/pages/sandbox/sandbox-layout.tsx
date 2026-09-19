@@ -1,17 +1,19 @@
 import { type CSSProperties, useState } from 'react';
-
-import { motion } from 'motion/react';
 import { Outlet } from 'react-router';
 
+import { motion } from 'motion/react';
+
 import { LabProvider, useLab } from '@/contexts/lab';
-import { usePlanetTransition } from '@/features/planet-transition';
+
 import { ToastProvider } from '@/shared/ui';
 
+import { usePlanetTransition } from '@/features/planet-transition';
+
 import { downloadExperiment } from './lib';
-import { LabDialog, LabFooter, LabHeader, LabTitle } from './ui';
+import { LabDialog, LabRail } from './ui';
 
 const shellClassName =
-  "group/lab min-h-screen overflow-y-auto bg-[#090d12] text-[#e6edf1] text-xs px-8 pb-[18px] font-['Geist_Variable',Arial,sans-serif] min-[1600px]:px-12 max-[1180px]:px-[18px] max-[700px]:px-3 max-[700px]:pb-[15px] motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none";
+  'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-[700px]:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
 
 const SandboxShell = () => {
   const lab = useLab();
@@ -29,22 +31,18 @@ const SandboxShell = () => {
       data-expanded={lab.expanded || undefined}
       style={{ '--world-color': lab.world.color } as CSSProperties}
     >
-      <LabHeader
-        onOpenGuide={() => lab.setModal('guide')}
-        onOpenAtlas={() => lab.setModal('atlas')}
-      />
-
-      <LabTitle
+      <LabRail
         seed={lab.sim.seed}
         onExport={() => {
           downloadExperiment(lab.sim);
           lab.notify('Эксперимент экспортирован в JSON');
         }}
+        onOpenGuide={() => lab.setModal('guide')}
       />
 
-      <Outlet />
-
-      <LabFooter onOpenGuide={() => lab.setModal('guide')} />
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <Outlet />
+      </div>
 
       <LabDialog
         modal={lab.modal}
@@ -52,7 +50,6 @@ const SandboxShell = () => {
         seed={lab.seed}
         onSeedChange={lab.setSeed}
         onClose={() => lab.setModal(null)}
-        onSelectWorld={lab.selectWorld}
         onDownload={() => downloadExperiment(lab.sim)}
         onReset={lab.resetExperiment}
         onReplay={lab.runReplay}

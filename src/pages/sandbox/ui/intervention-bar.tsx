@@ -13,14 +13,13 @@ export const InterventionBar = ({
   onStorm,
   onScarcity,
 }: InterventionBarProps) => (
-  <div className="flex gap-2 items-center py-4 px-[17px] border-b border-[#222c37] bg-[#0e151c] max-[1180px]:flex-wrap max-[1180px]:p-[11px] max-[700px]:p-3 max-[700px]:gap-[7px]">
-    <div className="flex items-center gap-[7px] text-[9px] text-[#a3b3be] mr-auto max-[1180px]:w-full max-[1180px]:mb-[3px] [&_svg]:text-[#b0cdbc]">
+  <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2 max-[1180px]:flex-wrap max-[700px]:gap-[7px]">
+    <div className="mr-auto flex items-center gap-[7px] text-[9px] text-foreground max-[1180px]:mb-[3px] max-[1180px]:w-full [&_svg]:text-xeno-green">
       <Zap size={15} />
       <span>
-        Воздействовать
-        <br />
-        <small className="text-[7px] text-[#566e7d] leading-[2]">
-          60 модельных тактов
+        Воздействовать{' '}
+        <small className="text-[8px] text-muted-foreground">
+          · 60 модельных тактов
         </small>
       </span>
     </div>

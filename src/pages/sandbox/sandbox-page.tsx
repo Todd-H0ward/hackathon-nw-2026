@@ -13,7 +13,7 @@ export const SandboxPage = () => {
   const lab = useLab();
 
   return (
-    <div className="grid grid-cols-[220px_minmax(0,1fr)_270px] border border-[#222c37] rounded-[10px] overflow-hidden min-h-[705px] group-data-[expanded=true]/lab:grid-cols-1 min-[1600px]:grid-cols-[250px_minmax(0,1fr)_310px] max-[1180px]:grid-cols-[185px_minmax(0,1fr)_235px] max-[980px]:grid-cols-[190px_minmax(0,1fr)] max-[700px]:grid-cols-1">
+    <div className="grid h-full grid-cols-[220px_minmax(0,1fr)_270px] group-data-[expanded=true]/lab:grid-cols-1 min-[1600px]:grid-cols-[250px_minmax(0,1fr)_300px] max-[1180px]:grid-cols-[190px_minmax(0,1fr)_235px] max-[980px]:h-auto max-[980px]:grid-cols-[190px_minmax(0,1fr)] max-[700px]:grid-cols-1">
       <EnvironmentPanel
         body={lab.body}
         sim={lab.sim}
@@ -21,7 +21,7 @@ export const SandboxPage = () => {
         onSettings={lab.settings}
       />
 
-      <main className="min-w-0 bg-[#080d14]">
+      <main className="flex min-h-0 min-w-0 flex-col bg-background max-[980px]:min-h-[calc(100dvh-1px)]">
         <PlanetViewport
           body={lab.body}
           sim={lab.sim}

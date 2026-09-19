@@ -8,7 +8,7 @@ type SparklineProps = {
 
 export const Sparkline = ({
   values,
-  color = '#8bd6c2',
+  color = 'var(--xeno-green)',
   className,
 }: SparklineProps) => {
   const max = Math.max(1, ...values);

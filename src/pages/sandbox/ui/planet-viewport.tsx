@@ -36,6 +36,9 @@ type PlanetViewportProps = {
   onToggleExpanded: () => void;
 };
 
+const toolClass =
+  'inline-flex size-8 items-center justify-center rounded-[5px] border border-border bg-card/80 text-muted-foreground backdrop-blur transition-colors hover:bg-secondary hover:text-foreground aria-pressed:border-primary/50 aria-pressed:bg-secondary aria-pressed:text-foreground';
+
 export const PlanetViewport = ({
   body,
   sim,
@@ -89,34 +92,37 @@ export const PlanetViewport = ({
   return (
     <section
       ref={sectionRef}
-      className={cn(
-        'h-[496px] relative overflow-hidden bg-[radial-gradient(ellipse_at_45%_50%,#152b3840,transparent_62%)]',
-        'group-data-[expanded=true]/lab:h-[65vh] group-data-[expanded=true]/lab:min-h-[480px]',
-        'min-[1600px]:h-[580px] max-[1180px]:h-[460px] max-[700px]:h-[420px]',
-        'max-[700px]:group-data-[expanded=true]/lab:min-h-[450px]',
-      )}
+      className="relative min-h-[360px] flex-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_50%,color-mix(in_oklch,var(--world-color)_9%,transparent),transparent_62%)] max-[700px]:min-h-[380px]"
       aria-label="Интерактивная планета с особями и колониями"
     >
-      <div className="absolute z-[11] top-6 left-6 right-6 flex justify-between items-start pointer-events-none gap-3 max-[1180px]:left-[17px] max-[1180px]:right-[17px]">
+      <div className="pointer-events-none absolute top-4 right-4 left-4 z-[11] flex items-start justify-between gap-3">
         <div>
-          <span className={cn('[font:9px_monospace] tracking-[1.45px] text-[#82929f]', 'text-[8px] max-[700px]:text-[7px]')}>
-            {world.code} <span className="text-[#495967] mx-[7px]">/</span>{' '}
-            ПОВЕРХНОСТНЫЙ СЛОЙ
+          <span className="font-mono text-[8px] tracking-[1.45px] text-muted-foreground">
+            {world.code}{' '}
+            <span className="mx-[7px] text-muted-foreground/50">/</span>{' '}
+            ПОВЕРХНОСТНЫЙ СЛОЙ · SEED {sim.seed}
           </span>
-          <h2 className="text-[27px] font-normal tracking-[-0.7px] my-2.5 max-[700px]:text-[23px]">
+          <h2 className="mt-1.5 text-[22px] font-normal tracking-[-0.6px]">
             {world.name}
-            <span className="block text-[10px] tracking-normal text-[#728691] mt-[5px]">
+            <span className="mt-1 block text-[10px] tracking-normal text-muted-foreground">
               {world.process}
             </span>
           </h2>
         </div>
         <span
           className={cn(
-            '[font:8px_monospace] tracking-[1px] flex gap-[7px] items-center bg-[#122721b8] border border-[#284c3e] text-[#9bbfac] py-1.5 px-2 rounded max-[1180px]:text-[6px] max-[700px]:text-[6px]',
-            !running && 'text-[#aebbc8] bg-[#212a34] border-[#374350]',
+            'flex items-center gap-[7px] rounded border px-2 py-1.5 font-mono text-[8px] tracking-[1px]',
+            running
+              ? 'border-xeno-green/30 bg-xeno-green/10 text-xeno-green'
+              : 'border-border bg-secondary text-muted-foreground',
           )}
         >
-          <span className="size-1 bg-[#9dd5aa] rounded-full" />
+          <span
+            className={cn(
+              'size-1 rounded-full',
+              running ? 'bg-xeno-green' : 'bg-muted-foreground',
+            )}
+          />
           {running ? 'НАБЛЮДЕНИЕ' : 'ПАУЗА'}
         </span>
       </div>
@@ -144,13 +150,10 @@ export const PlanetViewport = ({
           </GlobeCanvas>
         </SceneBoundary>
       </motion.div>
-      <div className="absolute right-[15px] top-[100px] grid gap-1.5 z-[11]">
+      <div className="absolute top-[88px] right-3 z-[11] grid gap-1.5">
         <button
           type="button"
-          className={cn(
-            'size-8 inline-flex items-center justify-center border border-transparent rounded-[5px] bg-transparent text-[#8c9aa7] hover:text-[#ceebdf] hover:bg-[#23342f] hover:border-[#344a43] aria-pressed:text-[#ceebdf] aria-pressed:bg-[#23342f] aria-pressed:border-[#344a43]',
-            'bg-[#101c25c9] border-[#263540] text-[#93a6b3]',
-          )}
+          className={toolClass}
           title="Показать связи"
           aria-label="Показать связи"
           aria-pressed={showLinks}
@@ -160,10 +163,7 @@ export const PlanetViewport = ({
         </button>
         <button
           type="button"
-          className={cn(
-            'size-8 inline-flex items-center justify-center border border-transparent rounded-[5px] bg-transparent text-[#8c9aa7] hover:text-[#ceebdf] hover:bg-[#23342f] hover:border-[#344a43] aria-pressed:text-[#ceebdf] aria-pressed:bg-[#23342f] aria-pressed:border-[#344a43]',
-            'bg-[#101c25c9] border-[#263540] text-[#93a6b3]',
-          )}
+          className={toolClass}
           title="Подписи колоний"
           aria-label="Подписи колоний"
           aria-pressed={showLabels}
@@ -173,10 +173,7 @@ export const PlanetViewport = ({
         </button>
         <button
           type="button"
-          className={cn(
-            'size-8 inline-flex items-center justify-center border border-transparent rounded-[5px] bg-transparent text-[#8c9aa7] hover:text-[#ceebdf] hover:bg-[#23342f] hover:border-[#344a43] aria-pressed:text-[#ceebdf] aria-pressed:bg-[#23342f] aria-pressed:border-[#344a43]',
-            'bg-[#101c25c9] border-[#263540] text-[#93a6b3]',
-          )}
+          className={toolClass}
           title="Исходный ракурс"
           aria-label="Исходный ракурс"
           onClick={onResetCamera}
@@ -185,10 +182,7 @@ export const PlanetViewport = ({
         </button>
         <button
           type="button"
-          className={cn(
-            'size-8 inline-flex items-center justify-center border border-transparent rounded-[5px] bg-transparent text-[#8c9aa7] hover:text-[#ceebdf] hover:bg-[#23342f] hover:border-[#344a43] aria-pressed:text-[#ceebdf] aria-pressed:bg-[#23342f] aria-pressed:border-[#344a43]',
-            'bg-[#101c25c9] border-[#263540] text-[#93a6b3]',
-          )}
+          className={toolClass}
           title="Расширить сцену"
           aria-label="Расширить сцену"
           aria-pressed={expanded}
@@ -197,11 +191,11 @@ export const PlanetViewport = ({
           <Maximize2 size={17} />
         </button>
       </div>
-      <div className="absolute left-[23px] bottom-[70px] grid gap-1.5 [font:7px_monospace] tracking-[1.1px] text-[#4d6674] pointer-events-none max-[1180px]:left-[17px] max-[1180px]:text-[6px]">
+      <div className="pointer-events-none absolute bottom-[46px] left-4 grid gap-1.5 font-mono text-[7px] tracking-[1.1px] text-muted-foreground/60">
         <span>ПОВОРОТ — ПЕРЕТАСКИВАНИЕ</span>
         <span>МАСШТАБ — КОЛЕСО МЫШИ</span>
       </div>
-      <div className="absolute bottom-5 left-6 flex gap-3.5 text-[8px] text-[#80949f] pointer-events-none max-[1180px]:gap-[9px] max-[1180px]:left-[17px] max-[700px]:text-[7px]">
+      <div className="pointer-events-none absolute bottom-4 left-4 flex gap-3.5 text-[8px] text-muted-foreground max-[1180px]:gap-[9px] max-[700px]:text-[7px]">
         <span className="flex items-center gap-[5px]">
           <i className="size-[5px] rotate-45 block bg-[#81d6b9]" />
           Особь
@@ -215,16 +209,16 @@ export const PlanetViewport = ({
           Угасание
         </span>
         <span className="flex items-center gap-[5px]">
-          <span className="w-2.5 h-px bg-[#709599]" />
+          <span className="h-px w-2.5 bg-muted-foreground" />
           Связь
         </span>
       </div>
       {sim.effect && (
         <div
           className={cn(
-            'absolute left-1/2 bottom-[65px] -translate-x-1/2 bg-[#25483be8] border border-[#4e8070] text-[#bee7d2] py-[9px] px-[13px] rounded-md flex gap-[9px] items-center text-[9px] whitespace-nowrap max-[700px]:bottom-[115px] max-[700px]:text-[8px] max-[700px]:p-2',
+            'absolute bottom-[50px] left-1/2 flex -translate-x-1/2 items-center gap-[9px] whitespace-nowrap rounded-md border border-xeno-green/40 bg-card/90 px-[13px] py-[9px] text-[9px] text-xeno-green backdrop-blur max-[700px]:bottom-[100px] max-[700px]:p-2 max-[700px]:text-[8px]',
             (sim.effect.kind === 'scarcity' || sim.effect.kind === 'storm') &&
-              'bg-[#422a25e8] border-[#84514a] text-[#f3b7a4]',
+              'border-destructive/40 text-destructive',
           )}
         >
           <Zap size={15} />
@@ -233,19 +227,19 @@ export const PlanetViewport = ({
             : sim.effect.kind === 'storm'
               ? 'Возмущение среды'
               : 'Истощение ресурса'}
-          <span className="[font:8px_monospace] opacity-60 max-[700px]:text-[7px]">
+          <span className="font-mono text-[8px] opacity-60 max-[700px]:text-[7px]">
             {sim.effect.until - sim.tick} тактов
           </span>
         </div>
       )}
-      <div className="absolute right-5 bottom-[55px] grid grid-cols-[auto_auto] gap-x-2 gap-y-1 items-center pointer-events-none">
-        <b className="text-[22px] font-[350] text-[#c6dcd5]">{aliveCount}</b>
-        <span className="[font:7px_monospace] text-[#6c8994] tracking-[1px]">
+      <div className="pointer-events-none absolute right-4 bottom-4 grid grid-cols-[auto_auto] items-center gap-x-2 gap-y-1">
+        <b className="text-[20px] font-[350] text-foreground">{aliveCount}</b>
+        <span className="font-mono text-[7px] tracking-[1px] text-muted-foreground">
           ОСОБЕЙ
         </span>
-        <i className="col-span-full border-t border-[#2f414b] my-1" />
-        <b className="text-[22px] font-[350] text-[#c6dcd5]">{colonyCount}</b>
-        <span className="[font:7px_monospace] text-[#6c8994] tracking-[1px]">
+        <i className="col-span-full my-1 border-t border-border" />
+        <b className="text-[20px] font-[350] text-foreground">{colonyCount}</b>
+        <span className="font-mono text-[7px] tracking-[1px] text-muted-foreground">
           КОЛОНИЙ
         </span>
       </div>

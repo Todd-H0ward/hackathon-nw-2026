@@ -4,6 +4,7 @@ export const STATIC_ROUTES = {
   VOICE: '/voice',
   SANDBOX: '/sandbox',
   SANDBOX_ANALYTICS: '/sandbox/analytics',
+  SANDBOX_ATLAS: '/sandbox/atlas',
 } as const;
 
 export const DYNAMIC_ROUTES = {
