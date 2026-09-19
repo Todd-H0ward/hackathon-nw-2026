@@ -49,7 +49,7 @@ const SquareCameraRig = () => {
   return null;
 };
 
-export type GlobeCanvasProps = {
+export interface GlobeCanvasProps {
   body?: GlobeBodyId;
   /** World-space globe radius. Defaults to `GLOBE_DEFAULTS.RADIUS`. */
   radius?: number;
@@ -63,7 +63,7 @@ export type GlobeCanvasProps = {
   cameraReset?: number;
   className?: string;
   children?: ReactNode;
-};
+}
 
 export const GlobeCanvas = ({
   body = 'earth',

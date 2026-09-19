@@ -2,13 +2,14 @@ import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
+interface SliderProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   /** Rendered value next to the label (e.g. "72 %") */
   outputValue?: ReactNode;
   minLabel?: string;
   maxLabel?: string;
-};
+}
 
 export const Slider = ({
   className,

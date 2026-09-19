@@ -7,10 +7,10 @@ type MetricPoint = {
   entropy: number;
 };
 
-type MetricGridProps = {
+interface MetricGridProps {
   current: MetricPoint;
   history: MetricPoint[];
-};
+}
 
 export const MetricGrid = ({ current, history }: MetricGridProps) => {
   const items = [

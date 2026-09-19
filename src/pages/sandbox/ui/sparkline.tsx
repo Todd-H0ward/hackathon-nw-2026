@@ -1,10 +1,10 @@
 import { cn } from '@/shared/lib/utils';
 
-type SparklineProps = {
+interface SparklineProps {
   values: number[];
   color?: string;
   className?: string;
-};
+}
 
 export const Sparkline = ({
   values,

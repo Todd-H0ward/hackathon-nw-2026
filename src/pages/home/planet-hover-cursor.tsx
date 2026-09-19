@@ -16,14 +16,14 @@ export type PlanetHoverCursorHandle = {
   hide: () => void;
 };
 
-type PlanetHoverCursorProps = {
+interface PlanetHoverCursorProps {
   catalog: PlanetInfoCatalog;
-};
+}
 
 export const PlanetHoverCursor = forwardRef<
   PlanetHoverCursorHandle,
   PlanetHoverCursorProps
->(function PlanetHoverCursor({ catalog }, ref) {
+>(({ catalog }, ref) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState<GlobeBodyId | null>(null);
   const [visible, setVisible] = useState(false);
@@ -107,3 +107,4 @@ export const PlanetHoverCursor = forwardRef<
     </div>
   );
 });
+PlanetHoverCursor.displayName = 'PlanetHoverCursor';

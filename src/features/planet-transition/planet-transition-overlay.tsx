@@ -45,7 +45,11 @@ const mixPose = (
   distance: MathUtils.lerp(a.distance, b.distance, t),
 });
 
-const FlightScene = ({ body }: { body: GlobeBodyId }) => {
+interface FlightSceneProps {
+  body: GlobeBodyId;
+}
+
+const FlightScene = ({ body }: FlightSceneProps) => {
   const groupRef = useRef<Group>(null);
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const size = useThree((state) => state.size);

@@ -22,7 +22,7 @@ import {
 } from './planet-hover-cursor';
 import type { PlanetInfoCatalog } from './planet-info';
 
-type PlanetSliderProps = {
+interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
@@ -30,7 +30,7 @@ type PlanetSliderProps = {
   poseMeasureRef?: RefObject<
     ((body: GlobeBodyId) => PlanetScreenPose | null) | null
   >;
-};
+}
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
   const index = GLOBE_BODY_IDS.indexOf(current);

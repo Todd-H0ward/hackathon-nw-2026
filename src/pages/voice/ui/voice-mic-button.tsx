@@ -4,13 +4,13 @@ import { cn } from '@/shared/lib/utils';
 
 import { useVoiceError, useVoiceStatus } from '@/store';
 
-type VoiceMicButtonProps = {
+interface VoiceMicButtonProps {
   /** Controls come from `useVoiceBridge`, which the page mounts once. */
   isSupported: boolean;
   startListening: () => void;
   stopListening: () => void;
   className?: string;
-};
+}
 
 export const VoiceMicButton = ({
   isSupported,

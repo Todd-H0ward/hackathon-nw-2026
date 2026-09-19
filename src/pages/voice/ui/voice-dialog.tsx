@@ -7,7 +7,11 @@ import { Button } from '@/shared/ui';
 
 import { useClearVoiceHistory, useVoiceHistory } from '@/store';
 
-export const VoiceDialog = ({ className }: { className?: string }) => {
+interface VoiceDialogProps {
+  className?: string;
+}
+
+export const VoiceDialog = ({ className }: VoiceDialogProps) => {
   const history = useVoiceHistory();
   const clearHistory = useClearVoiceHistory();
   const bottomRef = useRef<HTMLDivElement>(null);

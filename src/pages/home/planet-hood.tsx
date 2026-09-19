@@ -3,11 +3,11 @@ import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import type { PlanetInfo } from './planet-info';
 
-type PlanetHoodProps = {
+interface PlanetHoodProps {
   activeBody: GlobeBodyId;
   info: PlanetInfo;
   className?: string;
-};
+}
 
 export const PlanetHood = ({
   activeBody,

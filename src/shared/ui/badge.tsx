@@ -4,8 +4,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-export type BadgeProps = HTMLAttributes<HTMLSpanElement> &
-  VariantProps<typeof badgeVariants>;
+export interface BadgeProps
+  extends HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {}
 
 export const badgeVariants = cva(
   'inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[1.5px] uppercase rounded px-[7px] py-[5px] leading-none select-none',

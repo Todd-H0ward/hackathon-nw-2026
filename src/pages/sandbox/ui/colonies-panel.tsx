@@ -14,7 +14,7 @@ import {
   type Simulation,
 } from '@/features/ecosystem/model';
 
-type ColoniesPanelProps = {
+interface ColoniesPanelProps {
   sim: Simulation;
   colonies: Colony[];
   selected: number | null;
@@ -27,7 +27,7 @@ type ColoniesPanelProps = {
   focused: Individual | undefined;
   onSelect: (id: number) => void;
   onAddColony: () => void;
-};
+}
 
 export const ColoniesPanel = ({
   sim,

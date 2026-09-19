@@ -19,9 +19,9 @@ import { GLOBE_DEFAULTS, type GlobeConfig } from '@/shared/ui/globe/config';
 
 const NOISE = 0.028;
 
-type GlobeFxProps = {
+interface GlobeFxProps {
   configRef: RefObject<GlobeConfig>;
-};
+}
 
 const passEffects = (pass: EffectPass): Effect[] =>
   (pass as unknown as { effects: Effect[] }).effects;

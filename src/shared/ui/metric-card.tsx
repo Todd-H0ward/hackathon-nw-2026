@@ -6,13 +6,13 @@ export type SparklinePoint = {
   value: number;
 };
 
-type MetricSparklineProps = SVGProps<SVGSVGElement> & {
+interface MetricSparklineProps extends SVGProps<SVGSVGElement> {
   data: SparklinePoint[];
   color?: string;
   strokeWidth?: number;
-};
+}
 
-type MetricCardProps = HTMLAttributes<HTMLDivElement> & {
+interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
   icon?: ReactNode;
   value: ReactNode;
@@ -20,7 +20,7 @@ type MetricCardProps = HTMLAttributes<HTMLDivElement> & {
   description?: string;
   sparkData?: SparklinePoint[];
   sparkColor?: string;
-};
+}
 
 /**
  * Inline 68×20 spark for the card footer. Deliberately not exported: the lab's

@@ -96,7 +96,7 @@ export type PlanetHoverPayload = {
   clientY: number;
 };
 
-type CarouselSceneProps = {
+interface CarouselSceneProps {
   /** Continuous carousel offset; integer part aligns with active body. */
   offsetRef: RefObject<number>;
   targetOffsetRef: RefObject<number>;
@@ -106,7 +106,7 @@ type CarouselSceneProps = {
   hoveredBodyRef: RefObject<GlobeBodyId | null>;
   hiddenBodyRef: RefObject<GlobeBodyId | null>;
   measureRef: RefObject<MeasureBody | null>;
-};
+}
 
 const CarouselScene = ({
   offsetRef,
@@ -297,7 +297,7 @@ const CarouselScene = ({
   );
 };
 
-export type GlobeCarouselCanvasProps = {
+export interface GlobeCarouselCanvasProps {
   activeBody: GlobeBodyId;
   onBodyChange: (body: GlobeBodyId) => void;
   onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
@@ -308,7 +308,7 @@ export type GlobeCarouselCanvasProps = {
   /** Lets a parent read live screen poses (reverse transition landing). */
   poseMeasureRef?: RefObject<MeasureBody | null>;
   className?: string;
-};
+}
 
 export const GlobeCarouselCanvas = ({
   activeBody,

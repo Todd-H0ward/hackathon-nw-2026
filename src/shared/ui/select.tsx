@@ -2,9 +2,9 @@ import type { SelectHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
+interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
-};
+}
 
 export const Select = ({ className, label, id, ...props }: SelectProps) => {
   return (

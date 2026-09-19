@@ -2,10 +2,9 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-export const Card = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+
+export const Card = ({ className, ...props }: CardProps) => {
   return (
     <div
       data-slot="card"
@@ -18,10 +17,9 @@ export const Card = ({
   );
 };
 
-export const CardHeader = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+
+export const CardHeader = ({ className, ...props }: CardHeaderProps) => {
   return (
     <div
       data-slot="card-header"
@@ -34,10 +32,9 @@ export const CardHeader = ({
   );
 };
 
-export const CardTitle = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLHeadingElement>) => {
+interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+
+export const CardTitle = ({ className, ...props }: CardTitleProps) => {
   return (
     <h3
       data-slot="card-title"
@@ -47,10 +44,9 @@ export const CardTitle = ({
   );
 };
 
-export const CardContent = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+
+export const CardContent = ({ className, ...props }: CardContentProps) => {
   return (
     <div
       data-slot="card-content"
@@ -60,10 +56,9 @@ export const CardContent = ({
   );
 };
 
-export const CardFooter = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+
+export const CardFooter = ({ className, ...props }: CardFooterProps) => {
   return (
     <div
       data-slot="card-footer"
