@@ -14,8 +14,7 @@ import {
   type PlanetScreenPose,
 } from '@/shared/ui/globe';
 
-import { usePlanetTransition } from '@/features/planet-transition';
-import { useLabStore } from '@/store';
+import { useLabSetBody, useTransitionLaunch } from '@/store';
 
 import {
   PlanetHoverCursor,
@@ -45,8 +44,8 @@ export const PlanetSlider = ({
   catalog,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
-  const setBody = useLabStore((s) => s.setBody);
-  const launchTransition = usePlanetTransition((s) => s.launch);
+  const setBody = useLabSetBody();
+  const launchTransition = useTransitionLaunch();
   const reduceMotion = useReducedMotion();
   const cursorRef = useRef<PlanetHoverCursorHandle>(null);
   const lastBodyRef = useRef<GlobeBodyId | null>(null);

@@ -29,7 +29,7 @@ import {
   snapshotToSimulation,
 } from '@/features/ecosystem/model';
 import { worldsToInfoMap } from '@/features/ecosystem/world-info';
-import { selectBody, useLabStore } from '@/store';
+import { useLabBody, useLabSetBody } from '@/store';
 
 import type { LabModal } from './types';
 
@@ -76,8 +76,8 @@ const initialCarries = (): Record<GlobeBodyId, AdapterCarry> => ({
 export const useLabState = () => {
   const { toast: notify } = useToast();
 
-  const body = useLabStore(selectBody);
-  const setBody = useLabStore((s) => s.setBody);
+  const body = useLabBody();
+  const setBody = useLabSetBody();
 
   const [speed, setSpeedState] = useState<1 | 2 | 5>(1);
   const [selected, setSelected] = useState<number | null>(null);

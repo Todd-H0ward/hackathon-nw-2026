@@ -10,15 +10,19 @@ import { useWorlds } from '@/shared/api/xenochoice';
 import { STATIC_ROUTES } from '@/shared/constants/routes';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { usePlanetTransition } from '@/features/planet-transition';
+import {
+  getTransitionState,
+  useTransitionBody,
+  useTransitionPhase,
+} from '@/store';
 
 import { worldsToPlanetInfoMap } from './planet-info';
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState<GlobeBodyId>('earth');
-  const phase = usePlanetTransition((s) => s.phase);
-  const transitionBody = usePlanetTransition((s) => s.body);
+  const phase = useTransitionPhase();
+  const transitionBody = useTransitionBody();
   const navigated = useRef(false);
 
   const worldsQuery = useWorlds();
@@ -38,7 +42,7 @@ export const HomePage = () => {
       transition={{ duration: 0.35, ease: 'easeOut' }}
       onAnimationComplete={() => {
         if (navigated.current) return;
-        if (usePlanetTransition.getState().phase !== 'handoff') return;
+        if (getTransitionState().phase !== 'handoff') return;
         navigated.current = true;
         navigate(STATIC_ROUTES.SANDBOX);
       }}

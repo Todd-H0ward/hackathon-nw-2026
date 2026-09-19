@@ -7,7 +7,7 @@ import { LabProvider, useLab } from '@/contexts';
 
 import { ToastProvider } from '@/shared/ui';
 
-import { usePlanetTransition } from '@/features/planet-transition';
+import { getTransitionState } from '@/store';
 
 import { LabDialog, LabRail, LabStatus } from './ui';
 
@@ -17,9 +17,7 @@ const shellClassName =
 const SandboxShell = () => {
   const lab = useLab();
   // Arriving with a planet in flight: fade the lab in around it.
-  const [arriving] = useState(
-    () => usePlanetTransition.getState().phase !== 'idle',
-  );
+  const [arriving] = useState(() => getTransitionState().phase !== 'idle');
 
   return (
     <motion.div

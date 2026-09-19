@@ -1,28 +1,25 @@
 import { create } from 'zustand';
 
-export type LoadingScreenState = {
+export type LoadingScreenStore = {
   /** Активен ли экран загрузки */
   isLoading: boolean;
   /** Текст текущего статуса */
   statusText: string;
-
-  // Actions
   setStatusText: (text: string) => void;
   startLoading: (statusText?: string) => void;
   finishLoading: () => void;
   dismiss: () => void;
 };
 
-export const useLoadingScreenStore = create<LoadingScreenState>((set) => ({
+const DEFAULT_STATUS = 'Синхронизация орбитальных систем';
+
+export const useLoadingScreenStore = create<LoadingScreenStore>((set) => ({
   isLoading: true,
-  statusText: 'Синхронизация орбитальных систем',
+  statusText: DEFAULT_STATUS,
 
   setStatusText: (statusText) => set({ statusText }),
-
-  startLoading: (statusText = 'Синхронизация орбитальных систем') =>
+  startLoading: (statusText = DEFAULT_STATUS) =>
     set({ isLoading: true, statusText }),
-
   finishLoading: () => set({ isLoading: false }),
-
   dismiss: () => set({ isLoading: false }),
 }));

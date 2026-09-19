@@ -12,8 +12,6 @@ export type LabStore = {
   setBody: (body: GlobeBodyId) => void;
 };
 
-export const selectBody = (s: LabStore) => s.body;
-
 export const useLabStore = create<LabStore>((set) => ({
   body: 'earth',
   setBody: (body) => set({ body }),

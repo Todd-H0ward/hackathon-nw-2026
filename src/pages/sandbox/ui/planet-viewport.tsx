@@ -15,7 +15,7 @@ import {
 import type { Simulation } from '@/features/ecosystem/model';
 import { SurfaceLife } from '@/features/ecosystem/surface-life';
 import type { WorldInfo } from '@/features/ecosystem/world-info';
-import { usePlanetTransition } from '@/features/planet-transition';
+import { getTransitionState, useTransitionPhase } from '@/store';
 
 import { SceneBoundary } from './scene-boundary';
 
@@ -60,7 +60,7 @@ export const PlanetViewport = ({
   onToggleExpanded,
 }: PlanetViewportProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const transitionPhase = usePlanetTransition((s) => s.phase);
+  const transitionPhase = useTransitionPhase();
   // The planet is still in flight from the home page — show ours once it lands.
   const sceneHidden =
     transitionPhase === 'launch' ||
@@ -68,7 +68,7 @@ export const PlanetViewport = ({
     transitionPhase === 'flight';
 
   useEffect(() => {
-    const { phase, setTarget } = usePlanetTransition.getState();
+    const { phase, setTarget } = getTransitionState();
     if (phase === 'idle') return;
 
     setTarget(() => {
@@ -88,7 +88,7 @@ export const PlanetViewport = ({
         distance,
       };
     });
-    return () => usePlanetTransition.getState().setTarget(null);
+    return () => getTransitionState().setTarget(null);
   }, []);
 
   return (

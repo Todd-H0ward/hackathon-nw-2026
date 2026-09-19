@@ -16,7 +16,7 @@ export type PlanetTransitionPhase =
   | 'flight'
   | 'land';
 
-type PlanetTransitionStore = {
+export type PlanetTransitionStore = {
   phase: PlanetTransitionPhase;
   body: GlobeBodyId | null;
   from: PlanetScreenPose | null;
