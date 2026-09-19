@@ -6,7 +6,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { cn } from '@/shared/lib/utils';
 
 import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
-import { GLOBE_DEFAULTS } from './config';
+import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS } from './config';
 import { Globe } from './globe';
 
 const CAMERA = {
@@ -138,7 +138,7 @@ export const GlobeCanvas = ({
       <div ref={hostRef} className={cn('relative size-full', className)}>
         <Canvas
           camera={GLOBE_FILL_CAMERA}
-          dpr={[1, 2]}
+          dpr={GLOBE_BLOOM_DPR}
           gl={GL}
           className="!block !h-full !w-full"
           style={{ width: '100%', height: '100%', touchAction: 'none' }}
@@ -165,7 +165,7 @@ export const GlobeCanvas = ({
         >
           <Canvas
             camera={CAMERA}
-            dpr={interactive ? [1, 2] : [1, 1.5]}
+            dpr={interactive ? GLOBE_BLOOM_DPR : [1, 1.5]}
             gl={GL}
             className="!block !size-full"
             style={{ width: pixelSize, height: pixelSize, touchAction: 'none' }}

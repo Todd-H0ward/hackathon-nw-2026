@@ -15,7 +15,7 @@ import {
   type GlobeBodyId,
   resolveGlobeConfig,
 } from './bodies';
-import { GLOBE_DEFAULTS, type GlobeConfig } from './config';
+import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
 import { type PlanetScreenPose, projectedRadius } from './lib/screen-pose';
@@ -445,7 +445,7 @@ export const GlobeCarouselCanvas = ({
     >
       <Canvas
         camera={CAMERA}
-        dpr={[1, 2]}
+        dpr={GLOBE_BLOOM_DPR}
         gl={GL}
         className="absolute inset-0 !h-full !w-full"
         style={{ width: '100%', height: '100%', display: 'block' }}

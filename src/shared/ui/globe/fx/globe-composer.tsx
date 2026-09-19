@@ -1,4 +1,4 @@
-import { type RefObject, useContext, useEffect, useMemo } from 'react';
+import { type RefObject, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { useFrame, useThree } from '@react-three/fiber';
 import {
@@ -23,30 +23,54 @@ interface GlobeFxProps {
   configRef: RefObject<GlobeConfig>;
 }
 
+type BloomParams = {
+  intensity: number;
+  threshold: number;
+  smoothing: number;
+  radius: number;
+};
+
 const passEffects = (pass: EffectPass): Effect[] =>
   (pass as unknown as { effects: Effect[] }).effects;
 
-const syncBloom = (
-  composer: { passes: readonly unknown[] },
-  cfg: GlobeConfig,
-) => {
+const findBloom = (composer: {
+  passes: readonly unknown[];
+}): BloomEffect | null => {
   for (const pass of composer.passes) {
     if (!(pass instanceof EffectPass)) continue;
     pass.dithering = true;
-
     for (const effect of passEffects(pass)) {
-      if (!(effect instanceof BloomEffect)) continue;
-      effect.intensity = cfg.BLOOM_INTENSITY;
-      effect.luminanceMaterial.threshold = cfg.BLOOM_THRESHOLD;
-      effect.luminanceMaterial.smoothing = cfg.BLOOM_SMOOTHING;
-      effect.mipmapBlurPass.radius = cfg.BLOOM_RADIUS;
+      if (effect instanceof BloomEffect) return effect;
     }
   }
+  return null;
 };
+
+const applyBloom = (bloom: BloomEffect, params: BloomParams) => {
+  bloom.intensity = params.intensity;
+  bloom.luminanceMaterial.threshold = params.threshold;
+  bloom.luminanceMaterial.smoothing = params.smoothing;
+  bloom.mipmapBlurPass.radius = params.radius;
+};
+
+const bloomParamsFrom = (cfg: GlobeConfig): BloomParams => ({
+  intensity: cfg.BLOOM_INTENSITY,
+  threshold: cfg.BLOOM_THRESHOLD,
+  smoothing: cfg.BLOOM_SMOOTHING,
+  radius: cfg.BLOOM_RADIUS,
+});
+
+const bloomParamsEqual = (a: BloomParams, b: BloomParams) =>
+  a.intensity === b.intensity &&
+  a.threshold === b.threshold &&
+  a.smoothing === b.smoothing &&
+  a.radius === b.radius;
 
 const GlobeFxSync = ({ configRef }: GlobeFxProps) => {
   const { composer } = useContext(EffectComposerContext);
   const size = useThree((state) => state.size);
+  const bloomRef = useRef<BloomEffect | null>(null);
+  const appliedRef = useRef<BloomParams | null>(null);
 
   // @react-three/postprocessing sizes a new composer from a module-level Vector2
   // shared by every canvas, so with two canvases mounted (e.g. the planet
@@ -56,8 +80,18 @@ const GlobeFxSync = ({ configRef }: GlobeFxProps) => {
     composer.setSize(size.width, size.height);
   }, [composer, size.width, size.height]);
 
+  // Bloom knobs change only on planet switch — skip the pass walk otherwise.
   useFrame(() => {
-    syncBloom(composer, configRef.current);
+    if (!composer) return;
+    const next = bloomParamsFrom(configRef.current);
+    const applied = appliedRef.current;
+    if (applied && bloomParamsEqual(applied, next) && bloomRef.current) return;
+
+    const bloom = bloomRef.current ?? findBloom(composer);
+    if (!bloom) return;
+    bloomRef.current = bloom;
+    applyBloom(bloom, next);
+    appliedRef.current = next;
   });
 
   return null;

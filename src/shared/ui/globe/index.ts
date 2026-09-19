@@ -6,7 +6,11 @@ export {
   resolveGlobeConfig,
 } from './bodies';
 export type { GlobeConfig } from './config';
-export { GLOBE_DEFAULTS } from './config';
+export {
+  GLOBE_BLOOM_DPR,
+  GLOBE_DEFAULTS,
+  GLOBE_TRANSITION_DPR,
+} from './config';
 export type { GlobeProps } from './globe';
 export { Globe } from './globe';
 export type { GlobeCanvasProps } from './globe-canvas';

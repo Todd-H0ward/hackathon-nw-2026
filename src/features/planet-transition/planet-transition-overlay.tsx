@@ -6,6 +6,7 @@ import { type Group, MathUtils, type PerspectiveCamera } from 'three';
 
 import {
   GLOBE_MAPS,
+  GLOBE_TRANSITION_DPR,
   Globe,
   type GlobeBodyId,
   type PlanetScreenPose,
@@ -156,7 +157,7 @@ export const PlanetTransitionOverlay = () => {
     >
       <Canvas
         camera={{ position: [0, 0, 0], near: 0.1, far: 100 }}
-        dpr={[1, 2]}
+        dpr={GLOBE_TRANSITION_DPR}
         gl={GL}
         style={{ width: '100%', height: '100%', display: 'block' }}
       >
