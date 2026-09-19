@@ -3,6 +3,7 @@ export const STATIC_ROUTES = {
   ABOUT: '/about',
   VOICE: '/voice',
   UI_KIT: '/ui-kit',
+  SANDBOX: '/sandbox',
 } as const;
 
 

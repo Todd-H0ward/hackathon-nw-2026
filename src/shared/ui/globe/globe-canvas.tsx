@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Stars } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 
 import { cn } from '@/shared/lib/utils';
@@ -14,6 +14,14 @@ const CAMERA = {
   near: 0.1,
   far: 100,
   position: [0, 0, 7] as [number, number, number],
+};
+
+/** Wider freer view for lab / sandbox full-bleed canvas. */
+const FILL_CAMERA = {
+  fov: 42,
+  near: 0.1,
+  far: 100,
+  position: [0, 0, 8.6] as [number, number, number],
 };
 
 const GL = {
@@ -47,6 +55,12 @@ export type GlobeCanvasProps = {
   radius?: number;
   /** Enable orbit drag. Off by default for carousel slides. */
   interactive?: boolean;
+  /** Full-bleed canvas (lab/sandbox). Default keeps square letterboxed host. */
+  fill?: boolean;
+  /** Soft starfield background (typically with `fill`). */
+  stars?: boolean;
+  /** Remount orbit controls (e.g. after camera reset in lab). */
+  cameraReset?: number;
   className?: string;
   children?: ReactNode;
 };
@@ -55,6 +69,9 @@ export const GlobeCanvas = ({
   body = 'earth',
   radius = GLOBE_DEFAULTS.RADIUS,
   interactive = false,
+  fill = false,
+  stars = false,
+  cameraReset = 0,
   className,
   children,
 }: GlobeCanvasProps) => {
@@ -68,6 +85,7 @@ export const GlobeCanvas = ({
   const maps = useMemo(() => GLOBE_MAPS[body], [body]);
 
   useEffect(() => {
+    if (fill) return;
     const host = hostRef.current;
     if (!host) return;
 
@@ -80,7 +98,57 @@ export const GlobeCanvas = ({
     const observer = new ResizeObserver(measure);
     observer.observe(host);
     return () => observer.disconnect();
-  }, []);
+  }, [fill]);
+
+  const scene = (
+    <>
+      <ambientLight intensity={fill ? 0.5 : 0.55} />
+      {stars ? (
+        <Stars
+          radius={70}
+          depth={30}
+          count={1300}
+          factor={2}
+          saturation={0}
+          fade
+          speed={0.15}
+        />
+      ) : null}
+      <Globe config={config} colorUrl={maps.color} />
+      {interactive ? (
+        fill ? (
+          <OrbitControls
+            key={`${body}-${cameraReset}`}
+            makeDefault
+            enablePan={false}
+            minDistance={3.4}
+            maxDistance={12}
+            enableDamping
+          />
+        ) : (
+          <OrbitControls enableZoom={false} enablePan={false} />
+        )
+      ) : null}
+      {children}
+    </>
+  );
+
+  if (fill) {
+    return (
+      <div ref={hostRef} className={cn('relative size-full', className)}>
+        <Canvas
+          camera={FILL_CAMERA}
+          dpr={[1, 2]}
+          gl={GL}
+          className="!block !h-full !w-full"
+          style={{ width: '100%', height: '100%', touchAction: 'none' }}
+          flat={false}
+        >
+          {scene}
+        </Canvas>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -104,12 +172,7 @@ export const GlobeCanvas = ({
             flat={false}
           >
             <SquareCameraRig />
-            <ambientLight intensity={0.55} />
-            <Globe config={config} colorUrl={maps.color} />
-            {interactive ? (
-              <OrbitControls enableZoom={false} enablePan={false} />
-            ) : null}
-            {children}
+            {scene}
           </Canvas>
         </div>
       ) : null}
