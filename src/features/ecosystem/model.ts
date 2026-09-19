@@ -9,6 +9,7 @@ export const COLORS = [
   '#f38bad',
   '#d8e985',
 ];
+
 export const WORLDS = {
   earth: {
     name: 'Земля',

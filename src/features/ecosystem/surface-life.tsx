@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef } from 'react';
 
 import { Html, Line } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Color, type InstancedMesh, Object3D, Vector3 } from 'three';
+
+import { cn } from '@/shared/lib/utils';
 
 import { activeColonies, members, position, type Simulation } from './model';
 
@@ -17,6 +19,7 @@ function arc(a: [number, number, number], b: [number, number, number]) {
       .multiplyScalar(2.36 + Math.sin((i / 19) * Math.PI) * 0.12),
   );
 }
+
 export function SurfaceLife({
   simulation,
   selected,
@@ -144,12 +147,19 @@ export function SurfaceLife({
               >
                 <button
                   type="button"
-                  className={`colony-pin ${selected === c.id ? 'selected' : ''}`}
-                  style={{ '--colony-color': c.color } as React.CSSProperties}
+                  className={cn(
+                    '[font:8px_monospace] tracking-[1px] text-[var(--colony-color)] border border-[#65868355] bg-[#0b161ee8] rounded-[4px] whitespace-nowrap py-1.5 px-[7px] flex items-center gap-1.5 shadow-[0_2px_15px_#0005]',
+                    selected === c.id &&
+                      'border-[var(--colony-color)] bg-[#19312cf0]',
+                  )}
+                  style={{ '--colony-color': c.color } as CSSProperties}
                   onClick={() => onSelect(c.id)}
                 >
-                  <span /> C—{String(c.id).padStart(2, '0')}{' '}
-                  <small>{group.length}</small>
+                  <span className="size-1 bg-[var(--colony-color)] rounded-full" />{' '}
+                  C—{String(c.id).padStart(2, '0')}{' '}
+                  <small className="text-[#9dafb8] border-l border-[#ffffff25] pl-[5px]">
+                    {group.length}
+                  </small>
                 </button>
               </Html>
             )}
