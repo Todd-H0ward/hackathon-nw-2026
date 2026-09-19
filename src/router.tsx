@@ -1,12 +1,14 @@
 import { createBrowserRouter } from 'react-router';
 
-import { AboutPage } from '@/pages/about';
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
-import { PostPage } from '@/pages/post';
-import { UIKitPage } from '@/pages/ui-kit';
+import {
+  AnalyticsPage,
+  SandboxLayout,
+  SandboxPage,
+} from '@/pages/sandbox';
 
-import { DYNAMIC_ROUTE_PATTERNS, STATIC_ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 import { App } from './App';
 
@@ -20,17 +22,18 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: STATIC_ROUTES.ABOUT,
-        element: <AboutPage />,
-      },
-
-      {
-        path: DYNAMIC_ROUTE_PATTERNS.POST,
-        element: <PostPage />,
-      },
-      {
-        path: STATIC_ROUTES.UI_KIT,
-        element: <UIKitPage />,
+        path: STATIC_ROUTES.SANDBOX,
+        element: <SandboxLayout />,
+        children: [
+          {
+            index: true,
+            element: <SandboxPage />,
+          },
+          {
+            path: 'analytics',
+            element: <AnalyticsPage />,
+          },
+        ],
       },
       {
         path: '*',

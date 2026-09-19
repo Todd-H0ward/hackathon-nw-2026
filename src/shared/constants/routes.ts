@@ -2,10 +2,9 @@ export const STATIC_ROUTES = {
   HOME: '/',
   ABOUT: '/about',
   VOICE: '/voice',
-  UI_KIT: '/ui-kit',
+  SANDBOX: '/sandbox',
+  SANDBOX_ANALYTICS: '/sandbox/analytics',
 } as const;
-
-
 
 export const DYNAMIC_ROUTES = {
   POST: (postId: string | number) => `/news/${postId}`,

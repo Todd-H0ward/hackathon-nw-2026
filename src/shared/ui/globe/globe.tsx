@@ -1,0 +1,93 @@
+import { useRef } from 'react';
+
+import { useTexture } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import {
+  AdditiveBlending,
+  BackSide,
+  type Mesh,
+  type ShaderMaterial,
+} from 'three';
+
+import { GLOBE_DEFAULTS, type GlobeConfig } from './config';
+import { GlobeFx } from './fx/globe-composer';
+import { usePointGrid } from './hooks/use-point-grid';
+import { usePositionSim } from './hooks/use-position-sim';
+import { syncHazeUniforms, syncSparkUniforms } from './lib/sync-uniforms';
+import './materials/haze';
+import './materials/spark';
+
+export type GlobeProps = {
+  config?: GlobeConfig;
+  colorUrl?: string;
+  enableFx?: boolean;
+};
+
+const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
+
+export const Globe = ({
+  config = GLOBE_DEFAULTS,
+  colorUrl = DEFAULT_COLOR,
+  enableFx = true,
+}: GlobeProps) => {
+  const hazeRef = useRef<Mesh>(null);
+  const hazeMat = useRef<ShaderMaterial>(null);
+  const sparkMat = useRef<ShaderMaterial>(null);
+  const live = useRef(config);
+  live.current = config;
+
+  const colorTex = useTexture(colorUrl);
+
+  const geometry = usePointGrid(config.RESOLUTION);
+  const sim = usePositionSim({
+    size: config.RESOLUTION,
+    spin: config.SPIN,
+    jitter: config.JITTER,
+  });
+
+  useFrame(() => {
+    const cfg = live.current;
+    if (hazeMat.current) syncHazeUniforms(hazeMat.current, cfg);
+    if (sparkMat.current) {
+      syncSparkUniforms(sparkMat.current, cfg, sim.getPositions());
+    }
+  });
+
+  return (
+    <group>
+      <mesh ref={hazeRef} scale={config.RADIUS}>
+        <sphereGeometry args={[config.HAZE_RADIUS, 64, 64]} />
+        <hazeMaterial
+          ref={hazeMat}
+          transparent
+          toneMapped={false}
+          blending={AdditiveBlending}
+          side={BackSide}
+          atmOpacity={config.HAZE_OPACITY}
+          atmPowFactor={config.HAZE_POW}
+          atmMultiplier={config.HAZE_MUL}
+        />
+      </mesh>
+
+      {sim.ready && sim.seedTexture ? (
+        <points frustumCulled={false} geometry={geometry}>
+          <sparkMaterial
+            ref={sparkMat}
+            depthWrite={false}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            uPositions={sim.seedTexture}
+            uColor={colorTex}
+            uPointSize={config.POINT_SIZE}
+            uScreenScale={config.SCREEN_SCALE}
+            uRadius={config.RADIUS}
+            uSimSize={config.RESOLUTION}
+          />
+        </points>
+      ) : null}
+
+      {enableFx ? <GlobeFx configRef={live} /> : null}
+    </group>
+  );
+};
