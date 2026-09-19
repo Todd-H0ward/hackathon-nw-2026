@@ -35,11 +35,11 @@ const GL = {
 
 const BODY_COUNT = GLOBE_BODY_IDS.length;
 const RING_HALF = BODY_COUNT / 2;
-/** Wide enough that ring-edge fade/wrap happens off-screen. */
-const SPACING = 8.2;
-const SIDE_DEPTH = 1.35;
+/** Side planets sit near the viewport edge so a bit peeks in. */
+const SPACING = 5.8;
+const SIDE_DEPTH = 1.2;
 const ACTIVE_SCALE = 1;
-const SIDE_SCALE = 0.58;
+const SIDE_SCALE = 0.62;
 /** Start shrinking toward 0 past the side slot so the ring wrap is invisible. */
 const EDGE_FADE_START = Math.max(1, RING_HALF - 0.45);
 const SWIPE_PX = 56;
@@ -213,15 +213,6 @@ export const GlobeCarouselCanvas = ({
     }
   }, [activeIndex]);
 
-  const commitStep = (step: number) => {
-    if (step === 0) return;
-    targetOffsetRef.current += step;
-    const nextIndex =
-      (((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
-        BODY_COUNT);
-    onBodyChange(GLOBE_BODY_IDS[nextIndex]);
-  };
-
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     pointerX.current = event.clientX;
     dragging.current = true;
@@ -243,16 +234,20 @@ export const GlobeCarouselCanvas = ({
     }
 
     const deltaPx = clientX - pointerX.current;
-    const dragged = dragOffsetRef.current;
     dragging.current = false;
     pointerX.current = null;
     dragOffsetRef.current = 0;
 
     if (Math.abs(deltaPx) < SWIPE_PX) return;
 
-    // Fold residual drag into the animated offset so it doesn't snap.
-    offsetRef.current += dragged;
-    commitStep(deltaPx < 0 ? 1 : -1);
+    // Snap to the next slot — no residual drag / damp coast.
+    const step = deltaPx < 0 ? 1 : -1;
+    targetOffsetRef.current += step;
+    offsetRef.current = targetOffsetRef.current;
+    const nextIndex =
+      (((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
+        BODY_COUNT);
+    onBodyChange(GLOBE_BODY_IDS[nextIndex]);
   };
 
   return (

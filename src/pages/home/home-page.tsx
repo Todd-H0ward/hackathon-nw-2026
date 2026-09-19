@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import { PlanetSlider } from '@/pages/home/planet-slider.tsx';
+import { PlanetHood } from '@/pages/home/planet-hood';
+import { PlanetSlider } from '@/pages/home/planet-slider';
 
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
@@ -10,6 +11,7 @@ export const HomePage = () => {
   return (
     <div className="fixed inset-0 h-dvh w-dvw overflow-hidden bg-black">
       <PlanetSlider activeSlide={activeSlide} setActiveSlide={setActiveSlide} />
+      <PlanetHood activeBody={activeSlide} />
     </div>
   );
 };
