@@ -16,7 +16,7 @@ export type VoiceCommand = {
   action: (args: VoiceCommandArgs) => void;
 };
 
-// Voice context types
+// Voice session types — the live state itself lives in `store/voice`.
 
 export type VoiceStatus = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -25,14 +25,4 @@ export type VoiceHistoryEntry = {
   type: 'user' | 'program';
   text: string;
   timestamp: number;
-};
-
-export type VoiceContextValue = {
-  status: VoiceStatus;
-  history: VoiceHistoryEntry[];
-  isSupported: boolean;
-  error: string | null;
-  startListening: () => void;
-  stopListening: () => void;
-  clearHistory: () => void;
 };

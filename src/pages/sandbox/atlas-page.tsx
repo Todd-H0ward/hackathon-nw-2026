@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router';
 
 import { ArrowRight, Waves } from 'lucide-react';
 
-import { useLab } from '@/contexts';
-
 import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import { activeColonies, living } from '@/features/ecosystem/model';
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useLabBody, useLabSims } from '@/store';
 
 import { WORLD_THUMB } from './lib';
+import { useLabActions } from './use-lab-actions';
 
 const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="min-w-0">
@@ -26,11 +27,14 @@ const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
 );
 
 export const AtlasPage = () => {
-  const lab = useLab();
   const navigate = useNavigate();
+  const actions = useLabActions();
+  const worlds = useWorldCatalog();
+  const body = useLabBody();
+  const sims = useLabSims();
 
   const open = (id: GlobeBodyId) => {
-    if (id !== lab.body) lab.selectWorld(id);
+    if (id !== body) actions.selectWorld(id);
     navigate(STATIC_ROUTES.SANDBOX);
   };
 
@@ -48,10 +52,10 @@ export const AtlasPage = () => {
       </p>
 
       <div className="mt-5 grid grid-cols-3 gap-3 max-laptop:grid-cols-2 max-mobile:grid-cols-1">
-        {lab.availableWorlds.map((world) => {
+        {worlds.available.map((world) => {
           const id = world.id;
-          const sim = lab.sims[id];
-          const current = id === lab.body;
+          const sim = sims[id];
+          const current = id === body;
 
           return (
             <article

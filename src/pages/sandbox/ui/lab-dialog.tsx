@@ -1,5 +1,3 @@
-import type { LabModal } from '@/contexts';
-
 import {
   Button,
   Dialog,
@@ -11,6 +9,7 @@ import {
 
 import type { Simulation } from '@/features/ecosystem/model';
 import { MODEL_VERSION } from '@/features/ecosystem/world-info';
+import type { LabModal } from '@/store';
 
 type LabDialogProps = {
   modal: LabModal;

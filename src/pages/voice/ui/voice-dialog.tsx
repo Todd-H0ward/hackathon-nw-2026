@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react';
 
 import { Bot, Trash2, User } from 'lucide-react';
 
-import { useVoice } from '@/contexts';
-
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 
+import { useClearVoiceHistory, useVoiceHistory } from '@/store';
+
 export const VoiceDialog = ({ className }: { className?: string }) => {
-  const { history, clearHistory } = useVoice();
+  const history = useVoiceHistory();
+  const clearHistory = useClearVoiceHistory();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Автоскролл вниз при новых сообщениях

@@ -10,3 +10,4 @@
 export * from './lab';
 export * from './loading-screen';
 export * from './planet-transition';
+export * from './voice';

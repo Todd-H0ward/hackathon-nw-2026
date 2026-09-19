@@ -1,7 +1,5 @@
 import { RotateCcw } from 'lucide-react';
 
-import { useLab } from '@/contexts';
-
 import {
   Button,
   Card,
@@ -12,13 +10,17 @@ import {
 } from '@/shared/ui';
 
 import type { Metric } from '@/features/ecosystem/model';
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useLabBody, useLabSetModal, useLabSim } from '@/store';
 
 import { worldCaseName } from './lib';
 import { Sparkline } from './ui/sparkline';
 
 export const AnalyticsPage = () => {
-  const lab = useLab();
-  const { sim, world } = lab;
+  const sim = useLabSim();
+  const body = useLabBody();
+  const setModal = useLabSetModal();
+  const world = useWorldCatalog().catalog[body];
 
   if (!world) return null;
 
@@ -87,7 +89,7 @@ export const AnalyticsPage = () => {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => lab.setModal('replay')}
+          onClick={() => setModal('replay')}
         >
           <RotateCcw size={15} />
           Проверить воспроизводимость

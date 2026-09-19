@@ -13,7 +13,7 @@ export {
 export { Dialog, DialogClose, DialogDescription, DialogTitle } from './dialog';
 export { Input, inputVariants } from './input';
 export type { SparklinePoint } from './metric-card';
-export { MetricCard, Sparkline } from './metric-card';
+export { MetricCard } from './metric-card';
 export { NavButton, navButtonVariants } from './nav-button';
 export { Select } from './select';
 export { Separator } from './separator';

@@ -5,7 +5,6 @@ export { findCommand, resolveResponse } from './matcher';
 export type {
   VoiceCommand,
   VoiceCommandArgs,
-  VoiceContextValue,
   VoiceHistoryEntry,
   VoiceStatus,
 } from './types';

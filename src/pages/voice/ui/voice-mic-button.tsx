@@ -1,12 +1,25 @@
 import { Mic, MicOff, Volume2 } from 'lucide-react';
 
-import { useVoice } from '@/contexts';
-
 import { cn } from '@/shared/lib/utils';
 
-export const VoiceMicButton = ({ className }: { className?: string }) => {
-  const { status, isSupported, error, startListening, stopListening } =
-    useVoice();
+import { useVoiceError, useVoiceStatus } from '@/store';
+
+type VoiceMicButtonProps = {
+  /** Controls come from `useVoiceBridge`, which the page mounts once. */
+  isSupported: boolean;
+  startListening: () => void;
+  stopListening: () => void;
+  className?: string;
+};
+
+export const VoiceMicButton = ({
+  isSupported,
+  startListening,
+  stopListening,
+  className,
+}: VoiceMicButtonProps) => {
+  const status = useVoiceStatus();
+  const error = useVoiceError();
 
   if (!isSupported) return null;
 

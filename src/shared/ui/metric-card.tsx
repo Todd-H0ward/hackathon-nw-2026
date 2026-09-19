@@ -6,7 +6,7 @@ export type SparklinePoint = {
   value: number;
 };
 
-type SparklineProps = SVGProps<SVGSVGElement> & {
+type MetricSparklineProps = SVGProps<SVGSVGElement> & {
   data: SparklinePoint[];
   color?: string;
   strokeWidth?: number;
@@ -22,13 +22,18 @@ type MetricCardProps = HTMLAttributes<HTMLDivElement> & {
   sparkColor?: string;
 };
 
-export const Sparkline = ({
+/**
+ * Inline 68×20 spark for the card footer. Deliberately not exported: the lab's
+ * full-width chart is a separate component (`pages/sandbox/ui/sparkline.tsx`)
+ * with its own geometry, and two exported `Sparkline`s collided by name.
+ */
+const MetricSparkline = ({
   data,
   color = '#c08162',
   strokeWidth = 1.5,
   className,
   ...props
-}: SparklineProps) => {
+}: MetricSparklineProps) => {
   if (data.length < 2) return null;
 
   const max = Math.max(...data.map((d) => d.value), 0.001);
@@ -96,7 +101,7 @@ export const MetricCard = ({
       {/* Bottom row */}
       <div className="flex justify-between items-center text-[9px] text-[#a2b593]">
         {description && <span>{description}</span>}
-        {sparkData && <Sparkline data={sparkData} color={sparkColor} />}
+        {sparkData && <MetricSparkline data={sparkData} color={sparkColor} />}
       </div>
     </div>
   );
