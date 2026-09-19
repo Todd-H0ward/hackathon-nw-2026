@@ -48,15 +48,44 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
       else if (!open && el.open) el.close();
     }, [open, ref]);
 
+    const handleCancel = (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
+      e.preventDefault();
+      onClose?.();
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+      const rect = ref.current?.getBoundingClientRect();
+      if (!rect) return;
+      const isInside =
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width;
+      if (!isInside) {
+        onClose?.();
+      }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDialogElement>) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
     return (
       <DialogContext.Provider value={{ close: () => ref.current?.close() }}>
         <dialog
           ref={ref}
           data-slot="dialog"
           onClose={onClose}
+          onCancel={handleCancel}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
           className={cn(
-            'bg-card text-foreground border border-[#444] rounded-[14px] max-w-[520px] w-[90%] p-[30px]',
-            'backdrop:bg-black/60',
+            'fixed inset-0 z-50 m-auto h-fit max-h-[calc(100dvh-2rem)] overflow-y-auto',
+            'w-[90%] max-w-[520px] p-[30px] rounded-[14px]',
+            'border border-border bg-card text-foreground shadow-2xl outline-none',
+            'backdrop:bg-black/60 backdrop:backdrop-blur-xs',
             'open:animate-in open:fade-in-0 open:zoom-in-95',
             className,
           )}
