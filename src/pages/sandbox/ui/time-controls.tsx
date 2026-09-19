@@ -1,7 +1,7 @@
 import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 
-import { Button } from '@/shared/ui';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui';
 
 type TimeControlsProps = {
   running: boolean;
@@ -24,7 +24,7 @@ export const TimeControls = ({
   onOpenReset,
   onSpeedChange,
 }: TimeControlsProps) => (
-  <div className="flex items-center justify-between py-3 px-[18px] bg-[#111820] border-y border-[#222c37] gap-2 max-[700px]:p-2.5">
+  <div className="flex items-center justify-between gap-2 border-y border-border bg-card px-3 py-2 max-[700px]:p-2">
     <div className="flex items-center gap-[5px] max-[700px]:gap-0.5">
       <Button
         type="button"
@@ -54,31 +54,28 @@ export const TimeControls = ({
       >
         <RotateCcw size={15} />
       </Button>
-      <span className="font-mono text-[8px] tracking-[0.6px] text-[#607886] ml-2 max-[700px]:text-[7px] max-[700px]:ml-0.5">
+      <span className="font-mono text-[8px] tracking-[0.6px] text-muted-foreground ml-2 max-[700px]:text-[7px] max-[700px]:ml-0.5">
         ТАКТ{' '}
-        <b className="text-[#afc1ca] font-normal ml-1">
+        <b className="ml-1 font-normal text-foreground">
           {String(tick).padStart(5, '0')}
         </b>
       </span>
     </div>
-    <div className="bg-[#0b1118] p-[3px] rounded-[5px] flex">
+    <div className="flex rounded-[5px] bg-background p-[3px]">
       {[1, 2, 5].map((n) => (
         <Button
           type="button"
           key={n}
           variant="ghost"
           size="xs"
-          className={cn(
-            'text-[#657d8b]',
-            speed === n && 'bg-[#263a3c] text-[#bed9ce] hover:bg-[#263a3c]',
-          )}
+          className={cn(speed === n && 'bg-secondary text-foreground')}
           onClick={() => onSpeedChange(n)}
         >
           {n}×
         </Button>
       ))}
     </div>
-    <span className="font-mono text-[8px] text-[#526b78] max-[1180px]:hidden">
+    <span className="font-mono text-[8px] text-muted-foreground max-[1180px]:hidden">
       SEED {seed}
     </span>
   </div>

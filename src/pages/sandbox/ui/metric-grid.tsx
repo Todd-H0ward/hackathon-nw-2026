@@ -19,33 +19,33 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
       value: current.power.toFixed(1),
       unit: 'EU/такт',
       data: history.map((h) => ({ value: h.power })),
-      color: '#70e0c4',
+      color: 'var(--chart-2)',
     },
     {
       title: 'Задержка сигнала',
       value: current.delay === null ? '—' : current.delay.toFixed(1),
       unit: 'такта',
       data: history.map((h) => ({ value: h.delay ?? 0 })),
-      color: '#7cc9ff',
+      color: 'var(--muted-foreground)',
     },
     {
       title: 'Использование ресурса',
       value: current.efficiency.toFixed(1),
       unit: '%',
       data: history.map((h) => ({ value: h.efficiency })),
-      color: '#ffb66e',
+      color: 'var(--chart-1)',
     },
     {
       title: 'Энтропия решений',
       value: current.entropy.toFixed(2),
       unit: 'бит',
       data: history.map((h) => ({ value: h.entropy })),
-      color: '#b9a1ff',
+      color: 'var(--chart-3)',
     },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-0 bg-[#10171f] max-[700px]:grid-cols-2">
+    <div className="grid grid-cols-4 gap-0 bg-card max-[700px]:grid-cols-2">
       {items.map((item) => (
         <MetricCard
           key={item.title}
@@ -54,7 +54,7 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
           unit={item.unit}
           sparkData={item.data}
           sparkColor={item.color}
-          className="rounded-none border-0 border-r border-[#222c37] bg-transparent last:border-r-0 max-[700px]:border-b"
+          className="rounded-none border-0 border-r border-border bg-transparent px-3.5 py-2.5 last:border-r-0 max-[700px]:border-b [&>div:nth-child(2)]:my-2 [&>div:nth-child(2)]:text-[22px]"
         />
       ))}
     </div>

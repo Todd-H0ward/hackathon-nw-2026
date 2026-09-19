@@ -1,1 +1,1 @@
-export type LabModal = 'guide' | 'atlas' | 'reset' | 'replay' | null;
+export type LabModal = 'guide' | 'reset' | 'replay' | null;

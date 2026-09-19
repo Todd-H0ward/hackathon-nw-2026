@@ -1,6 +1,7 @@
+import type { ReactNode } from 'react';
+
 import {
   ArrowUpRight,
-  BookOpen,
   ChevronRight,
   Dna,
   Globe2,
@@ -8,9 +9,9 @@ import {
   Waves,
 } from 'lucide-react';
 
-import type { GlobeBodyId } from '@/shared/ui/globe';
 import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
+import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import {
   type Settings,
@@ -18,19 +19,13 @@ import {
   WORLDS,
 } from '@/features/ecosystem/model';
 
-import { BODY_IDS } from '../lib';
+import { BODY_IDS, WORLD_THUMB } from '../lib';
 
 type EnvironmentPanelProps = {
   body: GlobeBodyId;
   sim: Simulation;
   onSelectWorld: (id: GlobeBodyId) => void;
   onSettings: (next: Partial<Settings>) => void;
-};
-
-const worldThumb: Record<GlobeBodyId, string> = {
-  earth: "bg-[url('/images/globe/earth_color.jpg')] bg-[position:35%_50%]",
-  mars: "bg-[url('/images/globe/mars_color.jpg')]",
-  venus: "bg-[url('/images/globe/venus_color.jpg')]",
 };
 
 export const EnvironmentPanel = ({
@@ -42,33 +37,32 @@ export const EnvironmentPanel = ({
   const world = WORLDS[body];
 
   return (
-    <aside className="bg-[#10151b] border-r border-[#222c37] py-[22px] px-[17px] group-data-[expanded=true]/lab:!hidden min-[1600px]:p-[25px] max-[1180px]:py-[18px] max-[1180px]:px-3 max-[700px]:grid max-[700px]:grid-cols-2 max-[700px]:gap-x-[18px] max-[700px]:gap-y-3 max-[700px]:border-r-0 max-[700px]:border-b max-[700px]:border-[#222c37]">
-      <div className={cn('flex items-center gap-2 mb-5', 'max-[700px]:col-span-full max-[700px]:m-0')}>
-        <span className="[font:9px_monospace] text-[#536774]">01</span>
-        <h2 className="text-[11px] font-medium flex-1 m-0">Среда обитания</h2>
-        <Globe2 size={15} className="text-[#667884]" />
-      </div>
-      <div className="grid gap-[7px] max-[700px]:col-span-full max-[700px]:flex">
+    <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-[980px]:h-full max-[700px]:grid max-[700px]:h-auto max-[700px]:grid-cols-2 max-[700px]:gap-x-4 max-[700px]:gap-y-3 max-[700px]:border-r-0 max-[700px]:border-b">
+      <SectionTitle
+        index="01"
+        title="Среда обитания"
+        icon={<Globe2 size={14} />}
+      />
+      <div className="grid gap-1 max-[700px]:col-span-full max-[700px]:flex">
         {BODY_IDS.map((id) => (
           <button
             type="button"
             key={id}
             className={cn(
-              'flex items-center text-left p-2.5 border border-transparent bg-transparent rounded-[7px] gap-2.5 text-[#9caeb9] hover:bg-[#1b262d] max-[700px]:flex-1 max-[700px]:gap-[7px] max-[700px]:py-[7px] max-[700px]:px-[5px] max-[700px]:min-w-0 [&_svg]:max-[700px]:hidden',
-              body === id &&
-                'bg-[linear-gradient(110deg,#21312f,#172127)] border-[#3f514d] text-[#e6eeea]',
+              'flex items-center gap-2.5 rounded-md border border-transparent bg-transparent p-2 text-left text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground max-[700px]:min-w-0 max-[700px]:flex-1 max-[700px]:gap-[7px] max-[700px]:px-[5px] max-[700px]:py-[7px] [&_svg]:max-[700px]:hidden',
+              body === id && 'border-primary/40 bg-secondary text-foreground',
             )}
             onClick={() => onSelectWorld(id)}
           >
             <span
               className={cn(
-                'size-8 shrink-0 block rounded-full bg-cover shadow-[inset_-10px_-3px_10px_#000c,0_0_13px_#94cfce15] max-[700px]:size-[25px]',
-                worldThumb[id],
+                'block size-7 shrink-0 rounded-full bg-cover shadow-[inset_-8px_-3px_9px_rgb(0_0_0/0.8)] max-[700px]:size-[25px]',
+                WORLD_THUMB[id],
               )}
             />
             <span className="flex-1 text-xs max-[700px]:text-[10px]">
               {WORLDS[id].name}
-              <small className="block [font:8px_monospace] tracking-[1.3px] mt-1 text-[#607580] max-[700px]:text-[6px]">
+              <small className="mt-0.5 block font-mono text-[8px] tracking-[1.3px] text-muted-foreground max-[700px]:text-[6px]">
                 {WORLDS[id].english}
               </small>
             </span>
@@ -76,53 +70,48 @@ export const EnvironmentPanel = ({
           </button>
         ))}
       </div>
-      <div className="py-[17px] mb-[17px] border-b border-[#222c37] max-[700px]:col-start-1 max-[700px]:m-0 max-[700px]:pt-[7px] max-[700px]:pb-0 max-[700px]:border-0">
-        <div className="flex justify-between gap-1.5 mb-3 text-[9px] text-[#718491] max-[700px]:text-[8px]">
-          <span>Средняя температура</span>
-          <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
-            {world.temperature > 0 ? '+' : ''}
-            {world.temperature} <small className="text-[8px] text-[#718491]">°C</small>
-          </b>
-        </div>
-        <div className="flex justify-between gap-1.5 mb-3 text-[9px] text-[#718491] max-[700px]:text-[8px]">
-          <span>Гравитация</span>
-          <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
-            {world.gravity} <small className="text-[8px] text-[#718491]">м/с²</small>
-          </b>
-        </div>
-        <div className="flex justify-between gap-1.5 mb-3 text-[9px] text-[#718491] max-[700px]:text-[8px]">
-          <span>Давление у поверхности</span>
-          <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
-            {world.pressure} <small className="text-[8px] text-[#718491]">бар</small>
-          </b>
-        </div>
+
+      <dl className="my-3 grid gap-2 border-b border-border pb-3 max-[700px]:col-start-1 max-[700px]:m-0 max-[700px]:border-0 max-[700px]:p-0">
+        <Stat label="Средняя температура" unit="°C">
+          {world.temperature > 0 ? '+' : ''}
+          {world.temperature}
+        </Stat>
+        <Stat label="Гравитация" unit="м/с²">
+          {world.gravity}
+        </Stat>
+        <Stat label="Давление у поверхности" unit="бар">
+          {world.pressure}
+        </Stat>
         <a
           href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/"
           target="_blank"
           rel="noreferrer"
-          className="text-[8px] text-[#6b8e8b] flex items-center gap-[5px] no-underline"
+          className="flex items-center gap-[5px] text-[8px] text-muted-foreground no-underline hover:text-foreground"
         >
           Справочные данные NASA <ArrowUpRight size={11} />
         </a>
-      </div>
-      <div className="p-3 border border-[#2b3b3d] rounded-md bg-[#162224] mb-[23px] max-[700px]:col-start-2 max-[700px]:m-0 max-[700px]:p-2.5 [&_svg]:text-[#9cd2bd] [&_svg]:float-right">
-        <Waves size={17} />
-        <span className="[font:7px_monospace] tracking-[1px] text-[#729488]">
+      </dl>
+
+      <div className="mb-4 rounded-md border border-xeno-green/25 bg-xeno-green/5 p-2.5 max-[700px]:col-start-2 max-[700px]:m-0 [&_svg]:float-right [&_svg]:text-xeno-green">
+        <Waves size={15} />
+        <span className="font-mono text-[7px] tracking-[1px] text-muted-foreground">
           ФИЗИЧЕСКИЙ МЕХАНИЗМ
         </span>
-        <b className="block text-[10px] font-medium text-[#bad5c8] mt-2.5">
+        <b className="mt-2 block text-[10px] font-medium text-foreground">
           {world.phenomenon}
         </b>
-        <p className="text-[8px] text-[#698279] mt-[5px] leading-[1.7]">
+        <p className="mt-1 text-[8px] leading-[1.6] text-muted-foreground">
           Гипотетическая модель · условные единицы
         </p>
       </div>
-      <div className="flex items-center gap-2 mb-[22px] max-[700px]:col-span-full max-[700px]:my-[7px] max-[700px]:mx-0">
-        <span className="[font:9px_monospace] text-[#536774]">02</span>
-        <h2 className="text-[11px] font-medium flex-1 m-0">Условия эксперимента</h2>
-        <Settings2 size={15} className="text-[#667884]" />
-      </div>
-      <div className="mb-[23px] max-[700px]:m-0">
+
+      <SectionTitle
+        index="02"
+        title="Условия эксперимента"
+        icon={<Settings2 size={14} />}
+        className="max-[700px]:col-span-full"
+      />
+      <div className="grid gap-4 max-[700px]:col-span-full max-[700px]:grid-cols-2">
         <Slider
           label="Приток ресурса"
           outputValue={`${sim.settings.resource}%`}
@@ -133,8 +122,6 @@ export const EnvironmentPanel = ({
           minLabel="Слабый"
           maxLabel="Интенсивный"
         />
-      </div>
-      <div className="mb-[23px] max-[700px]:m-0">
         <Slider
           label="Шум среды"
           outputValue={`${sim.settings.noise}%`}
@@ -146,10 +133,10 @@ export const EnvironmentPanel = ({
           maxLabel="Возмущения"
         />
       </div>
-      <div className="mt-[27px] max-[700px]:col-span-full max-[700px]:mt-2 max-[700px]:mb-0">
+      <div className="mt-4 max-[700px]:col-span-full max-[700px]:mt-0">
         <Switch
           label={
-            <span className="flex gap-[7px] items-center text-[9px]">
+            <span className="flex items-center gap-[7px] text-[9px]">
               <Dna size={15} />
               Мутации при делении
             </span>
@@ -158,18 +145,46 @@ export const EnvironmentPanel = ({
           onChange={(e) => onSettings({ mutation: e.target.checked })}
         />
       </div>
-      <div className="flex gap-2.5 border-t border-[#222c37] mt-[27px] pt-5 text-[#657e85] max-[700px]:hidden">
-        <BookOpen size={16} />
-        <p className="text-[9px] leading-[1.9]">
-          Планета — среда.
-          <br />
-          Особь — структура.
-          <br />
-          <strong className="font-normal text-[#95b8ae]">
-            Колония — их сообщество.
-          </strong>
-        </p>
-      </div>
     </aside>
   );
 };
+
+type SectionTitleProps = {
+  index: string;
+  title: string;
+  icon: ReactNode;
+  className?: string;
+};
+
+const SectionTitle = ({ index, title, icon, className }: SectionTitleProps) => (
+  <div
+    className={cn(
+      'mb-2 flex items-center gap-2 text-muted-foreground max-[700px]:col-span-full max-[700px]:m-0',
+      className,
+    )}
+  >
+    <span className="font-mono text-[9px]">{index}</span>
+    <h2 className="m-0 flex-1 text-[11px] font-medium text-foreground">
+      {title}
+    </h2>
+    {icon}
+  </div>
+);
+
+const Stat = ({
+  label,
+  unit,
+  children,
+}: {
+  label: string;
+  unit: string;
+  children: ReactNode;
+}) => (
+  <div className="flex justify-between gap-1.5 text-[9px] text-muted-foreground max-[700px]:text-[8px]">
+    <dt>{label}</dt>
+    <dd className="font-mono text-[10px] text-foreground max-[700px]:text-[9px]">
+      {children}{' '}
+      <small className="text-[8px] text-muted-foreground">{unit}</small>
+    </dd>
+  </div>
+);

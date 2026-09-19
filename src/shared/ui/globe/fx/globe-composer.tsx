@@ -1,4 +1,4 @@
-import { type RefObject, useContext, useMemo } from 'react';
+import { type RefObject, useContext, useEffect, useMemo } from 'react';
 
 import { useFrame, useThree } from '@react-three/fiber';
 import {
@@ -47,6 +47,15 @@ const syncBloom = (
 
 const GlobeFxSync = ({ configRef }: GlobeFxProps) => {
   const { composer } = useContext(EffectComposerContext);
+  const size = useThree((state) => state.size);
+
+  // @react-three/postprocessing sizes a new composer from a module-level Vector2
+  // shared by every canvas, so with two canvases mounted (e.g. the planet
+  // transition overlay) one can inherit the other's size. Re-apply our own.
+  useEffect(() => {
+    if (!composer) return;
+    composer.setSize(size.width, size.height);
+  }, [composer, size.width, size.height]);
 
   useFrame(() => {
     syncBloom(composer, configRef.current);

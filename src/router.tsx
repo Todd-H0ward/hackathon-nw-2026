@@ -4,6 +4,7 @@ import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
 import {
   AnalyticsPage,
+  AtlasPage,
   SandboxLayout,
   SandboxPage,
 } from '@/pages/sandbox';
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
           {
             path: 'analytics',
             element: <AnalyticsPage />,
+          },
+          {
+            path: 'atlas',
+            element: <AtlasPage />,
           },
         ],
       },

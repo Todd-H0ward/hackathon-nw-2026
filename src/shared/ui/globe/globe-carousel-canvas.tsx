@@ -6,8 +6,13 @@ import {
   useRef,
 } from 'react';
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import { type Group, MathUtils } from 'three';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import {
+  type Group,
+  MathUtils,
+  type PerspectiveCamera,
+  Vector3,
+} from 'three';
 
 import {
   GLOBE_BODY_IDS,
@@ -18,6 +23,7 @@ import {
 import { GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
+import { type PlanetScreenPose, projectedRadius } from './lib/screen-pose';
 
 const CAMERA = {
   fov: 32,
@@ -63,6 +69,8 @@ const wrapCentered = (value: number, length: number) => {
   return v;
 };
 
+type MeasureBody = (body: GlobeBodyId) => PlanetScreenPose | null;
+
 export type PlanetHoverPayload = {
   body: GlobeBodyId;
   clientX: number;
@@ -77,6 +85,8 @@ type CarouselSceneProps = {
   fxConfigRef: RefObject<GlobeConfig>;
   onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
   hoveredBodyRef: RefObject<GlobeBodyId | null>;
+  hiddenBodyRef: RefObject<GlobeBodyId | null>;
+  measureRef: RefObject<MeasureBody | null>;
 };
 
 const CarouselScene = ({
@@ -86,9 +96,36 @@ const CarouselScene = ({
   fxConfigRef,
   onHoverPlanet,
   hoveredBodyRef,
+  hiddenBodyRef,
+  measureRef,
 }: CarouselSceneProps) => {
   const groupRefs = useRef<(Group | null)[]>([]);
   const ready = useRef(false);
+  const camera = useThree((state) => state.camera) as PerspectiveCamera;
+  const gl = useThree((state) => state.gl);
+
+  // Screen pose of a planet — lets a page hand the exact on-screen globe to another canvas.
+  measureRef.current = (body) => {
+    const group = groupRefs.current[GLOBE_BODY_IDS.indexOf(body)];
+    if (!group) return null;
+
+    const world = group.getWorldPosition(new Vector3());
+    const distance = world.distanceTo(camera.position);
+    const ndc = world.clone().project(camera);
+    const rect = gl.domElement.getBoundingClientRect();
+
+    return {
+      x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      radius: projectedRadius(
+        GLOBE_DEFAULTS.RADIUS * group.scale.x,
+        distance,
+        camera.fov,
+        rect.height,
+      ),
+      distance,
+    };
+  };
 
   useFrame((_, delta) => {
     offsetRef.current = MathUtils.damp(
@@ -149,6 +186,12 @@ const CarouselScene = ({
       const s = MathUtils.damp(group.scale.x, targetScale, POSE_DAMP, delta);
       group.scale.setScalar(s);
       group.visible = s > 0.03;
+    }
+
+    const hidden = hiddenBodyRef.current;
+    if (hidden) {
+      const group = groupRefs.current[GLOBE_BODY_IDS.indexOf(hidden)];
+      if (group) group.visible = false;
     }
 
     ready.current = true;
@@ -223,7 +266,10 @@ export type GlobeCarouselCanvasProps = {
   activeBody: GlobeBodyId;
   onBodyChange: (body: GlobeBodyId) => void;
   onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
-  onPlanetClick?: (body: GlobeBodyId) => void;
+  /** `pose` is the planet's current screen placement (for seamless handoff). */
+  onPlanetClick?: (body: GlobeBodyId, pose: PlanetScreenPose | null) => void;
+  /** Planet taken over by another canvas — not drawn here. */
+  hiddenBody?: GlobeBodyId | null;
   className?: string;
 };
 
@@ -232,6 +278,7 @@ export const GlobeCarouselCanvas = ({
   onBodyChange,
   onHoverPlanet,
   onPlanetClick,
+  hiddenBody = null,
   className,
 }: GlobeCarouselCanvasProps) => {
   const activeIndex = Math.max(0, GLOBE_BODY_IDS.indexOf(activeBody));
@@ -244,6 +291,17 @@ export const GlobeCarouselCanvas = ({
   const dragMoved = useRef(false);
   const hoveredBodyRef = useRef<GlobeBodyId | null>(null);
   const clickBodyRef = useRef<GlobeBodyId | null>(null);
+  const hiddenBodyRef = useRef<GlobeBodyId | null>(hiddenBody);
+  hiddenBodyRef.current = hiddenBody;
+  const measureRef = useRef<MeasureBody | null>(null);
+
+  // Hit meshes set a pointer cursor; don't leak it past unmount (e.g. navigation on click).
+  useEffect(
+    () => () => {
+      document.body.style.cursor = '';
+    },
+    [],
+  );
 
   const fxConfigRef = useRef(resolveGlobeConfig(activeBody));
   useEffect(() => {
@@ -299,7 +357,9 @@ export const GlobeCarouselCanvas = ({
     clickBodyRef.current = null;
 
     if (Math.abs(deltaPx) < SWIPE_PX) {
-      if (!dragMoved.current && clickedBody) onPlanetClick?.(clickedBody);
+      if (!dragMoved.current && clickedBody) {
+        onPlanetClick?.(clickedBody, measureRef.current?.(clickedBody) ?? null);
+      }
       dragMoved.current = false;
       return;
     }
@@ -343,6 +403,8 @@ export const GlobeCarouselCanvas = ({
           fxConfigRef={fxConfigRef}
           onHoverPlanet={onHoverPlanet}
           hoveredBodyRef={hoveredBodyRef}
+          hiddenBodyRef={hiddenBodyRef}
+          measureRef={measureRef}
         />
       </Canvas>
     </div>
