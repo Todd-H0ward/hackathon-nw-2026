@@ -1,8 +1,23 @@
-import { type CSSProperties, useEffect, useMemo, useRef } from 'react';
+import {
+  type ComponentProps,
+  type CSSProperties,
+  type RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
 import { Html, Line } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Color, type InstancedMesh, Object3D, Vector3 } from 'three';
+import {
+  Color,
+  type InstancedMesh,
+  type Mesh,
+  MeshBasicMaterial,
+  Object3D,
+  SphereGeometry,
+  Vector3,
+} from 'three';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -20,6 +35,47 @@ function arc(a: [number, number, number], b: [number, number, number]) {
   );
 }
 
+type LinePoints = ComponentProps<typeof Line>['points'];
+
+const coords = (
+  p: LinePoints[number],
+): readonly (number | undefined)[] | null => {
+  if (p instanceof Vector3) return [p.x, p.y, p.z];
+  return Array.isArray(p) ? p : null;
+};
+
+const samePoints = (a: LinePoints, b: LinePoints) => {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const pa = coords(a[i]);
+    const pb = coords(b[i]);
+    if (!pa || !pb || pa.length !== pb.length) return a[i] === b[i];
+    for (let k = 0; k < pa.length; k++) {
+      if (Math.abs((pa[k] ?? 0) - (pb[k] ?? 0)) > 1e-6) return false;
+    }
+  }
+  return true;
+};
+
+/**
+ * drei's Line rebuilds its geometry (and disposes its material) whenever the
+ * `points` array identity changes. Points here are rebuilt every simulation
+ * tick, so keep the previous array while the coordinates are unchanged —
+ * otherwise every tick re-uploads all line buffers and relinks the shader.
+ */
+const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
+  const stable = useRef(points);
+  if (!samePoints(stable.current, points)) stable.current = points;
+  return <Line points={stable.current} {...rest} />;
+};
+
+const PACKET_GEOMETRY = new SphereGeometry(0.017, 6, 6);
+const PACKET_MATERIAL = new MeshBasicMaterial({
+  color: '#fff4c4',
+  toneMapped: false,
+});
+
 export function SurfaceLife({
   simulation,
   selected,
@@ -34,7 +90,11 @@ export function SurfaceLife({
   onSelect: (id: number) => void;
 }) {
   const mesh = useRef<InstancedMesh>(null);
+  // Cheap stand-in for the planet: label occlusion raycasts against this only,
+  // not the whole scene (the globe's point cloud has 160k vertices).
+  const occluder = useRef<Mesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
+  const outward = useMemo(() => new Vector3(), []);
   const color = useMemo(() => new Color(), []);
   const visible = simulation.individuals;
   useEffect(() => {
@@ -63,7 +123,7 @@ export function SurfaceLife({
     if (!target) return;
     visible.forEach((i, index) => {
       dummy.position.set(...position(i));
-      dummy.lookAt(dummy.position.clone().multiplyScalar(2));
+      dummy.lookAt(outward.copy(dummy.position).multiplyScalar(2));
       const age = simulation.tick - i.born;
       const birthScale = Math.min(1, (age + 1) / 8);
       const deathScale =
@@ -83,6 +143,9 @@ export function SurfaceLife({
       <mesh>
         <sphereGeometry args={[2.27, 48, 48]} />
         <meshBasicMaterial color="#05080d" />
+      </mesh>
+      <mesh ref={occluder} visible={false}>
+        <sphereGeometry args={[2.3, 16, 12]} />
       </mesh>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: Three.js mesh; equivalent keyboard controls are the colony list buttons. */}
       <instancedMesh
@@ -115,7 +178,7 @@ export function SurfaceLife({
         );
         return (
           <group key={c.id}>
-            <Line
+            <StableLine
               points={boundary}
               color={c.color}
               transparent
@@ -126,7 +189,7 @@ export function SurfaceLife({
               group
                 .slice(1)
                 .map((i, j) => (
-                  <Line
+                  <StableLine
                     key={i.id}
                     points={arc(position(group[j]), position(i))}
                     color={c.color}
@@ -142,7 +205,7 @@ export function SurfaceLife({
                   2.45,
                 )}
                 center
-                occlude
+                occlude={[occluder as RefObject<Object3D>]}
                 zIndexRange={[9, 0]}
               >
                 <button
@@ -180,17 +243,18 @@ export function SurfaceLife({
           );
           return (
             <group key={`${p.from}-${p.to}-${p.sent}`}>
-              <Line
+              <StableLine
                 points={points}
                 color="#ffffff"
                 transparent
                 opacity={0.45}
                 lineWidth={1}
               />
-              <mesh position={points[idx]}>
-                <sphereGeometry args={[0.017, 6, 6]} />
-                <meshBasicMaterial color="#fff4c4" toneMapped={false} />
-              </mesh>
+              <mesh
+                position={points[idx]}
+                geometry={PACKET_GEOMETRY}
+                material={PACKET_MATERIAL}
+              />
             </group>
           );
         })}

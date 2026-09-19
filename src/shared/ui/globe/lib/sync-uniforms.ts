@@ -1,4 +1,4 @@
-import { Color, type ShaderMaterial } from 'three';
+import type { Color, ShaderMaterial } from 'three';
 
 import type { GlobeConfig } from '../config';
 
@@ -10,7 +10,7 @@ export const syncHazeUniforms = (
   u.atmOpacity.value = cfg.HAZE_OPACITY;
   u.atmPowFactor.value = cfg.HAZE_POW;
   u.atmMultiplier.value = cfg.HAZE_MUL;
-  u.atmosphereColor.value = new Color(cfg.HAZE_COLOR);
+  (u.atmosphereColor.value as Color).set(cfg.HAZE_COLOR);
   u.atmColorDotDiv.value = cfg.HAZE_DOT_DIV;
   u.atmColorScale.value = cfg.HAZE_COLOR_SCALE;
 };
