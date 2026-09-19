@@ -31,11 +31,11 @@ export const router = createBrowserRouter([
             element: <SandboxPage />,
           },
           {
-            path: 'analytics',
+            path: STATIC_ROUTES.ANALYTICS,
             element: <AnalyticsPage />,
           },
           {
-            path: 'atlas',
+            path: STATIC_ROUTES.ATLAS,
             element: <AtlasPage />,
           },
         ],
