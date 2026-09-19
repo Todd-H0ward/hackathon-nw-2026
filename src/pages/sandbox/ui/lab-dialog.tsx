@@ -7,8 +7,7 @@ import {
   Input,
 } from '@/shared/ui';
 
-import type { Simulation } from '@/features/ecosystem/model';
-import { MODEL_VERSION } from '@/features/ecosystem/world-info';
+import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
 import type { LabModal } from '@/store';
 
 interface LabDialogProps {

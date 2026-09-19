@@ -12,7 +12,7 @@ import {
   type Individual,
   members,
   type Simulation,
-} from '@/features/ecosystem/model';
+} from '@/features/ecosystem';
 
 interface ColoniesPanelProps {
   sim: Simulation;

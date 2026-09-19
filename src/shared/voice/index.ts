@@ -8,5 +8,5 @@ export type {
   VoiceHistoryEntry,
   VoiceStatus,
 } from './types';
-export { useSpeechRecognition } from './useSpeechRecognition';
-export { useSpeechSynthesis } from './useSpeechSynthesis';
+export { useSpeechRecognition } from './use-speech-recognition';
+export { useSpeechSynthesis } from './use-speech-synthesis';

@@ -6,15 +6,18 @@ import { motion } from 'motion/react';
 import { cn } from '@/shared/lib/utils';
 import {
   GLOBE_DEFAULTS,
+  GLOBE_FILL_CAMERA,
   type GlobeBodyId,
+  GlobeCanvas,
   type PlanetScreenPose,
   projectedRadius,
 } from '@/shared/ui/globe';
-import { GLOBE_FILL_CAMERA, GlobeCanvas } from '@/shared/ui/globe/globe-canvas';
 
-import type { Simulation } from '@/features/ecosystem/model';
-import { SurfaceLife } from '@/features/ecosystem/surface-life';
-import type { WorldInfo } from '@/features/ecosystem/world-info';
+import {
+  type Simulation,
+  SurfaceLife,
+  type WorldInfo,
+} from '@/features/ecosystem';
 import { registerSandboxPose } from '@/features/planet-transition';
 import { getTransitionState, useTransitionPhase } from '@/store';
 

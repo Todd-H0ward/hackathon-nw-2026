@@ -8,8 +8,7 @@ import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { activeColonies, living } from '@/features/ecosystem/model';
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { activeColonies, living, useWorldCatalog } from '@/features/ecosystem';
 import { useLabBody, useLabSims } from '@/store';
 
 import { WORLD_THUMB } from './lib';

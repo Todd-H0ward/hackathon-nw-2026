@@ -4,7 +4,7 @@ import { useCommand, useCreateExperiment } from '@/shared/api/xenochoice';
 import { useToast } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useWorldCatalog } from '@/features/ecosystem';
 import { getLabState } from '@/store';
 
 import {

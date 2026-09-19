@@ -15,8 +15,8 @@ import {
   living,
   logIntervention,
   type Settings,
-} from '@/features/ecosystem/model';
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+  useWorldCatalog,
+} from '@/features/ecosystem';
 import { getLabState } from '@/store';
 
 import {

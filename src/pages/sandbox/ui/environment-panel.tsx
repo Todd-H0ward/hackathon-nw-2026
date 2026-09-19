@@ -15,8 +15,7 @@ import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import type { Settings, Simulation } from '@/features/ecosystem/model';
-import type { WorldInfo } from '@/features/ecosystem/world-info';
+import type { Settings, Simulation, WorldInfo } from '@/features/ecosystem';
 
 interface EnvironmentPanelProps {
   body: GlobeBodyId;
