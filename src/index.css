@@ -8,6 +8,19 @@
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
+
+  /*
+   * Lab layout breakpoints. The three-column sandbox shell collapses at these
+   * widths; named here so the magic numbers live in one place instead of being
+   * repeated as `max-[980px]:` across a dozen files.
+   */
+  --breakpoint-mobile: 700px;
+  --breakpoint-tablet: 980px;
+  --breakpoint-laptop: 1180px;
+  --breakpoint-ultrawide: 1600px;
+
+  --color-field: var(--field);
+  --color-field-border: var(--field-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,14 +62,19 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ── XenoChoice Dark Theme ── */
+/*
+ * ── XenoChoice Dark Theme ──
+ * Hex values in comments are the actual sRGB result of each oklch() colour.
+ * Keep them in sync when tweaking: stale comments here are what pushed parts
+ * of `shared/ui` to hardcode hex instead of using these tokens.
+ */
 :root {
   /* Base */
-  --background: oklch(0.142 0.003 264); /* #101112 */
-  --foreground: oklch(0.935 0.003 75); /* #ededeb */
+  --background: oklch(0.142 0.003 264); /* #09090b */
+  --foreground: oklch(0.935 0.003 75); /* #ebe9e7 */
 
   /* Cards / panels */
-  --card: oklch(0.172 0.003 264); /* #191a1b */
+  --card: oklch(0.172 0.003 264); /* #0f1011 */
   --card-foreground: oklch(0.935 0.003 75);
 
   /* Popovers */
@@ -64,16 +82,16 @@
   --popover-foreground: oklch(0.935 0.003 75);
 
   /* Primary = accent orange */
-  --primary: oklch(0.664 0.185 35.6); /* #ff7649 */
-  --primary-foreground: oklch(0.175 0.03 30); /* #201711 */
+  --primary: oklch(0.664 0.185 35.6); /* #ee5f39 */
+  --primary-foreground: oklch(0.175 0.03 30); /* #1c0b09 */
 
   /* Secondary = panel hover */
-  --secondary: oklch(0.22 0.003 264); /* #303031 */
+  --secondary: oklch(0.22 0.003 264); /* #1a1b1c */
   --secondary-foreground: oklch(0.935 0.003 75);
 
   /* Muted */
   --muted: oklch(0.22 0.003 264);
-  --muted-foreground: oklch(0.576 0.005 264); /* #898b8d */
+  --muted-foreground: oklch(0.576 0.005 264); /* #78797c */
 
   /* Accent = same as primary for shadcn compat */
   --accent: oklch(0.664 0.185 35.6);
@@ -83,13 +101,17 @@
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Borders / inputs */
-  --border: oklch(0.26 0.003 264); /* #2c2d2e */
-  --input: oklch(0.205 0.003 264); /* #222425 */
+  --border: oklch(0.26 0.003 264); /* #232425 */
+  --input: oklch(0.205 0.003 264); /* #161719 */
   --ring: oklch(0.664 0.185 35.6); /* orange ring */
 
+  /* Form field surface — lighter than --input, as the kit was designed. */
+  --field: #222425;
+  --field-border: #383a3b;
+
   /* Charts — efficiency orange / entropy green */
-  --chart-1: oklch(0.664 0.185 35.6); /* #ff7649 */
-  --chart-2: oklch(0.795 0.1 130); /* #b0ce93 */
+  --chart-1: oklch(0.664 0.185 35.6); /* #ee5f39 */
+  --chart-2: oklch(0.795 0.1 130); /* #a7c984 */
   --chart-3: oklch(0.55 0.08 130);
   --chart-4: oklch(0.45 0.06 264);
   --chart-5: oklch(0.35 0.004 264);
@@ -107,10 +129,7 @@
   --sidebar-ring: oklch(0.664 0.185 35.6);
 
   /* XenoChoice-specific */
-  --xeno-green: oklch(0.795 0.1 130); /* #b0ce93 */
-  --xeno-muted-text: oklch(0.576 0.005 264); /* #898b8d */
-  --xeno-line: oklch(0.26 0.003 264); /* #2c2d2e */
-  --xeno-panel: oklch(0.172 0.003 264); /* #191a1b */
+  --xeno-green: oklch(0.795 0.1 130); /* #a7c984 */
 }
 
 /* No separate .dark block — the app is always dark */

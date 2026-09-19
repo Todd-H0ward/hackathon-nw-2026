@@ -1,7 +1,5 @@
 import { RotateCcw } from 'lucide-react';
 
-import { useLab } from '@/contexts/lab';
-
 import {
   Button,
   Card,
@@ -12,15 +10,19 @@ import {
 } from '@/shared/ui';
 
 import type { Metric } from '@/features/ecosystem/model';
-import { WORLDS } from '@/features/ecosystem/model';
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useLabBody, useLabSetModal, useLabSim } from '@/store';
 
 import { worldCaseName } from './lib';
 import { Sparkline } from './ui/sparkline';
 
 export const AnalyticsPage = () => {
-  const lab = useLab();
-  const { sim, body } = lab;
-  const world = WORLDS[body];
+  const sim = useLabSim();
+  const body = useLabBody();
+  const setModal = useLabSetModal();
+  const world = useWorldCatalog().catalog[body];
+
+  if (!world) return null;
 
   const charts = [
     {
@@ -37,7 +39,7 @@ export const AnalyticsPage = () => {
 
   return (
     <div className="mx-auto max-w-[1180px]">
-      <section className="px-5 py-6 max-[700px]:px-3 max-[700px]:py-4">
+      <section className="px-5 py-6 max-mobile:px-3 max-mobile:py-4">
         <div className="font-mono text-[9px] tracking-[1.45px] text-muted-foreground">
           ДАННЫЕ ТЕКУЩЕГО ПРОГОНА
         </div>
@@ -49,13 +51,13 @@ export const AnalyticsPage = () => {
           {sim.history.length} тактов
         </p>
 
-        <div className="mb-3 grid grid-cols-3 gap-3 max-[700px]:grid-cols-1">
+        <div className="mb-3 grid grid-cols-3 gap-3 max-mobile:grid-cols-1">
           <MetricCard label="Рождений" value={sim.births} />
           <MetricCard label="Делений колоний" value={sim.splits} />
           <MetricCard label="Угасших особей" value={sim.deaths} />
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3 max-[980px]:grid-cols-1">
+        <div className="mb-5 grid grid-cols-2 gap-3 max-tablet:grid-cols-1">
           {charts.map((item) => (
             <Card key={item.name} className="border-border bg-card">
               <CardHeader className="pb-0">
@@ -87,7 +89,7 @@ export const AnalyticsPage = () => {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => lab.setModal('replay')}
+          onClick={() => setModal('replay')}
         >
           <RotateCcw size={15} />
           Проверить воспроизводимость

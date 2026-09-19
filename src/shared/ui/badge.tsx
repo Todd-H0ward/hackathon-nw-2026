@@ -4,19 +4,10 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
+export type BadgeProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof badgeVariants>;
 
-export interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
-
-// ═══════════════════════════════════════════
-// VARIANTS
-// ═══════════════════════════════════════════
-
-const badgeVariants = cva(
+export const badgeVariants = cva(
   'inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[1.5px] uppercase rounded px-[7px] py-[5px] leading-none select-none',
   {
     variants: {
@@ -38,11 +29,7 @@ const badgeVariants = cva(
   },
 );
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function Badge({ className, variant, ...props }: BadgeProps) {
+export const Badge = ({ className, variant, ...props }: BadgeProps) => {
   return (
     <span
       data-slot="badge"
@@ -50,10 +37,4 @@ function Badge({ className, variant, ...props }: BadgeProps) {
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Badge, badgeVariants };
+};

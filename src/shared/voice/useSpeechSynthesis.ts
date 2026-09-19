@@ -1,33 +1,25 @@
 import { useCallback, useRef, useState } from 'react';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface UseSpeechSynthesisOptions {
+type UseSpeechSynthesisOptions = {
   lang?: string;
   rate?: number;
   pitch?: number;
   volume?: number;
-}
+};
 
-interface UseSpeechSynthesisReturn {
+type UseSpeechSynthesisReturn = {
   speak: (text: string, onEnd?: () => void) => void;
   cancel: () => void;
   isSpeaking: boolean;
   isSupported: boolean;
-}
+};
 
-// ═══════════════════════════════════════════
-// HOOK
-// ═══════════════════════════════════════════
-
-export function useSpeechSynthesis({
+export const useSpeechSynthesis = ({
   lang = 'ru-RU',
   rate = 1.0,
   pitch = 1.0,
   volume = 1.0,
-}: UseSpeechSynthesisOptions = {}): UseSpeechSynthesisReturn {
+}: UseSpeechSynthesisOptions = {}): UseSpeechSynthesisReturn => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -81,4 +73,4 @@ export function useSpeechSynthesis({
   }, [isSupported]);
 
   return { speak, cancel, isSpeaking, isSupported };
-}
+};

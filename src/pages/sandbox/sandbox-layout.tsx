@@ -3,24 +3,50 @@ import { Outlet } from 'react-router';
 
 import { motion } from 'motion/react';
 
-import { LabProvider, useLab } from '@/contexts/lab';
-
 import { ToastProvider } from '@/shared/ui';
 
-import { usePlanetTransition } from '@/features/planet-transition';
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import {
+  getTransitionState,
+  useLabBody,
+  useLabBooting,
+  useLabExpanded,
+  useLabModal,
+  useLabSeed,
+  useLabSetModal,
+  useLabSetSeed,
+  useLabSim,
+  useLabStreamStatus,
+} from '@/store';
 
-import { downloadExperiment } from './lib';
-import { LabDialog, LabRail } from './ui';
+import { LabDialog, LabRail, LabStatus } from './ui';
+import { useLabActions } from './use-lab-actions';
+import { useLabBootstrap } from './use-lab-bootstrap';
 
 const shellClassName =
-  'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-[700px]:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
+  'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-mobile:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
 
 const SandboxShell = () => {
-  const lab = useLab();
+  // Single mount point for the experiment lifecycle: one create, one socket.
+  useLabBootstrap();
+
+  const actions = useLabActions();
+  const worlds = useWorldCatalog();
+
+  const body = useLabBody();
+  const sim = useLabSim();
+  const seed = useLabSeed();
+  const setSeed = useLabSetSeed();
+  const modal = useLabModal();
+  const setModal = useLabSetModal();
+  const expanded = useLabExpanded();
+  const booting = useLabBooting();
+  const streamStatus = useLabStreamStatus();
+
+  const world = worlds.catalog[body];
+
   // Arriving with a planet in flight: fade the lab in around it.
-  const [arriving] = useState(
-    () => usePlanetTransition.getState().phase !== 'idle',
-  );
+  const [arriving] = useState(() => getTransitionState().phase !== 'idle');
 
   return (
     <motion.div
@@ -28,31 +54,43 @@ const SandboxShell = () => {
       initial={arriving ? { opacity: 0 } : false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
-      data-expanded={lab.expanded || undefined}
-      style={{ '--world-color': lab.world.color } as CSSProperties}
+      data-expanded={expanded || undefined}
+      style={{ '--world-color': world?.color ?? '#70e0c4' } as CSSProperties}
     >
       <LabRail
-        seed={lab.sim.seed}
-        onExport={() => {
-          downloadExperiment(lab.sim);
-          lab.notify('Эксперимент экспортирован в JSON');
-        }}
-        onOpenGuide={() => lab.setModal('guide')}
+        seed={sim.seed}
+        onExport={actions.exportExperiment}
+        onOpenGuide={() => setModal('guide')}
       />
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        <Outlet />
+      {/*
+        Anchors the floating LabStatus without reserving height. Scrolling lives
+        on the inner layer so the notice stays pinned instead of scrolling away.
+      */}
+      <div className="relative min-h-0 min-w-0 flex-1">
+        <LabStatus
+          booting={booting}
+          streamStatus={streamStatus}
+          worldsLoading={worlds.isLoading}
+          worldsError={worlds.isError}
+        />
+        {/* Pages assume a loaded planet catalog; the notice explains the wait. */}
+        <div className="h-full overflow-y-auto">
+          {world ? <Outlet /> : null}
+        </div>
       </div>
 
       <LabDialog
-        modal={lab.modal}
-        sim={lab.sim}
-        seed={lab.seed}
-        onSeedChange={lab.setSeed}
-        onClose={() => lab.setModal(null)}
-        onDownload={() => downloadExperiment(lab.sim)}
-        onReset={lab.resetExperiment}
-        onReplay={lab.runReplay}
+        modal={modal}
+        sim={sim}
+        seed={seed}
+        onSeedChange={setSeed}
+        onClose={() => setModal(null)}
+        onDownload={actions.exportExperiment}
+        onReset={() => {
+          void actions.resetExperiment();
+        }}
+        onReplay={actions.runReplay}
       />
     </motion.div>
   );
@@ -60,8 +98,6 @@ const SandboxShell = () => {
 
 export const SandboxLayout = () => (
   <ToastProvider duration={3500}>
-    <LabProvider>
-      <SandboxShell />
-    </LabProvider>
+    <SandboxShell />
   </ToastProvider>
 );

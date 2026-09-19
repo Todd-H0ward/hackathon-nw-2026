@@ -1,15 +1,25 @@
 import { Mic, MicOff, Volume2 } from 'lucide-react';
 
-import { useVoice } from '@/contexts';
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
+import { useVoiceError, useVoiceStatus } from '@/store';
 
-export function VoiceMicButton({ className }: { className?: string }) {
-  const { status, isSupported, error, startListening, stopListening } =
-    useVoice();
+type VoiceMicButtonProps = {
+  /** Controls come from `useVoiceBridge`, which the page mounts once. */
+  isSupported: boolean;
+  startListening: () => void;
+  stopListening: () => void;
+  className?: string;
+};
+
+export const VoiceMicButton = ({
+  isSupported,
+  startListening,
+  stopListening,
+  className,
+}: VoiceMicButtonProps) => {
+  const status = useVoiceStatus();
+  const error = useVoiceError();
 
   if (!isSupported) return null;
 
@@ -39,9 +49,7 @@ export function VoiceMicButton({ className }: { className?: string }) {
           onClick={handleClick}
           disabled={isSpeaking || isProcessing}
           title={
-            isListening
-              ? 'Нажмите чтобы остановить'
-              : 'Нажмите чтобы говорить'
+            isListening ? 'Нажмите чтобы остановить' : 'Нажмите чтобы говорить'
           }
           className={cn(
             'relative z-10 size-12 rounded-full border flex items-center justify-center transition-all',
@@ -83,4 +91,4 @@ export function VoiceMicButton({ className }: { className?: string }) {
       )}
     </div>
   );
-}
+};

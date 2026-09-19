@@ -1,16 +1,15 @@
 import { useEffect, useRef } from 'react';
+
 import { Bot, Trash2, User } from 'lucide-react';
 
-import { useVoice } from '@/contexts';
 import { cn } from '@/shared/lib/utils';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui';
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
+import { useClearVoiceHistory, useVoiceHistory } from '@/store';
 
-export function VoiceDialog({ className }: { className?: string }) {
-  const { history, clearHistory } = useVoice();
+export const VoiceDialog = ({ className }: { className?: string }) => {
+  const history = useVoiceHistory();
+  const clearHistory = useClearVoiceHistory();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Автоскролл вниз при новых сообщениях
@@ -62,7 +61,9 @@ export function VoiceDialog({ className }: { className?: string }) {
             key={entry.id}
             className={cn(
               'flex items-start gap-2 max-w-[85%]',
-              entry.type === 'user' ? 'self-end flex-row-reverse' : 'self-start',
+              entry.type === 'user'
+                ? 'self-end flex-row-reverse'
+                : 'self-start',
             )}
           >
             {/* Аватар */}
@@ -98,4 +99,4 @@ export function VoiceDialog({ className }: { className?: string }) {
       </div>
     </div>
   );
-}
+};

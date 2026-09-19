@@ -5,28 +5,29 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui';
 import {
   GLOBE_BODY_IDS,
   type GlobeBodyId,
-  GlobeCarouselCanvas,
   type PlanetHoverPayload,
   type PlanetScreenPose,
 } from '@/shared/ui/globe';
+import { GlobeCarouselCanvas } from '@/shared/ui/globe/globe-carousel-canvas';
 
-import { usePlanetTransition } from '@/features/planet-transition';
-import { useLabStore } from '@/store';
+import { useLabSetBody, useTransitionLaunch } from '@/store';
 
 import {
   PlanetHoverCursor,
   type PlanetHoverCursorHandle,
 } from './planet-hover-cursor';
+import type { PlanetInfoCatalog } from './planet-info';
 
-interface PlanetSliderProps {
+type PlanetSliderProps = {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
-}
+  catalog: PlanetInfoCatalog;
+};
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
   const index = GLOBE_BODY_IDS.indexOf(current);
@@ -40,10 +41,11 @@ export const PlanetSlider = ({
   activeSlide,
   setActiveSlide,
   hiddenBody = null,
+  catalog,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
-  const setBody = useLabStore((s) => s.setBody);
-  const launchTransition = usePlanetTransition((s) => s.launch);
+  const setBody = useLabSetBody();
+  const launchTransition = useTransitionLaunch();
   const reduceMotion = useReducedMotion();
   const cursorRef = useRef<PlanetHoverCursorHandle>(null);
   const lastBodyRef = useRef<GlobeBodyId | null>(null);
@@ -106,13 +108,13 @@ export const PlanetSlider = ({
         hiddenBody={hiddenBody}
       />
 
-      <PlanetHoverCursor ref={cursorRef} />
+      <PlanetHoverCursor ref={cursorRef} catalog={catalog} />
 
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Previous planet"
+        aria-label="Предыдущая планета"
         className="absolute top-[42%] left-2 z-10 -translate-y-1/2 cursor-pointer text-white/80 hover:bg-white/10 hover:text-white md:left-6"
         onClick={() => handleShift(-1)}
       >
@@ -123,7 +125,7 @@ export const PlanetSlider = ({
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Next planet"
+        aria-label="Следующая планета"
         className="absolute top-[42%] right-2 z-10 -translate-y-1/2 cursor-pointer text-white/80 hover:bg-white/10 hover:text-white md:right-6"
         onClick={() => handleShift(1)}
       >

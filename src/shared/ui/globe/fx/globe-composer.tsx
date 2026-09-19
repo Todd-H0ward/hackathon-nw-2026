@@ -15,8 +15,7 @@ import {
 } from 'postprocessing';
 
 import { getComposerFrameBufferType } from '@/shared/lib/webgl/texture-types';
-
-import { GLOBE_DEFAULTS, type GlobeConfig } from '../config';
+import { GLOBE_DEFAULTS, type GlobeConfig } from '@/shared/ui/globe/config';
 
 const NOISE = 0.028;
 

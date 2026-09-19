@@ -3,6 +3,7 @@ export { EnvironmentPanel } from './environment-panel';
 export { InterventionBar } from './intervention-bar';
 export { LabDialog } from './lab-dialog';
 export { LabRail } from './lab-rail';
+export { LabStatus } from './lab-status';
 export { MetricGrid } from './metric-grid';
 export { PlanetViewport } from './planet-viewport';
 export { SceneBoundary } from './scene-boundary';

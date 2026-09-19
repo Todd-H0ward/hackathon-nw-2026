@@ -1,13 +1,11 @@
-import { VoiceDialog } from '@/components/VoiceDialog';
-import { VoiceMicButton } from '@/components/VoiceMicButton';
-
 import { voiceCommands } from '@/shared/voice';
 
-// ═══════════════════════════════════════════
-// PAGE
-// ═══════════════════════════════════════════
+import { VoiceDialog, VoiceMicButton } from './ui';
+import { useVoiceBridge } from './use-voice-bridge';
 
 export const VoicePage = () => {
+  const { isSupported, startListening, stopListening } = useVoiceBridge();
+
   return (
     <div className="flex h-full min-h-svh flex-col gap-8 p-8">
       {/* Заголовок */}
@@ -26,7 +24,11 @@ export const VoicePage = () => {
         <div className="flex flex-1 flex-col gap-6">
           {/* Кнопка микрофона */}
           <div className="flex justify-center py-4">
-            <VoiceMicButton />
+            <VoiceMicButton
+              isSupported={isSupported}
+              startListening={startListening}
+              stopListening={stopListening}
+            />
           </div>
 
           {/* История диалога */}
@@ -41,7 +43,10 @@ export const VoicePage = () => {
             </h2>
             <ul className="flex flex-col gap-3">
               {voiceCommands.map((cmd) => (
-                <li key={cmd.triggers.join('-')} className="flex flex-col gap-1">
+                <li
+                  key={cmd.triggers.join('-')}
+                  className="flex flex-col gap-1"
+                >
                   <div className="flex flex-wrap gap-1">
                     {cmd.triggers.map((trigger) => (
                       <span

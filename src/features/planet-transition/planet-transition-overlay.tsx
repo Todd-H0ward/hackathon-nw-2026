@@ -12,7 +12,13 @@ import {
   resolveGlobeConfig,
 } from '@/shared/ui/globe';
 
-import { usePlanetTransition } from './store';
+import {
+  getTransitionState,
+  useTransitionBody,
+  useTransitionHasTarget,
+  useTransitionPhase,
+  useTransitionReset,
+} from '@/store';
 
 const GL = {
   alpha: true,
@@ -44,7 +50,7 @@ const FlightScene = ({ body }: { body: GlobeBodyId }) => {
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const size = useThree((state) => state.size);
   const config = useMemo(() => resolveGlobeConfig(body), [body]);
-  const hasTarget = usePlanetTransition((s) => s.resolveTarget !== null);
+  const hasTarget = useTransitionHasTarget();
 
   const frames = useRef(0);
   const progress = useRef(0);
@@ -52,7 +58,7 @@ const FlightScene = ({ body }: { body: GlobeBodyId }) => {
   // motion drives the timeline; the frame loop maps it onto the live target.
   useEffect(() => {
     if (!hasTarget) return;
-    const { phase, setPhase } = usePlanetTransition.getState();
+    const { phase, setPhase } = getTransitionState();
     if (phase !== 'handoff' && phase !== 'flight') return;
 
     setPhase('flight');
@@ -62,13 +68,13 @@ const FlightScene = ({ body }: { body: GlobeBodyId }) => {
       onUpdate: (value) => {
         progress.current = value;
       },
-      onComplete: () => usePlanetTransition.getState().setPhase('land'),
+      onComplete: () => getTransitionState().setPhase('land'),
     });
     return () => controls.stop();
   }, [hasTarget]);
 
   useFrame(() => {
-    const store = usePlanetTransition.getState();
+    const store = getTransitionState();
     const group = groupRef.current;
     if (!store.from || !group) return;
 
@@ -123,9 +129,9 @@ const FlightScene = ({ body }: { body: GlobeBodyId }) => {
  * as the destination's own canvas fades in.
  */
 export const PlanetTransitionOverlay = () => {
-  const phase = usePlanetTransition((s) => s.phase);
-  const body = usePlanetTransition((s) => s.body);
-  const reset = usePlanetTransition((s) => s.reset);
+  const phase = useTransitionPhase();
+  const body = useTransitionBody();
+  const reset = useTransitionReset();
 
   useEffect(() => {
     if (phase !== 'handoff') return;
@@ -143,7 +149,7 @@ export const PlanetTransitionOverlay = () => {
       animate={{ opacity: phase === 'land' ? 0 : 1 }}
       transition={{ duration: LAND_FADE, ease: 'easeOut' }}
       onAnimationComplete={() => {
-        if (usePlanetTransition.getState().phase === 'land') reset();
+        if (getTransitionState().phase === 'land') reset();
       }}
     >
       <Canvas

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { type RefObject, useRef } from 'react';
 
 import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
@@ -21,6 +21,8 @@ export type GlobeProps = {
   config?: GlobeConfig;
   colorUrl?: string;
   enableFx?: boolean;
+  /** When set, GPGPU position evolve follows this flag (carousel visibility). */
+  simEnabledRef?: RefObject<boolean>;
 };
 
 const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
@@ -29,6 +31,7 @@ export const Globe = ({
   config = GLOBE_DEFAULTS,
   colorUrl = DEFAULT_COLOR,
   enableFx = true,
+  simEnabledRef,
 }: GlobeProps) => {
   const hazeRef = useRef<Mesh>(null);
   const hazeMat = useRef<ShaderMaterial>(null);
@@ -43,11 +46,13 @@ export const Globe = ({
     size: config.RESOLUTION,
     spin: config.SPIN,
     jitter: config.JITTER,
+    enabledRef: simEnabledRef,
   });
 
   useFrame(() => {
     const cfg = live.current;
-    if (hazeMat.current && cfg.HAZE_OPACITY > 0) syncHazeUniforms(hazeMat.current, cfg);
+    if (hazeMat.current && cfg.HAZE_OPACITY > 0)
+      syncHazeUniforms(hazeMat.current, cfg);
     if (sparkMat.current) {
       syncSparkUniforms(sparkMat.current, cfg, sim.getPositions());
     }

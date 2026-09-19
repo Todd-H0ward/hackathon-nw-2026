@@ -7,12 +7,7 @@ import {
 } from 'react';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import {
-  type Group,
-  MathUtils,
-  type PerspectiveCamera,
-  Vector3,
-} from 'three';
+import { type Group, MathUtils, type PerspectiveCamera, Vector3 } from 'three';
 
 import {
   GLOBE_BODY_IDS,
@@ -124,6 +119,8 @@ const CarouselScene = ({
   measureRef,
 }: CarouselSceneProps) => {
   const groupRefs = useRef<(Group | null)[]>([]);
+  // Stable per-body flags — pose frame writes, usePositionSim (−1) reads.
+  const simEnabledRefs = useRef(GLOBE_BODY_IDS.map(() => ({ current: true })));
   const ready = useRef(false);
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const gl = useThree((state) => state.gl);
@@ -151,6 +148,7 @@ const CarouselScene = ({
     };
   };
 
+  // Priority −2: run before usePositionSim (−1) so enabled flags are fresh.
   useFrame((_, delta) => {
     offsetRef.current = MathUtils.damp(
       offsetRef.current,
@@ -160,11 +158,13 @@ const CarouselScene = ({
     );
 
     const visualOffset = offsetRef.current + (dragOffsetRef.current ?? 0);
+    const hidden = hiddenBodyRef.current;
 
     for (let index = 0; index < BODY_COUNT; index++) {
       const group = groupRefs.current[index];
       if (!group) continue;
 
+      const body = GLOBE_BODY_IDS[index];
       const slot = wrapCentered(index - visualOffset, BODY_COUNT);
       const abs = Math.abs(slot);
       const coverAbs = Math.min(abs, 1.2);
@@ -194,34 +194,37 @@ const CarouselScene = ({
         group.position.set(targetX, 0, targetZ);
         group.scale.setScalar(targetScale);
         group.visible = targetScale > 0.03;
-        continue;
+      } else {
+        group.position.x = MathUtils.damp(
+          group.position.x,
+          targetX,
+          POSE_DAMP,
+          delta,
+        );
+        group.position.z = MathUtils.damp(
+          group.position.z,
+          targetZ,
+          POSE_DAMP,
+          delta,
+        );
+        const s = MathUtils.damp(group.scale.x, targetScale, POSE_DAMP, delta);
+        group.scale.setScalar(s);
+        group.visible = s > 0.03;
       }
 
-      group.position.x = MathUtils.damp(
-        group.position.x,
-        targetX,
-        POSE_DAMP,
-        delta,
-      );
-      group.position.z = MathUtils.damp(
-        group.position.z,
-        targetZ,
-        POSE_DAMP,
-        delta,
-      );
-      const s = MathUtils.damp(group.scale.x, targetScale, POSE_DAMP, delta);
-      group.scale.setScalar(s);
-      group.visible = s > 0.03;
-    }
+      if (hidden === body) {
+        group.visible = false;
+      }
 
-    const hidden = hiddenBodyRef.current;
-    if (hidden) {
-      const group = groupRefs.current[GLOBE_BODY_IDS.indexOf(hidden)];
-      if (group) group.visible = false;
+      // Side peek (SIDE_SCALE) stays drawn but freezes GPGPU — only the
+      // active / approaching planet pays for an FBO evolve each frame.
+      const scale = group.scale.x;
+      simEnabledRefs.current[index].current =
+        group.visible && scale > SIDE_SCALE + 0.04;
     }
 
     ready.current = true;
-  });
+  }, -2);
 
   const bodyConfigs = useMemo(
     () =>
@@ -249,7 +252,12 @@ const CarouselScene = ({
             groupRefs.current[index] = node;
           }}
         >
-          <Globe config={config} colorUrl={colorUrl} enableFx={false} />
+          <Globe
+            config={config}
+            colorUrl={colorUrl}
+            enableFx={false}
+            simEnabledRef={simEnabledRefs.current[index]}
+          />
           {/* Invisible hit target — point cloud does not receive pointers. */}
           <mesh
             onPointerOver={(event) => {

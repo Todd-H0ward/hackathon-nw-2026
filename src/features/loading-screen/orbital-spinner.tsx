@@ -1,11 +1,14 @@
 import { cn } from '@/shared/lib/utils';
 
-interface OrbitalSpinnerProps {
+type OrbitalSpinnerProps = {
   className?: string;
   size?: number;
-}
+};
 
-export function OrbitalSpinner({ className, size = 112 }: OrbitalSpinnerProps) {
+export const OrbitalSpinner = ({
+  className,
+  size = 112,
+}: OrbitalSpinnerProps) => {
   return (
     <div
       className={cn(
@@ -155,4 +158,4 @@ export function OrbitalSpinner({ className, size = 112 }: OrbitalSpinnerProps) {
       </svg>
     </div>
   );
-}
+};

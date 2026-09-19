@@ -1,21 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface UseSpeechRecognitionOptions {
+type UseSpeechRecognitionOptions = {
   lang?: string;
   onResult?: (transcript: string) => void;
   onError?: (error: string) => void;
-}
+};
 
-interface UseSpeechRecognitionReturn {
+type UseSpeechRecognitionReturn = {
   isListening: boolean;
   isSupported: boolean;
   startListening: () => void;
   stopListening: () => void;
-}
+};
 
 /** Тип конструктора SpeechRecognition (включает webkit-вариант) */
 type SpeechRecognitionConstructor = new () => SpeechRecognition;
@@ -27,15 +23,11 @@ type WindowWithSpeechRecognition = Window &
     webkitSpeechRecognition?: SpeechRecognitionConstructor;
   };
 
-// ═══════════════════════════════════════════
-// HOOK
-// ═══════════════════════════════════════════
-
-export function useSpeechRecognition({
+export const useSpeechRecognition = ({
   lang = 'ru-RU',
   onResult,
   onError,
-}: UseSpeechRecognitionOptions = {}): UseSpeechRecognitionReturn {
+}: UseSpeechRecognitionOptions = {}): UseSpeechRecognitionReturn => {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -55,14 +47,15 @@ export function useSpeechRecognition({
     if (!isSupported) return;
 
     const win = window as WindowWithSpeechRecognition;
-    const SpeechRecognitionAPI = win.SpeechRecognition ?? win.webkitSpeechRecognition;
+    const SpeechRecognitionAPI =
+      win.SpeechRecognition ?? win.webkitSpeechRecognition;
 
     if (!SpeechRecognitionAPI) return;
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = lang;
-    recognition.continuous = false;       // останавливаться после одной фразы
-    recognition.interimResults = false;   // ждать финального результата
+    recognition.continuous = false; // останавливаться после одной фразы
+    recognition.interimResults = false; // ждать финального результата
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -110,4 +103,4 @@ export function useSpeechRecognition({
   }, [isListening]);
 
   return { isListening, isSupported, startListening, stopListening };
-}
+};

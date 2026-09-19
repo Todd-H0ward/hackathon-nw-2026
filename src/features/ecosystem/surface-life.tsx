@@ -26,22 +26,56 @@ import {
   activeColonies,
   type Colony,
   type Individual,
-  type Packet,
-  position,
   type Simulation,
 } from './model';
 
-function arc(a: [number, number, number], b: [number, number, number]) {
-  const start = new Vector3(...a),
-    end = new Vector3(...b);
-  return Array.from({ length: 20 }, (_, i) =>
-    start
-      .clone()
-      .lerp(end, i / 19)
-      .normalize()
-      .multiplyScalar(2.36 + Math.sin((i / 19) * Math.PI) * 0.12),
-  );
-}
+type Vec3 = [number, number, number];
+
+const ARC_STEPS = 20;
+const DEFAULT_RADIUS = 2.33;
+const BOUNDARY_RADIUS = 2.35;
+const LABEL_RADIUS = 2.46;
+
+/** Spherical → cartesian into a reusable tuple (no per-call array alloc). */
+const writePosition = (
+  out: Vec3,
+  lat: number,
+  lon: number,
+  radius = DEFAULT_RADIUS,
+) => {
+  const cosLat = Math.cos(lat);
+  out[0] = radius * cosLat * Math.sin(lon);
+  out[1] = radius * Math.sin(lat);
+  out[2] = radius * cosLat * Math.cos(lon);
+  return out;
+};
+
+const makeArcBuffer = (): Vec3[] =>
+  Array.from({ length: ARC_STEPS }, () => [0, 0, 0] as Vec3);
+
+/**
+ * Great-circle bump between two surface points. Writes into a caller-owned
+ * buffer so a 10 Hz stream never allocates 20 Vector3s per link.
+ */
+const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
+  for (let i = 0; i < ARC_STEPS; i++) {
+    const t = i / (ARC_STEPS - 1);
+    const x = a[0] + (b[0] - a[0]) * t;
+    const y = a[1] + (b[1] - a[1]) * t;
+    const z = a[2] + (b[2] - a[2]) * t;
+    const len = Math.hypot(x, y, z) || 1;
+    const r = 2.36 + Math.sin(t * Math.PI) * 0.12;
+    const point = out[i];
+    point[0] = (x / len) * r;
+    point[1] = (y / len) * r;
+    point[2] = (z / len) * r;
+  }
+  return out;
+};
+
+/** Copy an arc buffer into a fresh tuple array for StableLine / drei. */
+const snapshotArc = (buf: Vec3[]): Vec3[] =>
+  buf.map((p) => [p[0], p[1], p[2]] as Vec3);
 
 type LinePoints = ComponentProps<typeof Line>['points'];
 
@@ -84,9 +118,154 @@ const PACKET_MATERIAL = new MeshBasicMaterial({
   toneMapped: false,
 });
 
-type ColonyItemProps = {
+type ColonyView = {
   colony: Colony;
   group: Individual[];
+  center: { lat: number; lon: number };
+  centerPos: Vec3;
+  boundary: Vec3[];
+  links: { id: number; points: Vec3[] }[];
+  labelPosition: Vec3;
+};
+
+type PacketView = {
+  key: string;
+  points: Vec3[];
+  head: Vec3;
+};
+
+type SurfaceLifeProps = {
+  simulation: Simulation;
+  selected: number | null;
+  showLinks: boolean;
+  showLabels: boolean;
+  onSelect: (id: number) => void;
+};
+
+/**
+ * Build the per-colony / per-packet line geometry in one O(n) pass. The WS
+ * stream replaces `simulation` up to 10 Hz, so this still runs that often —
+ * but never O(colonies × living) with a fresh `living()` filter each time.
+ */
+const buildSceneViews = (
+  simulation: Simulation,
+  showLinks: boolean,
+  selected: number | null,
+): { colonyViews: ColonyView[]; packetViews: PacketView[] } => {
+  const alive = simulation.individuals.filter((i) => i.dead === null);
+  const byColony = new Map<number, Individual[]>();
+  const byId = new Map<number, Individual>();
+
+  for (const individual of alive) {
+    byId.set(individual.id, individual);
+    const list = byColony.get(individual.colony);
+    if (list) list.push(individual);
+    else byColony.set(individual.colony, [individual]);
+  }
+
+  const scratchA: Vec3 = [0, 0, 0];
+  const scratchB: Vec3 = [0, 0, 0];
+  const scratchArc = makeArcBuffer();
+
+  const colonyViews: ColonyView[] = [];
+  for (const colony of activeColonies(simulation)) {
+    const group = byColony.get(colony.id);
+    if (!group || group.length === 0) continue;
+
+    let latSum = 0;
+    let lonSum = 0;
+    for (const member of group) {
+      latSum += member.lat;
+      lonSum += member.lon;
+    }
+    const center = {
+      lat: latSum / group.length,
+      lon: lonSum / group.length,
+    };
+
+    const centerPos: Vec3 = [0, 0, 0];
+    writePosition(centerPos, center.lat, center.lon, BOUNDARY_RADIUS);
+
+    const boundary: Vec3[] = Array.from({ length: 49 }, (_, k) => {
+      const point: Vec3 = [0, 0, 0];
+      writePosition(
+        point,
+        center.lat + Math.sin((k / 48) * Math.PI * 2) * 0.2,
+        center.lon + Math.cos((k / 48) * Math.PI * 2) * 0.23,
+        BOUNDARY_RADIUS,
+      );
+      return point;
+    });
+
+    const links: ColonyView['links'] = [];
+    if (showLinks) {
+      const maxLinks = selected === colony.id ? 16 : 5;
+      const linkCount = Math.min(group.length - 1, maxLinks);
+      for (let j = 1; j <= linkCount; j++) {
+        writePosition(scratchA, group[j - 1].lat, group[j - 1].lon);
+        writePosition(scratchB, group[j].lat, group[j].lon);
+        writeArc(scratchArc, scratchA, scratchB);
+        links.push({ id: group[j].id, points: snapshotArc(scratchArc) });
+      }
+    }
+
+    const labelPosition: Vec3 = [0, 0, 0];
+    writePosition(
+      labelPosition,
+      center.lat + 0.27,
+      center.lon,
+      LABEL_RADIUS,
+    );
+
+    colonyViews.push({
+      colony,
+      group,
+      center,
+      centerPos,
+      boundary,
+      links,
+      labelPosition,
+    });
+  }
+
+  const packetViews: PacketView[] = [];
+  if (showLinks) {
+    const packets = simulation.packets;
+    const start = Math.max(0, packets.length - 35);
+    for (let i = start; i < packets.length; i++) {
+      const packet = packets[i];
+      const from = byId.get(packet.from);
+      const to = byId.get(packet.to);
+      if (!from || !to) continue;
+
+      writePosition(scratchA, from.lat, from.lon);
+      writePosition(scratchB, to.lat, to.lon);
+      writeArc(scratchArc, scratchA, scratchB);
+      const points = snapshotArc(scratchArc);
+      const travel = packet.arrival - packet.sent;
+      const idx =
+        travel <= 0
+          ? 0
+          : Math.min(
+              ARC_STEPS - 1,
+              Math.floor(
+                ((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1),
+              ),
+            );
+
+      packetViews.push({
+        key: `${packet.from}-${packet.to}-${packet.sent}`,
+        points,
+        head: points[idx],
+      });
+    }
+  }
+
+  return { colonyViews, packetViews };
+};
+
+type ColonyOverlayProps = {
+  view: ColonyView;
   selected: boolean;
   showLinks: boolean;
   showLabels: boolean;
@@ -94,60 +273,28 @@ type ColonyItemProps = {
   onSelect: (id: number) => void;
 };
 
-function ColonyItem({
-  colony,
-  group,
+/** Horizon occlusion + bright colony chrome; geometry comes from the parent memo. */
+const ColonyOverlay = ({
+  view,
   selected,
   showLinks,
   showLabels,
   occluder,
   onSelect,
-}: ColonyItemProps) {
+}: ColonyOverlayProps) => {
+  const { colony, group, centerPos, boundary, links, labelPosition } = view;
   const groupRef = useRef<Group>(null);
   const htmlRef = useRef<HTMLButtonElement>(null);
-
-  const center = useMemo(() => {
-    const len = group.length || 1;
-    return {
-      lat: group.reduce((s, i) => s + i.lat, 0) / len,
-      lon: group.reduce((s, i) => s + i.lon, 0) / len,
-    };
-  }, [group]);
-
-  const centerPos = useMemo(
-    () => new Vector3(...position(center, 2.35)),
-    [center],
+  const centerVec = useMemo(
+    () => new Vector3(centerPos[0], centerPos[1], centerPos[2]),
+    [centerPos],
   );
-
-  const boundary = useMemo(
-    () =>
-      Array.from({ length: 49 }, (_, k) =>
-        position(
-          {
-            lat: center.lat + Math.sin((k / 48) * Math.PI * 2) * 0.2,
-            lon: center.lon + Math.cos((k / 48) * Math.PI * 2) * 0.23,
-          },
-          2.35,
-        ),
-      ),
-    [center],
-  );
-
-  const maxLinks = selected ? 16 : 5;
-  const linkArcs = useMemo(() => {
-    if (!showLinks) return [];
-    return group.slice(1, maxLinks + 1).map((i, j) => ({
-      id: i.id,
-      points: arc(position(group[j]), position(i)),
-    }));
-  }, [group, showLinks, maxLinks]);
 
   useFrame(({ camera }) => {
     if (!groupRef.current) return;
-    // Horizon occlusion test: P . C - |P|^2 > -0.35
-    // Margin of -0.35 ensures colony edge doesn't clip prematurely.
-    const pDotC = centerPos.dot(camera.position);
-    const isVisible = pDotC - centerPos.lengthSq() > -0.35;
+    // Horizon occlusion: P · C − |P|² > −0.35 (margin so edges don't clip early).
+    const pDotC = centerVec.dot(camera.position);
+    const isVisible = pDotC - centerVec.lengthSq() > -0.35;
 
     if (groupRef.current.visible !== isVisible) {
       groupRef.current.visible = isVisible;
@@ -169,22 +316,20 @@ function ColonyItem({
         opacity={selected ? 0.95 : 0.65}
         lineWidth={selected ? 2.8 : 1.8}
       />
-      {linkArcs.map(({ id, points }) => (
-        <StableLine
-          key={id}
-          points={points}
-          color={colony.color}
-          transparent
-          opacity={selected ? 0.9 : 0.6}
-          lineWidth={selected ? 2.2 : 1.4}
-        />
-      ))}
+      {showLinks &&
+        links.map((link) => (
+          <StableLine
+            key={link.id}
+            points={link.points}
+            color={colony.color}
+            transparent
+            opacity={selected ? 0.9 : 0.6}
+            lineWidth={selected ? 2.2 : 1.4}
+          />
+        ))}
       {showLabels && (
         <Html
-          position={position(
-            { lat: center.lat + 0.27, lon: center.lon },
-            2.46,
-          )}
+          position={labelPosition}
           center
           occlude={[occluder as RefObject<Object3D>]}
           zIndexRange={[9, 0]}
@@ -210,36 +355,23 @@ function ColonyItem({
       )}
     </group>
   );
-}
+};
 
-function PacketItem({
-  packet,
-  fromInd,
-  toInd,
-  tick,
-}: {
-  packet: Packet;
-  fromInd: Individual;
-  toInd: Individual;
-  tick: number;
-}) {
+type PacketOverlayProps = {
+  view: PacketView;
+};
+
+const PacketOverlay = ({ view }: PacketOverlayProps) => {
   const groupRef = useRef<Group>(null);
-  const fromPos = useMemo(() => position(fromInd), [fromInd]);
-  const toPos = useMemo(() => position(toInd), [toInd]);
-  const points = useMemo(() => arc(fromPos, toPos), [fromPos, toPos]);
-
-  const idx = Math.min(
-    19,
-    Math.floor(
-      ((tick - packet.sent) / (packet.arrival - packet.sent || 1)) * 19,
-    ),
+  const headVec = useMemo(
+    () => new Vector3(view.head[0], view.head[1], view.head[2]),
+    [view.head],
   );
-  const currentPos = points[idx];
 
   useFrame(({ camera }) => {
-    if (!groupRef.current || !currentPos) return;
-    const pDotC = currentPos.dot(camera.position);
-    const isVisible = pDotC - currentPos.lengthSq() > -0.1;
+    if (!groupRef.current) return;
+    const pDotC = headVec.dot(camera.position);
+    const isVisible = pDotC - headVec.lengthSq() > -0.1;
     if (groupRef.current.visible !== isVisible) {
       groupRef.current.visible = isVisible;
     }
@@ -248,36 +380,28 @@ function PacketItem({
   return (
     <group ref={groupRef}>
       <StableLine
-        points={points}
+        points={view.points}
         color="#ffffff"
         transparent
         opacity={0.8}
         lineWidth={1.6}
       />
-      {currentPos && (
-        <mesh
-          position={currentPos}
-          geometry={PACKET_GEOMETRY}
-          material={PACKET_MATERIAL}
-        />
-      )}
+      <mesh
+        position={view.head}
+        geometry={PACKET_GEOMETRY}
+        material={PACKET_MATERIAL}
+      />
     </group>
   );
-}
+};
 
-export function SurfaceLife({
+export const SurfaceLife = ({
   simulation,
   selected,
   showLinks,
   showLabels,
   onSelect,
-}: {
-  simulation: Simulation;
-  selected: number | null;
-  showLinks: boolean;
-  showLabels: boolean;
-  onSelect: (id: number) => void;
-}) {
+}: SurfaceLifeProps) => {
   const mesh = useRef<InstancedMesh>(null);
   // Cheap stand-in for the planet: label occlusion raycasts against this only,
   // not the whole scene (the globe's point cloud has 160k vertices).
@@ -287,80 +411,83 @@ export function SurfaceLife({
   const color = useMemo(() => new Color(), []);
   const visible = simulation.individuals;
 
+  const colonyColorById = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const colony of simulation.colonies) {
+      map.set(colony.id, colony.color);
+    }
+    return map;
+  }, [simulation.colonies]);
+
+  const { colonyViews, packetViews } = useMemo(
+    () => buildSceneViews(simulation, showLinks, selected),
+    [simulation, showLinks, selected],
+  );
+
   useEffect(() => {
     const target = mesh.current;
     if (!target) return;
     target.count = visible.length;
-    visible.forEach((i, index) => {
-      const colony = simulation.colonies.find((c) => c.id === i.colony);
+    for (let index = 0; index < visible.length; index++) {
+      const individual = visible[index];
       target.setColorAt(
         index,
         color.set(
-          i.dead !== null
+          individual.dead !== null
             ? '#ff5d66'
-            : i.action === 'divide'
+            : individual.action === 'divide'
               ? '#ffffff'
-              : i.energy < 18
+              : individual.energy < 18
                 ? '#ff805e'
-                : (colony?.color ?? '#70e0c4'),
+                : (colonyColorById.get(individual.colony) ?? '#70e0c4'),
         ),
       );
-    });
-    if (target.instanceColor) target.instanceColor.needsUpdate = true;
-  }, [visible, simulation.colonies, color]);
-
-  const positions = useMemo(
-    () => visible.map((i) => position(i)),
-    [visible],
-  );
-
-  const colonyMembers = useMemo(() => {
-    const map = new Map<number, Individual[]>();
-    for (const i of simulation.individuals) {
-      if (i.dead !== null) continue;
-      let arr = map.get(i.colony);
-      if (!arr) {
-        arr = [];
-        map.set(i.colony, arr);
-      }
-      arr.push(i);
     }
-    return map;
-  }, [simulation.individuals]);
+    if (target.instanceColor) target.instanceColor.needsUpdate = true;
+  }, [visible, colonyColorById, color]);
 
   useFrame(({ clock, camera }) => {
     const target = mesh.current;
     if (!target) return;
-    visible.forEach((i, index) => {
-      const pos = positions[index];
-      if (!pos) return;
-      dummy.position.set(pos[0], pos[1], pos[2]);
+    const tick = simulation.tick;
+    for (let index = 0; index < visible.length; index++) {
+      const individual = visible[index];
+      // Write cartesian coords straight into the Object3D — no per-frame array.
+      const cosLat = Math.cos(individual.lat);
+      dummy.position.set(
+        DEFAULT_RADIUS * cosLat * Math.sin(individual.lon),
+        DEFAULT_RADIUS * Math.sin(individual.lat),
+        DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
+      );
 
-      // Occlusion culling: if individual is on back side of sphere, set scale 0 and skip
+      // Back-face cull: hide individuals on the far side of the sphere.
       const pDotC = dummy.position.dot(camera.position);
       if (pDotC - dummy.position.lengthSq() <= -0.05) {
         dummy.scale.set(0, 0, 0);
         dummy.updateMatrix();
         target.setMatrixAt(index, dummy.matrix);
-        return;
+        continue;
       }
 
       dummy.lookAt(outward.copy(dummy.position).multiplyScalar(2));
-      const age = simulation.tick - i.born;
+      const age = tick - individual.born;
       const birthScale = Math.min(1, (age + 1) / 8);
       const deathScale =
-        i.dead === null ? 1 : Math.max(0, 1 - (simulation.tick - i.dead) / 16);
-      const pulse = 1 + Math.sin(clock.elapsedTime * 2 + i.id) * 0.13;
+        individual.dead === null
+          ? 1
+          : Math.max(0, 1 - (tick - individual.dead) / 16);
+      const pulse = 1 + Math.sin(clock.elapsedTime * 2 + individual.id) * 0.13;
       const scale =
-        (i.colony === selected ? 1.2 : 1) * birthScale * deathScale * pulse;
+        (individual.colony === selected ? 1.2 : 1) *
+        birthScale *
+        deathScale *
+        pulse;
       dummy.scale.set(0.052 * scale, 0.052 * scale, 0.088 * scale);
       dummy.updateMatrix();
       target.setMatrixAt(index, dummy.matrix);
-    });
+    }
     target.instanceMatrix.needsUpdate = true;
   });
-
-  const colonies = activeColonies(simulation);
 
   return (
     <group>
@@ -380,8 +507,12 @@ export function SurfaceLife({
           e.stopPropagation();
           const individual = visible[e.instanceId ?? -1];
           if (!individual) return;
-          const pos = positions[e.instanceId ?? -1] ?? position(individual);
-          dummy.position.set(pos[0], pos[1], pos[2]);
+          const cosLat = Math.cos(individual.lat);
+          dummy.position.set(
+            DEFAULT_RADIUS * cosLat * Math.sin(individual.lon),
+            DEFAULT_RADIUS * Math.sin(individual.lat),
+            DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
+          );
           if (
             dummy.position.dot(e.camera.position) - dummy.position.lengthSq() >
             -0.05
@@ -393,12 +524,11 @@ export function SurfaceLife({
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
-      {colonies.map((c) => (
-        <ColonyItem
-          key={c.id}
-          colony={c}
-          group={colonyMembers.get(c.id) ?? []}
-          selected={selected === c.id}
+      {colonyViews.map((view) => (
+        <ColonyOverlay
+          key={view.colony.id}
+          view={view}
+          selected={selected === view.colony.id}
           showLinks={showLinks}
           showLabels={showLabels}
           occluder={occluder}
@@ -406,20 +536,9 @@ export function SurfaceLife({
         />
       ))}
       {showLinks &&
-        simulation.packets.slice(-35).map((p) => {
-          const from = visible.find((i) => i.id === p.from);
-          const to = visible.find((i) => i.id === p.to);
-          if (!from || !to) return null;
-          return (
-            <PacketItem
-              key={`${p.from}-${p.to}-${p.sent}`}
-              packet={p}
-              fromInd={from}
-              toInd={to}
-              tick={simulation.tick}
-            />
-          );
-        })}
+        packetViews.map((view) => (
+          <PacketOverlay key={view.key} view={view} />
+        ))}
     </group>
   );
-}
+};

@@ -1,12 +1,12 @@
 // Barrel export для voice-модуля
-export { useSpeechRecognition } from './useSpeechRecognition';
-export { useSpeechSynthesis } from './useSpeechSynthesis';
-export { findCommand, resolveResponse } from './matcher';
+
 export { voiceCommands } from './commands';
+export { findCommand, resolveResponse } from './matcher';
 export type {
   VoiceCommand,
   VoiceCommandArgs,
-  VoiceStatus,
   VoiceHistoryEntry,
-  VoiceContextValue,
+  VoiceStatus,
 } from './types';
+export { useSpeechRecognition } from './useSpeechRecognition';
+export { useSpeechSynthesis } from './useSpeechSynthesis';

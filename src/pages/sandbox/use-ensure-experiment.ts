@@ -1,0 +1,64 @@
+import { useCallback } from 'react';
+
+import { useCommand, useCreateExperiment } from '@/shared/api/xenochoice';
+import { useToast } from '@/shared/ui';
+import type { GlobeBodyId } from '@/shared/ui/globe';
+
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { getLabState } from '@/store';
+
+import {
+  applySnapshot,
+  errorMessage,
+  labRuntime,
+  rememberExperiment,
+  resetLabRuntime,
+} from './lab-runtime';
+
+/**
+ * Creates the experiment for a planet and starts it. Idempotent: the
+ * `labRuntime.creating` guard is module-level, so two call sites (bootstrap and
+ * the reset handler) can never open two experiments for the same planet.
+ */
+export const useEnsureExperiment = () => {
+  const { toast: notify } = useToast();
+  const worlds = useWorldCatalog();
+  const createExperiment = useCreateExperiment();
+  const command = useCommand();
+
+  return useCallback(
+    async (target: GlobeBodyId, seedValue: number) => {
+      const { experimentIds, setBooting, setSeed } = getLabState();
+      if (experimentIds[target] || labRuntime.creating[target]) return;
+
+      labRuntime.creating[target] = true;
+      setBooting(true);
+
+      try {
+        const experiment = await createExperiment.mutateAsync({
+          name: `Лаборатория · ${worlds.catalog[target]?.name ?? target}`,
+          worldId: target,
+          mode: 'adaptive',
+          seed: seedValue,
+        });
+
+        resetLabRuntime(target, experiment.seed);
+        rememberExperiment(target, experiment.id);
+        applySnapshot(target, experiment.initialSnapshot);
+        setSeed(String(experiment.seed));
+
+        await command.mutateAsync({
+          experimentId: experiment.id,
+          command: 'start',
+          speed: getLabState().speed,
+        });
+      } catch (error) {
+        notify(errorMessage(error, 'Не удалось создать эксперимент'));
+      } finally {
+        labRuntime.creating[target] = false;
+        getLabState().setBooting(false);
+      }
+    },
+    [command, createExperiment, notify, worlds.catalog],
+  );
+};

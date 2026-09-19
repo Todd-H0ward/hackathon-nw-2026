@@ -25,19 +25,30 @@ pnpm dev
 
 ```
 src/
-  components/   # app-level layouts / providers
-  contexts/     # React contexts (e.g. user session)
-  pages/        # route pages
+  App.tsx, router.tsx, providers.tsx, main.tsx   # app shell
+  contexts/     # React contexts, one folder per domain
+  store/        # Zustand stores: <domain>/{store,selectors,index}.ts
+  features/     # domain modules with their own UI and logic
+  pages/        # route pages; page-only components in <page>/ui/
   shared/
-    api/        # Axios instance + endpoints
+    api/        # Axios instances + endpoints
     constants/  # routes, etc.
-    hooks/      # shared hooks (React Query, …)
-    lib/        # utilities (cn, …)
+    lib/        # utilities (cn, webgl helpers, …)
     types/      # shared types
-    ui/         # shadcn UI primitives
+    ui/         # design-system primitives + the globe widget
 ```
 
 Path alias: `@/*` → `src/*`.
+
+### Where does a new component go?
+
+| Reused across pages, no domain knowledge | `shared/ui/` |
+|------------------------------------------|--------------|
+| Belongs to a domain, used on 2+ pages    | `features/<domain>/` |
+| Used by exactly one page                 | `pages/<page>/ui/` |
+
+There is deliberately no `src/components/`: it used to be a fourth location with
+no rule, which is how the same `Sparkline` ended up implemented twice.
 
 ## Environment
 

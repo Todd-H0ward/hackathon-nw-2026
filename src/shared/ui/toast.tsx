@@ -10,39 +10,49 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface ToastItem {
+type ToastItem = {
   id: number;
   message: ReactNode;
-}
+};
 
-interface ToastContextValue {
+type ToastContextValue = {
   toast: (message: ReactNode) => void;
-}
+};
 
-interface ToastProviderProps {
+type ToastProviderProps = {
   children: ReactNode;
   duration?: number;
-}
-
-// ═══════════════════════════════════════════
-// CONTEXT
-// ═══════════════════════════════════════════
+};
 
 const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
-export function useToast() {
+export const useToast = () => {
   return useContext(ToastContext);
-}
+};
 
-// ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
-// ═══════════════════════════════════════════
+export const Toast = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div
+      role="status"
+      data-slot="toast"
+      className={cn(
+        'px-5 py-[13px] bg-[#d8e4cc] text-[#182013] rounded-[7px] shadow-[0_8px_30px_#0008]',
+        'text-[13px] font-medium pointer-events-auto',
+        'animate-in fade-in-0 slide-in-from-bottom-4',
+        className,
+      )}
+      {...props}
+    />
+  );
+};
 
-function ToastProvider({ children, duration = 2800 }: ToastProviderProps) {
+export const ToastProvider = ({
+  children,
+  duration = 2800,
+}: ToastProviderProps) => {
   const [items, setItems] = useState<ToastItem[]>([]);
   const counterRef = useRef(0);
 
@@ -71,26 +81,4 @@ function ToastProvider({ children, duration = 2800 }: ToastProviderProps) {
       </div>
     </ToastContext.Provider>
   );
-}
-
-function Toast({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      role="status"
-      data-slot="toast"
-      className={cn(
-        'px-5 py-[13px] bg-[#d8e4cc] text-[#182013] rounded-[7px] shadow-[0_8px_30px_#0008]',
-        'text-[13px] font-medium pointer-events-auto',
-        'animate-in fade-in-0 slide-in-from-bottom-4',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Toast, ToastProvider };
+};

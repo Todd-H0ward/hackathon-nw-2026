@@ -2,23 +2,15 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface SeparatorProps extends HTMLAttributes<HTMLHRElement> {
+type SeparatorProps = HTMLAttributes<HTMLHRElement> & {
   orientation?: 'horizontal' | 'vertical';
-}
+};
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function Separator({
+export const Separator = ({
   className,
   orientation = 'horizontal',
   ...props
-}: SeparatorProps) {
+}: SeparatorProps) => {
   return (
     <hr
       data-slot="separator"
@@ -31,10 +23,4 @@ function Separator({
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Separator };
+};

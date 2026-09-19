@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router';
 
-import { Providers } from '@/components/layouts';
-import { SpaceLoadingScreen } from '@/components/space-loading-screen';
-
+import { SpaceLoadingScreen } from '@/features/loading-screen';
 import { PlanetTransitionOverlay } from '@/features/planet-transition';
+
+import { Providers } from './providers';
 
 export const App = () => {
   return (

@@ -1,6 +1,6 @@
 import type { Color, ShaderMaterial } from 'three';
 
-import type { GlobeConfig } from '../config';
+import type { GlobeConfig } from '@/shared/ui/globe/config';
 
 export const syncHazeUniforms = (
   material: ShaderMaterial,

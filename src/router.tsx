@@ -2,12 +2,6 @@ import { createBrowserRouter } from 'react-router';
 
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
-import {
-  AnalyticsPage,
-  AtlasPage,
-  SandboxLayout,
-  SandboxPage,
-} from '@/pages/sandbox';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 
@@ -24,19 +18,31 @@ export const router = createBrowserRouter([
       },
       {
         path: STATIC_ROUTES.SANDBOX,
-        element: <SandboxLayout />,
+        lazy: async () => {
+          const { SandboxLayout } = await import('@/pages/sandbox');
+          return { Component: SandboxLayout };
+        },
         children: [
           {
             index: true,
-            element: <SandboxPage />,
+            lazy: async () => {
+              const { SandboxPage } = await import('@/pages/sandbox');
+              return { Component: SandboxPage };
+            },
           },
           {
             path: STATIC_ROUTES.ANALYTICS,
-            element: <AnalyticsPage />,
+            lazy: async () => {
+              const { AnalyticsPage } = await import('@/pages/sandbox');
+              return { Component: AnalyticsPage };
+            },
           },
           {
             path: STATIC_ROUTES.ATLAS,
-            element: <AtlasPage />,
+            lazy: async () => {
+              const { AtlasPage } = await import('@/pages/sandbox');
+              return { Component: AtlasPage };
+            },
           },
         ],
       },

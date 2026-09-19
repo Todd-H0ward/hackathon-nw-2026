@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 import { ChevronRight, GitBranch, Leaf, Plus } from 'lucide-react';
 
+import { pad } from '@/pages/sandbox/lib';
+
 import { cn } from '@/shared/lib/utils';
 
 import {
@@ -12,13 +14,14 @@ import {
   type Simulation,
 } from '@/features/ecosystem/model';
 
-import { pad } from '../lib';
-
 type ColoniesPanelProps = {
   sim: Simulation;
   colonies: Colony[];
   selected: number | null;
   aliveCount: number;
+  /** Engine ceilings from `/worlds` — not client-side guesses. */
+  maxPopulation: number;
+  maxColonies: number;
   colony: Colony | undefined;
   group: Individual[];
   focused: Individual | undefined;
@@ -31,17 +34,19 @@ export const ColoniesPanel = ({
   colonies,
   selected,
   aliveCount,
+  maxPopulation,
+  maxColonies,
   colony,
   group,
   focused,
   onSelect,
   onAddColony,
 }: ColoniesPanelProps) => (
-  <aside className="min-h-0 overflow-y-auto border-l border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-[980px]:col-span-full max-[980px]:grid max-[980px]:grid-cols-2 max-[980px]:gap-x-6 max-[980px]:gap-y-2.5 max-[980px]:border-t max-[980px]:border-l-0 max-[700px]:gap-x-[15px]">
+  <aside className="min-h-0 overflow-y-auto border-l border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-tablet:col-span-full max-tablet:grid max-tablet:grid-cols-2 max-tablet:gap-x-6 max-tablet:gap-y-2.5 max-tablet:border-t max-tablet:border-l-0 max-mobile:gap-x-[15px]">
     <div
       className={cn(
         'mb-2 flex items-center gap-2 text-muted-foreground',
-        'max-[980px]:col-span-full max-[980px]:mb-0',
+        'max-tablet:col-span-full max-tablet:mb-0',
       )}
     >
       <span className="font-mono text-[9px]">03</span>
@@ -52,7 +57,7 @@ export const ColoniesPanel = ({
         {colonies.length}
       </span>
     </div>
-    <div className="grid max-h-[210px] gap-1.5 overflow-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] max-[980px]:col-start-1 max-[980px]:max-h-[200px]">
+    <div className="grid max-h-[210px] gap-1.5 overflow-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] max-tablet:col-start-1 max-tablet:max-h-[200px]">
       {colonies.length ? (
         colonies.map((c) => {
           const population = members(sim, c.id);
@@ -64,21 +69,21 @@ export const ColoniesPanel = ({
               key={c.id}
               onClick={() => onSelect(c.id)}
               className={cn(
-                'flex items-center gap-2 rounded-md border border-border bg-background px-2 py-2 text-left text-muted-foreground transition-colors hover:bg-secondary max-[700px]:gap-1.5 max-[700px]:px-1.5',
+                'flex items-center gap-2 rounded-md border border-border bg-background px-2 py-2 text-left text-muted-foreground transition-colors hover:bg-secondary max-mobile:gap-1.5 max-mobile:px-1.5',
                 selected === c.id && 'border-primary/40 bg-secondary',
               )}
               style={{ '--colony-color': c.color } as CSSProperties}
             >
-              <span className="grid size-7 place-items-center rounded-[5px] bg-secondary text-[var(--colony-color)] max-[700px]:hidden">
+              <span className="grid size-7 place-items-center rounded-[5px] bg-secondary text-[var(--colony-color)] max-mobile:hidden">
                 <GitBranch size={16} />
               </span>
               <span className="flex-1">
-                <b className="block text-[11px] font-[450] text-foreground max-[700px]:text-[10px]">
+                <b className="block text-[11px] font-[450] text-foreground max-mobile:text-[10px]">
                   {c.name}
                 </b>
-                <small className="mt-1 block text-[8px] text-muted-foreground max-[700px]:text-[7px]">
+                <small className="mt-1 block text-[8px] text-muted-foreground max-mobile:text-[7px]">
                   {population.length} особей ·{' '}
-                  {c.parent ? `потомок C—${pad(c.parent)}` : 'первичная'}
+                  {c.primary ? 'первичная' : 'дочерняя'}
                 </small>
                 <span className="mt-2 block h-0.5 w-full bg-border">
                   <i
@@ -103,26 +108,26 @@ export const ColoniesPanel = ({
     </div>
     <button
       type="button"
-      className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-xeno-green/40 bg-xeno-green/5 p-2 text-[10px] text-xeno-green transition-colors hover:bg-xeno-green/10 disabled:opacity-50 max-[980px]:col-start-1 max-[980px]:mt-0"
+      className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-xeno-green/40 bg-xeno-green/5 p-2 text-[10px] text-xeno-green transition-colors hover:bg-xeno-green/10 disabled:opacity-50 max-tablet:col-start-1 max-tablet:mt-0"
       onClick={onAddColony}
-      disabled={aliveCount > 172 || colonies.length >= 12}
+      disabled={aliveCount >= maxPopulation || colonies.length >= maxColonies}
     >
       <Plus size={15} />
       Внести зародыши
     </button>
-    <div className="mt-3.5 border-t border-border pt-3.5 max-[980px]:col-start-2 max-[980px]:row-span-2 max-[980px]:row-start-2 max-[980px]:m-0 max-[980px]:border-0 max-[980px]:p-0">
-      <div className="font-mono text-[8px] tracking-[1.45px] text-muted-foreground max-[700px]:text-[7px]">
+    <div className="mt-3.5 border-t border-border pt-3.5 max-tablet:col-start-2 max-tablet:row-span-2 max-tablet:row-start-2 max-tablet:m-0 max-tablet:border-0 max-tablet:p-0">
+      <div className="font-mono text-[8px] tracking-[1.45px] text-muted-foreground max-mobile:text-[7px]">
         ИНСПЕКТОР <span className="mx-[7px] opacity-50">/</span>{' '}
         {colony ? `C—${pad(colony.id)}` : 'ВЫБЕРИТЕ КОЛОНИЮ'}
       </div>
-      <h3 className="my-2 flex items-center justify-between text-[14px] font-[450] max-[700px]:text-[13px]">
+      <h3 className="my-2 flex items-center justify-between text-[14px] font-[450] max-mobile:text-[13px]">
         {colony?.name ?? 'Наблюдение за жизнью'}
         <span
           className="inline-block size-[5px] shrink-0 rounded-full bg-destructive"
           style={group.length ? { background: colony?.color } : undefined}
         />
       </h3>
-      <div className="flex gap-7 text-[8px] text-muted-foreground max-[700px]:gap-[13px]">
+      <div className="flex gap-7 text-[8px] text-muted-foreground max-mobile:gap-[13px]">
         <span>
           Поколение
           <b className="mt-1 block font-mono text-[16px] font-normal text-foreground">
@@ -144,7 +149,7 @@ export const ColoniesPanel = ({
           </b>
         </span>
       </div>
-      <div className="mt-3 rounded-md border border-xeno-green/25 bg-xeno-green/5 p-2.5 max-[700px]:p-[9px]">
+      <div className="mt-3 rounded-md border border-xeno-green/25 bg-xeno-green/5 p-2.5 max-mobile:p-[9px]">
         <div className="flex items-center gap-1.5">
           <span className="inline-block size-[5px] shrink-0 rounded-full bg-xeno-green" />
           <b className="text-[9px] font-[450] text-xeno-green">
@@ -158,14 +163,14 @@ export const ColoniesPanel = ({
         </p>
       </div>
     </div>
-    <div className="mt-4 mb-2.5 flex items-center justify-between max-[980px]:col-span-full max-[980px]:mt-2.5">
+    <div className="mt-4 mb-2.5 flex items-center justify-between max-tablet:col-span-full max-tablet:mt-2.5">
       <h3 className="text-[10px] font-[450] m-0">Полевой журнал</h3>
       <span className="font-mono text-[7px] tracking-[1px] text-xeno-green">
         LIVE
       </span>
     </div>
     <div
-      className="max-[980px]:col-span-full max-[980px]:grid max-[980px]:grid-cols-3 max-[980px]:gap-3 max-[700px]:grid-cols-2"
+      className="max-tablet:col-span-full max-tablet:grid max-tablet:grid-cols-3 max-tablet:gap-3 max-mobile:grid-cols-2"
       role="log"
       aria-live="off"
       aria-label="Журнал событий"

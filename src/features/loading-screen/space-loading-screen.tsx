@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 
-import { useLoadingScreenStore } from './loading-screen-store';
+import { useFinishLoading, useIsLoading, useLoadingStatusText } from '@/store';
+
 import { OrbitalSpinner } from './orbital-spinner';
 
-interface SpaceLoadingScreenProps {
+type SpaceLoadingScreenProps = {
   /** Минимальное время показа лоадера в мс (по умолчанию 1000ms для плавности) */
   minDurationMs?: number;
-}
+};
 
-export function SpaceLoadingScreen({
+export const SpaceLoadingScreen = ({
   minDurationMs = 1000,
-}: SpaceLoadingScreenProps) {
-  const { isLoading, statusText, finishLoading } = useLoadingScreenStore();
+}: SpaceLoadingScreenProps) => {
+  const isLoading = useIsLoading();
+  const statusText = useLoadingStatusText();
+  const finishLoading = useFinishLoading();
   const [isRendered, setIsRendered] = useState(true);
   const [opacityClass, setOpacityClass] = useState('opacity-100');
 
@@ -56,4 +59,4 @@ export function SpaceLoadingScreen({
       </div>
     </div>
   );
-}
+};

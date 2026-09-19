@@ -1,5 +1,3 @@
-import type { LabModal } from '@/contexts/lab';
-
 import {
   Button,
   Dialog,
@@ -9,7 +7,9 @@ import {
   Input,
 } from '@/shared/ui';
 
-import { MODEL_VERSION, type Simulation } from '@/features/ecosystem/model';
+import type { Simulation } from '@/features/ecosystem/model';
+import { MODEL_VERSION } from '@/features/ecosystem/world-info';
+import type { LabModal } from '@/store';
 
 type LabDialogProps = {
   modal: LabModal;
