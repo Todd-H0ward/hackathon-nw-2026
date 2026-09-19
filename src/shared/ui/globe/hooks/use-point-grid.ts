@@ -7,7 +7,6 @@ const SHELL = 1.15;
 export const createPointGrid = (size: number) => {
   const count = size * size;
   const uv = new Float32Array(count * 2);
-  const position = new Float32Array(count * 3);
 
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
@@ -18,8 +17,8 @@ export const createPointGrid = (size: number) => {
   }
 
   const geometry = new BufferGeometry();
-  geometry.setAttribute('position', new Float32BufferAttribute(position, 3));
   geometry.setAttribute('uv', new Float32BufferAttribute(uv, 2));
+  geometry.setDrawRange(0, count);
   geometry.boundingSphere = new Sphere(new Vector3(0, 0, 0), SHELL);
   return geometry;
 };
