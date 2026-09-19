@@ -1,11 +1,11 @@
 import {
   createContext,
+  type HTMLAttributes,
+  type ReactNode,
   useCallback,
   useContext,
   useRef,
   useState,
-  type HTMLAttributes,
-  type ReactNode,
 } from 'react';
 
 import { cn } from '@/shared/lib/utils';

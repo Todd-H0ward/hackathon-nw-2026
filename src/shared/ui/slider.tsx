@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -6,7 +6,8 @@ import { cn } from '@/shared/lib/utils';
 // TYPES
 // ═══════════════════════════════════════════
 
-interface SliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface SliderProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   /** Rendered value next to the label (e.g. "72 %") */
   outputValue?: ReactNode;
@@ -38,10 +39,7 @@ function Slider({
             {label}
           </label>
           {outputValue !== undefined && (
-            <output
-              htmlFor={id}
-              className="font-mono text-[#c5c7c1]"
-            >
+            <output htmlFor={id} className="font-mono text-[#c5c7c1]">
               {outputValue}
             </output>
           )}

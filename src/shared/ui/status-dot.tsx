@@ -1,5 +1,6 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
+
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -15,30 +16,27 @@ interface StatusDotProps
 // VARIANTS
 // ═══════════════════════════════════════════
 
-const statusDotVariants = cva(
-  'inline-block rounded-full shrink-0',
-  {
-    variants: {
-      variant: {
-        /** Green — online / active colony */
-        green: 'bg-[var(--xeno-green)]',
-        /** Orange — accent / alert */
-        accent: 'bg-primary',
-        /** Muted — offline */
-        muted: 'bg-muted-foreground',
-      },
-      size: {
-        sm: 'size-[5px]',
-        md: 'size-[6px]',
-        lg: 'size-2',
-      },
+const statusDotVariants = cva('inline-block rounded-full shrink-0', {
+  variants: {
+    variant: {
+      /** Green — online / active colony */
+      green: 'bg-[var(--xeno-green)]',
+      /** Orange — accent / alert */
+      accent: 'bg-primary',
+      /** Muted — offline */
+      muted: 'bg-muted-foreground',
     },
-    defaultVariants: {
-      variant: 'green',
-      size: 'md',
+    size: {
+      sm: 'size-[5px]',
+      md: 'size-[6px]',
+      lg: 'size-2',
     },
   },
-);
+  defaultVariants: {
+    variant: 'green',
+    size: 'md',
+  },
+});
 
 // ═══════════════════════════════════════════
 // COMPONENT

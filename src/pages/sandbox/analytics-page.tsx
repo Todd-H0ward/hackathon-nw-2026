@@ -1,8 +1,7 @@
 import { RotateCcw } from 'lucide-react';
 
 import { useLab } from '@/contexts/lab';
-import type { Metric } from '@/features/ecosystem/model';
-import { WORLDS } from '@/features/ecosystem/model';
+
 import {
   Button,
   Card,
@@ -11,6 +10,9 @@ import {
   CardTitle,
   MetricCard,
 } from '@/shared/ui';
+
+import type { Metric } from '@/features/ecosystem/model';
+import { WORLDS } from '@/features/ecosystem/model';
 
 import { worldCaseName } from './lib';
 import { Sparkline } from './ui/sparkline';

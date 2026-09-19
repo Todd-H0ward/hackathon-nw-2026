@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
-
 import { Outlet } from 'react-router';
 
 import { LabProvider, useLab } from '@/contexts/lab';
+
 import { ToastProvider } from '@/shared/ui';
 
 import { downloadExperiment } from './lib';

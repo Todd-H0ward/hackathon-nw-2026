@@ -1,7 +1,7 @@
 import { Focus, Layers3, Maximize2, Radio, Zap } from 'lucide-react';
 
-import { type GlobeBodyId, GlobeCanvas } from '@/shared/ui/globe';
 import { cn } from '@/shared/lib/utils';
+import { type GlobeBodyId, GlobeCanvas } from '@/shared/ui/globe';
 
 import { type Simulation, WORLDS } from '@/features/ecosystem/model';
 import { SurfaceLife } from '@/features/ecosystem/surface-life';
@@ -57,7 +57,12 @@ export const PlanetViewport = ({
     >
       <div className="absolute z-[11] top-6 left-6 right-6 flex justify-between items-start pointer-events-none gap-3 max-[1180px]:left-[17px] max-[1180px]:right-[17px]">
         <div>
-          <span className={cn('[font:9px_monospace] tracking-[1.45px] text-[#82929f]', 'text-[8px] max-[700px]:text-[7px]')}>
+          <span
+            className={cn(
+              '[font:9px_monospace] tracking-[1.45px] text-[#82929f]',
+              'text-[8px] max-[700px]:text-[7px]',
+            )}
+          >
             {world.code} <span className="text-[#495967] mx-[7px]">/</span>{' '}
             ПОВЕРХНОСТНЫЙ СЛОЙ
           </span>

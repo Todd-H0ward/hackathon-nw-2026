@@ -1,5 +1,6 @@
-import { Activity, Atom, CircleHelp, Globe2, Microscope } from 'lucide-react';
 import { NavLink } from 'react-router';
+
+import { Activity, Atom, CircleHelp, Globe2, Microscope } from 'lucide-react';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
@@ -56,7 +57,11 @@ export const LabHeader = ({ onOpenGuide, onOpenAtlas }: LabHeaderProps) => (
       </Button>
     </nav>
     <div className="flex items-center gap-2.5 text-[#7d8c97] font-mono text-[8px] tracking-[1px] max-[1180px]:text-[0px] max-[1180px]:gap-2 max-[700px]:ml-auto">
-      <StatusDot variant="green" size="sm" className="shadow-[0_0_8px_#8ed6b433]" />
+      <StatusDot
+        variant="green"
+        size="sm"
+        className="shadow-[0_0_8px_#8ed6b433]"
+      />
       ЛОКАЛЬНАЯ МОДЕЛЬ
       <Button
         type="button"

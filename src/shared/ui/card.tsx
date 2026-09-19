@@ -32,7 +32,10 @@ function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
+function CardTitle({
+  className,
+  ...props
+}: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
       data-slot="card-title"
@@ -69,4 +72,4 @@ function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 // EXPORTS
 // ═══════════════════════════════════════════
 
-export { Card, CardHeader, CardTitle, CardContent, CardFooter };
+export { Card, CardContent, CardFooter, CardHeader, CardTitle };

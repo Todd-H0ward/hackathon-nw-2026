@@ -1,5 +1,6 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
+
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -21,17 +22,14 @@ const badgeVariants = cva(
     variants: {
       variant: {
         /** Default bordered tag — matches .tag */
-        default:
-          'border border-[#394131] bg-[#252a23] text-[#b3bbac]',
+        default: 'border border-[#394131] bg-[#252a23] text-[#b3bbac]',
         /** Accent / active state — orange */
-        accent:
-          'border border-primary/40 bg-primary/10 text-primary',
+        accent: 'border border-primary/40 bg-primary/10 text-primary',
         /** Green / healthy */
         green:
           'border border-[var(--xeno-green)]/30 bg-[var(--xeno-green)]/10 text-[var(--xeno-green)]',
         /** Subtle outline only */
-        outline:
-          'border border-border text-muted-foreground bg-transparent',
+        outline: 'border border-border text-muted-foreground bg-transparent',
       },
     },
     defaultVariants: {

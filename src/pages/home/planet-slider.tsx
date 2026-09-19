@@ -11,6 +11,7 @@ import {
   GlobeCarouselCanvas,
   type PlanetHoverPayload,
 } from '@/shared/ui/globe';
+
 import { useLabStore } from '@/store';
 
 import {

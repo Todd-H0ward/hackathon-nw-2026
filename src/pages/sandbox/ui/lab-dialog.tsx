@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 
-import type { GlobeBodyId } from '@/shared/ui/globe';
+import type { LabModal } from '@/contexts/lab';
+
 import { cn } from '@/shared/lib/utils';
 import {
   Button,
@@ -10,13 +11,13 @@ import {
   DialogTitle,
   Input,
 } from '@/shared/ui';
+import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import {
   MODEL_VERSION,
   type Simulation,
   WORLDS,
 } from '@/features/ecosystem/model';
-import { type LabModal } from '@/contexts/lab';
 
 import { BODY_IDS } from '../lib';
 
@@ -159,7 +160,12 @@ export const LabDialog = ({
           className="mt-4 max-w-[180px]"
         />
         <div className="flex justify-end gap-2.5 mt-5">
-          <Button type="button" variant="outline" size="sm" onClick={onDownload}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onDownload}
+          >
             Скачать текущий
           </Button>
           <Button type="button" variant="primary" size="sm" onClick={onReset}>

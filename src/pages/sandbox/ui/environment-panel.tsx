@@ -8,9 +8,9 @@ import {
   Waves,
 } from 'lucide-react';
 
-import type { GlobeBodyId } from '@/shared/ui/globe';
 import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
+import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import {
   type Settings,
@@ -43,7 +43,12 @@ export const EnvironmentPanel = ({
 
   return (
     <aside className="bg-[#10151b] border-r border-[#222c37] py-[22px] px-[17px] group-data-[expanded=true]/lab:!hidden min-[1600px]:p-[25px] max-[1180px]:py-[18px] max-[1180px]:px-3 max-[700px]:grid max-[700px]:grid-cols-2 max-[700px]:gap-x-[18px] max-[700px]:gap-y-3 max-[700px]:border-r-0 max-[700px]:border-b max-[700px]:border-[#222c37]">
-      <div className={cn('flex items-center gap-2 mb-5', 'max-[700px]:col-span-full max-[700px]:m-0')}>
+      <div
+        className={cn(
+          'flex items-center gap-2 mb-5',
+          'max-[700px]:col-span-full max-[700px]:m-0',
+        )}
+      >
         <span className="[font:9px_monospace] text-[#536774]">01</span>
         <h2 className="text-[11px] font-medium flex-1 m-0">Среда обитания</h2>
         <Globe2 size={15} className="text-[#667884]" />
@@ -81,19 +86,22 @@ export const EnvironmentPanel = ({
           <span>Средняя температура</span>
           <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
             {world.temperature > 0 ? '+' : ''}
-            {world.temperature} <small className="text-[8px] text-[#718491]">°C</small>
+            {world.temperature}{' '}
+            <small className="text-[8px] text-[#718491]">°C</small>
           </b>
         </div>
         <div className="flex justify-between gap-1.5 mb-3 text-[9px] text-[#718491] max-[700px]:text-[8px]">
           <span>Гравитация</span>
           <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
-            {world.gravity} <small className="text-[8px] text-[#718491]">м/с²</small>
+            {world.gravity}{' '}
+            <small className="text-[8px] text-[#718491]">м/с²</small>
           </b>
         </div>
         <div className="flex justify-between gap-1.5 mb-3 text-[9px] text-[#718491] max-[700px]:text-[8px]">
           <span>Давление у поверхности</span>
           <b className="text-[#c1ccd2] [font:10px_monospace] max-[700px]:text-[9px]">
-            {world.pressure} <small className="text-[8px] text-[#718491]">бар</small>
+            {world.pressure}{' '}
+            <small className="text-[8px] text-[#718491]">бар</small>
           </b>
         </div>
         <a
@@ -119,7 +127,9 @@ export const EnvironmentPanel = ({
       </div>
       <div className="flex items-center gap-2 mb-[22px] max-[700px]:col-span-full max-[700px]:my-[7px] max-[700px]:mx-0">
         <span className="[font:9px_monospace] text-[#536774]">02</span>
-        <h2 className="text-[11px] font-medium flex-1 m-0">Условия эксперимента</h2>
+        <h2 className="text-[11px] font-medium flex-1 m-0">
+          Условия эксперимента
+        </h2>
         <Settings2 size={15} className="text-[#667884]" />
       </div>
       <div className="mb-[23px] max-[700px]:m-0">

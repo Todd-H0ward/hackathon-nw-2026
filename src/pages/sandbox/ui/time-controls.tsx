@@ -1,7 +1,7 @@
 import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 
-import { Button } from '@/shared/ui';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui';
 
 type TimeControlsProps = {
   running: boolean;

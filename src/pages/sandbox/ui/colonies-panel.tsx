@@ -110,7 +110,12 @@ export const ColoniesPanel = ({
       Внести зародыши
     </button>
     <div className="border-t border-[#222c37] mt-[21px] pt-[19px] max-[980px]:col-start-2 max-[980px]:row-start-2 max-[980px]:row-span-2 max-[980px]:m-0 max-[980px]:p-0 max-[980px]:border-0">
-      <div className={cn('[font:9px_monospace] tracking-[1.45px] text-[#82929f]', 'text-[8px] max-[700px]:text-[7px]')}>
+      <div
+        className={cn(
+          '[font:9px_monospace] tracking-[1.45px] text-[#82929f]',
+          'text-[8px] max-[700px]:text-[7px]',
+        )}
+      >
         ИНСПЕКТОР <span className="text-[#495967] mx-[7px]">/</span>{' '}
         {colony ? `C—${pad(colony.id)}` : 'ВЫБЕРИТЕ КОЛОНИЮ'}
       </div>
