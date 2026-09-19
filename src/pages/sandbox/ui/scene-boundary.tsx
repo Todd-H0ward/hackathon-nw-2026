@@ -14,7 +14,7 @@ export class SceneBoundary extends Component<
 
   render() {
     return this.state.failed ? (
-      <div className="flex items-center justify-center flex-col h-full text-[#81989d] text-center">
+      <div className="flex items-center justify-center flex-col h-full text-muted-foreground text-center">
         <Globe2 size={60} />
         <h3 className="text-base m-[15px]">3D недоступно в этом браузере</h3>
         <p className="text-[11px] leading-[1.8]">

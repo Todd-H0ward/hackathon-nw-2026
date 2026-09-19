@@ -1,0 +1,101 @@
+import { useEffect, useRef } from 'react';
+import { Bot, Trash2, User } from 'lucide-react';
+
+import { useVoice } from '@/contexts';
+import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
+export function VoiceDialog({ className }: { className?: string }) {
+  const { history, clearHistory } = useVoice();
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Автоскролл вниз при новых сообщениях
+  useEffect(() => {
+    if (history.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [history]);
+
+  if (history.length === 0) {
+    return (
+      <div
+        className={cn(
+          'flex flex-col items-center justify-center gap-3 rounded-[14px] border border-dashed border-border p-8 text-center',
+          className,
+        )}
+      >
+        <Bot className="size-8 text-muted-foreground/40" />
+        <p className="text-[13px] text-muted-foreground">
+          История диалога пуста.
+          <br />
+          Нажмите на микрофон и скажите команду.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('flex flex-col gap-3', className)}>
+      {/* Шапка */}
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] text-muted-foreground">
+          История диалога
+        </span>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={clearHistory}
+          title="Очистить историю"
+        >
+          <Trash2 className="size-3.5" />
+        </Button>
+      </div>
+
+      {/* Сообщения */}
+      <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-1">
+        {history.map((entry) => (
+          <div
+            key={entry.id}
+            className={cn(
+              'flex items-start gap-2 max-w-[85%]',
+              entry.type === 'user' ? 'self-end flex-row-reverse' : 'self-start',
+            )}
+          >
+            {/* Аватар */}
+            <div
+              className={cn(
+                'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-[10px]',
+                entry.type === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground',
+              )}
+            >
+              {entry.type === 'user' ? (
+                <User className="size-3.5" />
+              ) : (
+                <Bot className="size-3.5" />
+              )}
+            </div>
+
+            {/* Пузырь */}
+            <div
+              className={cn(
+                'rounded-[10px] px-3 py-2 text-[13px] leading-[1.6]',
+                entry.type === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-foreground',
+              )}
+            >
+              {entry.text}
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+    </div>
+  );
+}

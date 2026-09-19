@@ -1,0 +1,69 @@
+import { VoiceDialog } from '@/components/VoiceDialog';
+import { VoiceMicButton } from '@/components/VoiceMicButton';
+
+import { voiceCommands } from '@/shared/voice';
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
+export const VoicePage = () => {
+  return (
+    <div className="flex h-full min-h-svh flex-col gap-8 p-8">
+      {/* Заголовок */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Голосовое управление
+        </h1>
+        <p className="text-[13px] text-muted-foreground">
+          Нажмите на микрофон и скажите одну из команд. Работает в Chrome и
+          Edge.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+        {/* Левая колонка: кнопка + диалог */}
+        <div className="flex flex-1 flex-col gap-6">
+          {/* Кнопка микрофона */}
+          <div className="flex justify-center py-4">
+            <VoiceMicButton />
+          </div>
+
+          {/* История диалога */}
+          <VoiceDialog />
+        </div>
+
+        {/* Правая колонка: список доступных команд */}
+        <aside className="w-full lg:w-72 shrink-0">
+          <div className="rounded-[14px] border border-border p-5 flex flex-col gap-4">
+            <h2 className="text-[13px] font-medium text-foreground">
+              Доступные команды
+            </h2>
+            <ul className="flex flex-col gap-3">
+              {voiceCommands.map((cmd) => (
+                <li key={cmd.triggers.join('-')} className="flex flex-col gap-1">
+                  <div className="flex flex-wrap gap-1">
+                    {cmd.triggers.map((trigger) => (
+                      <span
+                        key={trigger}
+                        className="rounded-[5px] bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground font-mono"
+                      >
+                        &ldquo;{trigger}&rdquo;
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-[12px] text-muted-foreground pl-1">
+                    →{' '}
+                    {typeof cmd.response === 'string'
+                      ? cmd.response
+                      : 'Ответ зависит от команды'}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+};
