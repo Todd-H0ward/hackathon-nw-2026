@@ -44,8 +44,8 @@ const createTarget = (size: number) =>
 
 export const usePositionSim = ({
   size,
-  spin = 0.045,
-  jitter = 0.014,
+  spin = 0,
+  jitter = 0,
 }: UsePositionSimParams): UsePositionSimResult => {
   const { gl } = useThree();
   const [ready, setReady] = useState(false);
@@ -152,6 +152,7 @@ export const usePositionSim = ({
     const read = flipRef.current ? previous : current;
     const write = flipRef.current ? current : previous;
     const { spin: nextSpin, jitter: nextJitter } = paramsRef.current;
+    if (nextSpin === 0 && nextJitter === 0) return;
 
     timeRef.current += delta * 0.3;
 

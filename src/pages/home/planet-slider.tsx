@@ -82,6 +82,14 @@ export const PlanetSlider = ({
     navigate(STATIC_ROUTES.SANDBOX);
   };
 
+  const lastShiftTime = useRef(0);
+  const handleShift = (delta: number) => {
+    const now = Date.now();
+    if (now - lastShiftTime.current < 350) return;
+    lastShiftTime.current = now;
+    setActiveSlide(shiftBody(activeSlide, delta));
+  };
+
   return (
     <div className="relative h-full w-full min-h-dvh overflow-hidden">
       <div
@@ -106,7 +114,7 @@ export const PlanetSlider = ({
         size="icon"
         aria-label="Previous planet"
         className="absolute top-[42%] left-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:left-6"
-        onClick={() => setActiveSlide(shiftBody(activeSlide, -1))}
+        onClick={() => handleShift(-1)}
       >
         <ChevronLeft className="size-7" />
       </Button>
@@ -117,7 +125,7 @@ export const PlanetSlider = ({
         size="icon"
         aria-label="Next planet"
         className="absolute top-[42%] right-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:right-6"
-        onClick={() => setActiveSlide(shiftBody(activeSlide, 1))}
+        onClick={() => handleShift(1)}
       >
         <ChevronRight className="size-7" />
       </Button>
