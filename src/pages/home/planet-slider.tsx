@@ -9,10 +9,10 @@ import { Button } from '@/shared/ui';
 import {
   GLOBE_BODY_IDS,
   type GlobeBodyId,
-  GlobeCarouselCanvas,
   type PlanetHoverPayload,
   type PlanetScreenPose,
 } from '@/shared/ui/globe';
+import { GlobeCarouselCanvas } from '@/shared/ui/globe/globe-carousel-canvas';
 
 import { useLabSetBody, useTransitionLaunch } from '@/store';
 

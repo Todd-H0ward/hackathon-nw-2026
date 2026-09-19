@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { motion } from 'motion/react';
@@ -34,6 +34,20 @@ export const HomePage = () => {
   const handingOff = phase === 'handoff';
   const activeInfo = catalog[activeSlide];
 
+  useEffect(() => {
+    const prefetch = () => {
+      void import('@/pages/sandbox');
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const handle = window.requestIdleCallback(prefetch);
+      return () => window.cancelIdleCallback?.(handle);
+    }
+
+    const timer = window.setTimeout(prefetch, 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <motion.div
       className="fixed inset-0 h-dvh w-dvw overflow-hidden bg-black"
@@ -53,7 +67,6 @@ export const HomePage = () => {
         hiddenBody={handingOff ? transitionBody : null}
         catalog={catalog}
       />
-      {/* No dossier until `/worlds` answers — nothing here is invented locally. */}
       {activeInfo ? (
         <PlanetHood activeBody={activeSlide} info={activeInfo} />
       ) : null}

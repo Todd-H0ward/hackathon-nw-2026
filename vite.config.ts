@@ -16,6 +16,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        advancedChunks: {
+          groups: [
+            { name: 'three', test: /node_modules[\\/]three[\\/]/ },
+            {
+              name: 'postprocessing',
+              test: /node_modules[\\/](postprocessing|@react-three[\\/]postprocessing)[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       // Only used when VITE_XENOCHOICE_API_URL is set to the relative `/api/v2`.
