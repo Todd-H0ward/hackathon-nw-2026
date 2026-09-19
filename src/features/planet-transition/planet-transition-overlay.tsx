@@ -6,6 +6,7 @@ import { type Group, MathUtils, type PerspectiveCamera } from 'three';
 
 import {
   GLOBE_MAPS,
+  GLOBE_TRANSITION_DPR,
   Globe,
   type GlobeBodyId,
   type PlanetScreenPose,
@@ -45,7 +46,11 @@ const mixPose = (
   distance: MathUtils.lerp(a.distance, b.distance, t),
 });
 
-const FlightScene = ({ body }: { body: GlobeBodyId }) => {
+interface FlightSceneProps {
+  body: GlobeBodyId;
+}
+
+const FlightScene = ({ body }: FlightSceneProps) => {
   const groupRef = useRef<Group>(null);
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const size = useThree((state) => state.size);
@@ -152,7 +157,7 @@ export const PlanetTransitionOverlay = () => {
     >
       <Canvas
         camera={{ position: [0, 0, 0], near: 0.1, far: 100 }}
-        dpr={[1, 2]}
+        dpr={GLOBE_TRANSITION_DPR}
         gl={GL}
         style={{ width: '100%', height: '100%', display: 'block' }}
       >

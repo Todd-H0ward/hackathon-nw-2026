@@ -2,9 +2,17 @@ import { Component, type ReactNode } from 'react';
 
 import { Globe2 } from 'lucide-react';
 
+interface SceneBoundaryProps {
+  children: ReactNode;
+}
+
+interface SceneBoundaryState {
+  failed: boolean;
+}
+
 export class SceneBoundary extends Component<
-  { children: ReactNode },
-  { failed: boolean }
+  SceneBoundaryProps,
+  SceneBoundaryState
 > {
   state = { failed: false };
 

@@ -1,7 +1,6 @@
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import type { Simulation } from '@/features/ecosystem/model';
-import { MODEL_VERSION } from '@/features/ecosystem/world-info';
+import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
 
 export type { LabModal } from '@/store';
 

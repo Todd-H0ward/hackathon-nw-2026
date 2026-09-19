@@ -15,10 +15,9 @@ import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import type { Settings, Simulation } from '@/features/ecosystem/model';
-import type { WorldInfo } from '@/features/ecosystem/world-info';
+import type { Settings, Simulation, WorldInfo } from '@/features/ecosystem';
 
-type EnvironmentPanelProps = {
+interface EnvironmentPanelProps {
   body: GlobeBodyId;
   sim: Simulation;
   world: WorldInfo;
@@ -26,7 +25,7 @@ type EnvironmentPanelProps = {
   worlds: WorldInfo[];
   onSelectWorld: (id: GlobeBodyId) => void;
   onSettings: (next: Partial<Settings>) => void;
-};
+}
 
 export const EnvironmentPanel = ({
   body,
@@ -150,12 +149,12 @@ export const EnvironmentPanel = ({
   );
 };
 
-type SectionTitleProps = {
+interface SectionTitleProps {
   index: string;
   title: string;
   icon: ReactNode;
   className?: string;
-};
+}
 
 const SectionTitle = ({ index, title, icon, className }: SectionTitleProps) => (
   <div
@@ -172,15 +171,13 @@ const SectionTitle = ({ index, title, icon, className }: SectionTitleProps) => (
   </div>
 );
 
-const Stat = ({
-  label,
-  unit,
-  children,
-}: {
+interface StatProps {
   label: string;
   unit: string;
   children: ReactNode;
-}) => (
+}
+
+const Stat = ({ label, unit, children }: StatProps) => (
   <div className="flex justify-between gap-1.5 text-[9px] text-muted-foreground max-mobile:text-[8px]">
     <dt>{label}</dt>
     <dd className="font-mono text-[10px] text-foreground max-mobile:text-[9px]">

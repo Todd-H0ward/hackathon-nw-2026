@@ -4,10 +4,11 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> &
-  VariantProps<typeof inputVariants> & {
-    label?: string;
-  };
+interface InputProps
+  extends InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputVariants> {
+  label?: string;
+}
 
 export const inputVariants = cva(
   [

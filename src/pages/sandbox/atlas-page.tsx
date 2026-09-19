@@ -8,14 +8,18 @@ import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { activeColonies, living } from '@/features/ecosystem/model';
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { activeColonies, living, useWorldCatalog } from '@/features/ecosystem';
 import { useLabBody, useLabSims } from '@/store';
 
 import { WORLD_THUMB } from './lib';
 import { useLabActions } from './use-lab-actions';
 
-const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
+interface FactProps {
+  label: string;
+  children: ReactNode;
+}
+
+const Fact = ({ label, children }: FactProps) => (
   <div className="min-w-0">
     <dt className="font-mono text-[8px] tracking-[1px] text-muted-foreground uppercase">
       {label}

@@ -1,9 +1,9 @@
 import { cn } from '@/shared/lib/utils';
 
-type OrbitalSpinnerProps = {
+interface OrbitalSpinnerProps {
   className?: string;
   size?: number;
-};
+}
 
 export const OrbitalSpinner = ({
   className,

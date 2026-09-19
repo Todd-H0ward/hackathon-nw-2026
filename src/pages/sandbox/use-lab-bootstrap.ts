@@ -6,7 +6,7 @@ import {
   useExperimentStream,
 } from '@/shared/api/xenochoice';
 
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useWorldCatalog } from '@/features/ecosystem';
 import { getLabState, useLabBody, useLabExperimentId } from '@/store';
 
 import { applySnapshot, clampSeed, labRuntime } from './lab-runtime';

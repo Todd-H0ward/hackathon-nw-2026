@@ -1,1 +1,1 @@
-export type { TUser } from './TUser';
+export type { TUser } from './t-user';

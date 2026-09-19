@@ -3,7 +3,7 @@ import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 
-type TimeControlsProps = {
+interface TimeControlsProps {
   running: boolean;
   speed: number;
   tick: number;
@@ -12,7 +12,7 @@ type TimeControlsProps = {
   onStep: () => void;
   onOpenReset: () => void;
   onSpeedChange: (speed: number) => void;
-};
+}
 
 export const TimeControls = ({
   running,

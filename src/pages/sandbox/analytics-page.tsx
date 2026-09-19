@@ -9,8 +9,7 @@ import {
   MetricCard,
 } from '@/shared/ui';
 
-import type { Metric } from '@/features/ecosystem/model';
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { type Metric, useWorldCatalog } from '@/features/ecosystem';
 import { useLabBody, useLabSetModal, useLabSim } from '@/store';
 
 import { worldCaseName } from './lib';

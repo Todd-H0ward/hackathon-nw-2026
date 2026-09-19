@@ -3,12 +3,12 @@ import { Loader2, PlugZap, TriangleAlert } from 'lucide-react';
 import type { StreamStatus } from '@/shared/api/xenochoice';
 import { cn } from '@/shared/lib/utils';
 
-type LabStatusProps = {
+interface LabStatusProps {
   booting: boolean;
   streamStatus: StreamStatus;
   worldsLoading: boolean;
   worldsError: boolean;
-};
+}
 
 type Notice = {
   tone: 'info' | 'warn' | 'error';

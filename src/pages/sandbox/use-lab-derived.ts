@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { activeColonies, living } from '@/features/ecosystem/model';
+import { activeColonies, living } from '@/features/ecosystem';
 import { useLabSelected, useLabSim } from '@/store';
 
 /**

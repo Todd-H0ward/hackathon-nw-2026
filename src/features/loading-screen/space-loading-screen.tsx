@@ -4,10 +4,10 @@ import { useFinishLoading, useIsLoading, useLoadingStatusText } from '@/store';
 
 import { OrbitalSpinner } from './orbital-spinner';
 
-type SpaceLoadingScreenProps = {
+interface SpaceLoadingScreenProps {
   /** Минимальное время показа лоадера в мс (по умолчанию 1000ms для плавности) */
   minDurationMs?: number;
-};
+}
 
 export const SpaceLoadingScreen = ({
   minDurationMs = 1000,
