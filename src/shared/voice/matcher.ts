@@ -1,5 +1,5 @@
-import type { VoiceCommand, VoiceCommandArgs } from './types';
 import { voiceCommands } from './commands';
+import type { VoiceCommand, VoiceCommandArgs } from './types';
 
 // ═══════════════════════════════════════════
 // COMMAND MATCHER

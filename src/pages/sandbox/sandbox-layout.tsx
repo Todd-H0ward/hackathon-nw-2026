@@ -9,8 +9,7 @@ import { ToastProvider } from '@/shared/ui';
 
 import { usePlanetTransition } from '@/features/planet-transition';
 
-import { downloadExperiment } from './lib';
-import { LabDialog, LabRail } from './ui';
+import { LabDialog, LabRail, LabStatus } from './ui';
 
 const shellClassName =
   'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-[700px]:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
@@ -29,19 +28,31 @@ const SandboxShell = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
       data-expanded={lab.expanded || undefined}
-      style={{ '--world-color': lab.world.color } as CSSProperties}
+      style={
+        { '--world-color': lab.world?.color ?? '#70e0c4' } as CSSProperties
+      }
     >
       <LabRail
         seed={lab.sim.seed}
-        onExport={() => {
-          downloadExperiment(lab.sim);
-          lab.notify('Эксперимент экспортирован в JSON');
-        }}
+        onExport={lab.exportExperiment}
         onOpenGuide={() => lab.setModal('guide')}
       />
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        <Outlet />
+      {/*
+        Anchors the floating LabStatus without reserving height. Scrolling lives
+        on the inner layer so the notice stays pinned instead of scrolling away.
+      */}
+      <div className="relative min-h-0 min-w-0 flex-1">
+        <LabStatus
+          booting={lab.booting}
+          streamStatus={lab.streamStatus}
+          worldsLoading={lab.worldsLoading}
+          worldsError={lab.worldsError}
+        />
+        {/* Pages assume a loaded planet catalog; the notice explains the wait. */}
+        <div className="h-full overflow-y-auto">
+          {lab.world ? <Outlet /> : null}
+        </div>
       </div>
 
       <LabDialog
@@ -50,8 +61,10 @@ const SandboxShell = () => {
         seed={lab.seed}
         onSeedChange={lab.setSeed}
         onClose={() => lab.setModal(null)}
-        onDownload={() => downloadExperiment(lab.sim)}
-        onReset={lab.resetExperiment}
+        onDownload={lab.exportExperiment}
+        onReset={() => {
+          void lab.resetExperiment();
+        }}
         onReplay={lab.runReplay}
       />
     </motion.div>

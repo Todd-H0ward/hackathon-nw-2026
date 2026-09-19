@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+
 import { Bot, Trash2, User } from 'lucide-react';
 
 import { useVoice } from '@/contexts';
+
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 
@@ -62,7 +64,9 @@ export function VoiceDialog({ className }: { className?: string }) {
             key={entry.id}
             className={cn(
               'flex items-start gap-2 max-w-[85%]',
-              entry.type === 'user' ? 'self-end flex-row-reverse' : 'self-start',
+              entry.type === 'user'
+                ? 'self-end flex-row-reverse'
+                : 'self-start',
             )}
           >
             {/* Аватар */}

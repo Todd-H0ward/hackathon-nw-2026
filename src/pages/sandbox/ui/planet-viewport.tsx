@@ -12,14 +12,16 @@ import {
   projectedRadius,
 } from '@/shared/ui/globe';
 
-import { type Simulation, WORLDS } from '@/features/ecosystem/model';
+import type { Simulation } from '@/features/ecosystem/model';
 import { SurfaceLife } from '@/features/ecosystem/surface-life';
+import type { WorldInfo } from '@/features/ecosystem/world-info';
 import { usePlanetTransition } from '@/features/planet-transition';
 
 import { SceneBoundary } from './scene-boundary';
 
 type PlanetViewportProps = {
   body: GlobeBodyId;
+  world: WorldInfo;
   sim: Simulation;
   running: boolean;
   selected: number | null;
@@ -41,6 +43,7 @@ const toolClass =
 
 export const PlanetViewport = ({
   body,
+  world,
   sim,
   running,
   selected,
@@ -56,7 +59,6 @@ export const PlanetViewport = ({
   onResetCamera,
   onToggleExpanded,
 }: PlanetViewportProps) => {
-  const world = WORLDS[body];
   const sectionRef = useRef<HTMLElement>(null);
   const transitionPhase = usePlanetTransition((s) => s.phase);
   // The planet is still in flight from the home page — show ours once it lands.

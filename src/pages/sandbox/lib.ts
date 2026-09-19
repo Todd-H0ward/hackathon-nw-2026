@@ -1,10 +1,9 @@
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { MODEL_VERSION, type Simulation } from '@/features/ecosystem/model';
+import type { Simulation } from '@/features/ecosystem/model';
+import { MODEL_VERSION } from '@/features/ecosystem/world-info';
 
 export type { LabModal } from '@/contexts/lab';
-
-export const BODY_IDS: GlobeBodyId[] = ['earth', 'mars', 'venus'];
 
 /** Planet texture as a round thumbnail background. */
 export const WORLD_THUMB: Record<GlobeBodyId, string> = {
@@ -15,6 +14,7 @@ export const WORLD_THUMB: Record<GlobeBodyId, string> = {
 
 export const pad = (n: number) => String(n).padStart(2, '0');
 
+/** Local fallback download when the API export is unavailable. */
 export const downloadExperiment = (s: Simulation) => {
   const data = {
     modelVersion: MODEL_VERSION,

@@ -1,6 +1,7 @@
 import { Mic, MicOff, Volume2 } from 'lucide-react';
 
 import { useVoice } from '@/contexts';
+
 import { cn } from '@/shared/lib/utils';
 
 // ═══════════════════════════════════════════
@@ -39,9 +40,7 @@ export function VoiceMicButton({ className }: { className?: string }) {
           onClick={handleClick}
           disabled={isSpeaking || isProcessing}
           title={
-            isListening
-              ? 'Нажмите чтобы остановить'
-              : 'Нажмите чтобы говорить'
+            isListening ? 'Нажмите чтобы остановить' : 'Нажмите чтобы говорить'
           }
           className={cn(
             'relative z-10 size-12 rounded-full border flex items-center justify-center transition-all',

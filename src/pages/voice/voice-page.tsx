@@ -41,7 +41,10 @@ export const VoicePage = () => {
             </h2>
             <ul className="flex flex-col gap-3">
               {voiceCommands.map((cmd) => (
-                <li key={cmd.triggers.join('-')} className="flex flex-col gap-1">
+                <li
+                  key={cmd.triggers.join('-')}
+                  className="flex flex-col gap-1"
+                >
                   <div className="flex flex-wrap gap-1">
                     {cmd.triggers.map((trigger) => (
                       <span

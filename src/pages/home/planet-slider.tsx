@@ -21,11 +21,13 @@ import {
   PlanetHoverCursor,
   type PlanetHoverCursorHandle,
 } from './planet-hover-cursor';
+import type { PlanetInfoCatalog } from './planet-info';
 
 interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
+  catalog: PlanetInfoCatalog;
 }
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
@@ -40,6 +42,7 @@ export const PlanetSlider = ({
   activeSlide,
   setActiveSlide,
   hiddenBody = null,
+  catalog,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
   const setBody = useLabStore((s) => s.setBody);
@@ -98,7 +101,7 @@ export const PlanetSlider = ({
         hiddenBody={hiddenBody}
       />
 
-      <PlanetHoverCursor ref={cursorRef} />
+      <PlanetHoverCursor ref={cursorRef} catalog={catalog} />
 
       <Button
         type="button"

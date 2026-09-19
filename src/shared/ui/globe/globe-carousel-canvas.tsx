@@ -7,12 +7,7 @@ import {
 } from 'react';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import {
-  type Group,
-  MathUtils,
-  type PerspectiveCamera,
-  Vector3,
-} from 'three';
+import { type Group, MathUtils, type PerspectiveCamera, Vector3 } from 'three';
 
 import {
   GLOBE_BODY_IDS,

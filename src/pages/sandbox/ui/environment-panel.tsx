@@ -13,17 +13,17 @@ import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import {
-  type Settings,
-  type Simulation,
-  WORLDS,
-} from '@/features/ecosystem/model';
+import type { Settings, Simulation } from '@/features/ecosystem/model';
+import type { WorldInfo } from '@/features/ecosystem/world-info';
 
-import { BODY_IDS, WORLD_THUMB } from '../lib';
+import { WORLD_THUMB } from '../lib';
 
 type EnvironmentPanelProps = {
   body: GlobeBodyId;
   sim: Simulation;
+  world: WorldInfo;
+  /** Only the planets `/worlds` actually returned. */
+  worlds: WorldInfo[];
   onSelectWorld: (id: GlobeBodyId) => void;
   onSettings: (next: Partial<Settings>) => void;
 };
@@ -31,11 +31,11 @@ type EnvironmentPanelProps = {
 export const EnvironmentPanel = ({
   body,
   sim,
+  world,
+  worlds,
   onSelectWorld,
   onSettings,
 }: EnvironmentPanelProps) => {
-  const world = WORLDS[body];
-
   return (
     <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-[980px]:h-full max-[700px]:grid max-[700px]:h-auto max-[700px]:grid-cols-2 max-[700px]:gap-x-4 max-[700px]:gap-y-3 max-[700px]:border-r-0 max-[700px]:border-b">
       <SectionTitle
@@ -44,26 +44,27 @@ export const EnvironmentPanel = ({
         icon={<Globe2 size={14} />}
       />
       <div className="grid gap-1 max-[700px]:col-span-full max-[700px]:flex">
-        {BODY_IDS.map((id) => (
+        {worlds.map((item) => (
           <button
             type="button"
-            key={id}
+            key={item.id}
             className={cn(
               'flex items-center gap-2.5 rounded-md border border-transparent bg-transparent p-2 text-left text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground max-[700px]:min-w-0 max-[700px]:flex-1 max-[700px]:gap-[7px] max-[700px]:px-[5px] max-[700px]:py-[7px] [&_svg]:max-[700px]:hidden',
-              body === id && 'border-primary/40 bg-secondary text-foreground',
+              body === item.id &&
+                'border-primary/40 bg-secondary text-foreground',
             )}
-            onClick={() => onSelectWorld(id)}
+            onClick={() => onSelectWorld(item.id)}
           >
             <span
               className={cn(
                 'block size-7 shrink-0 rounded-full bg-cover shadow-[inset_-8px_-3px_9px_rgb(0_0_0/0.8)] max-[700px]:size-[25px]',
-                WORLD_THUMB[id],
+                WORLD_THUMB[item.id],
               )}
             />
             <span className="flex-1 text-xs max-[700px]:text-[10px]">
-              {WORLDS[id].name}
+              {item.name}
               <small className="mt-0.5 block font-mono text-[8px] tracking-[1.3px] text-muted-foreground max-[700px]:text-[6px]">
-                {WORLDS[id].english}
+                {item.english}
               </small>
             </span>
             <ChevronRight size={14} />

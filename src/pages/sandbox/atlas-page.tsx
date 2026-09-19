@@ -10,10 +10,9 @@ import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import { activeColonies, living, WORLDS } from '@/features/ecosystem/model';
-import { selectWorlds, useLabStore } from '@/store';
+import { activeColonies, living } from '@/features/ecosystem/model';
 
-import { BODY_IDS, WORLD_THUMB } from './lib';
+import { WORLD_THUMB } from './lib';
 
 const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="min-w-0">
@@ -29,7 +28,6 @@ const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
 export const AtlasPage = () => {
   const lab = useLab();
   const navigate = useNavigate();
-  const worlds = useLabStore(selectWorlds);
 
   const open = (id: GlobeBodyId) => {
     if (id !== lab.body) lab.selectWorld(id);
@@ -50,9 +48,9 @@ export const AtlasPage = () => {
       </p>
 
       <div className="mt-5 grid grid-cols-3 gap-3 max-[1180px]:grid-cols-2 max-[700px]:grid-cols-1">
-        {BODY_IDS.map((id) => {
-          const world = WORLDS[id];
-          const sim = worlds[id];
+        {lab.availableWorlds.map((world) => {
+          const id = world.id;
+          const sim = lab.sims[id];
           const current = id === lab.body;
 
           return (

@@ -1,13 +1,5 @@
 export {
-  selectBody,
-  selectLabActions,
-  selectSim,
-  selectWorld,
-  selectWorlds,
-} from './lab/selectors';
-export {
-  type LabActions,
-  type LabState,
   type LabStore,
+  selectBody,
   useLabStore,
 } from './lab/store';

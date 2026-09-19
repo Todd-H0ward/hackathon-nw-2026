@@ -1,1 +1,1 @@
-export { VoiceProvider, useVoice } from './voice-context';
+export { useVoice, VoiceProvider } from './voice-context';

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { motion } from 'motion/react';
@@ -6,10 +6,13 @@ import { motion } from 'motion/react';
 import { PlanetHood } from '@/pages/home/planet-hood';
 import { PlanetSlider } from '@/pages/home/planet-slider';
 
+import { useWorlds } from '@/shared/api/xenochoice';
 import { STATIC_ROUTES } from '@/shared/constants/routes';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import { usePlanetTransition } from '@/features/planet-transition';
+
+import { worldsToPlanetInfoMap } from './planet-info';
 
 export const HomePage = () => {
   const navigate = useNavigate();
@@ -18,8 +21,14 @@ export const HomePage = () => {
   const transitionBody = usePlanetTransition((s) => s.body);
   const navigated = useRef(false);
 
-  // The overlay has taken over the planet: hide ours, fade the page, then leave.
+  const worldsQuery = useWorlds();
+  const catalog = useMemo(
+    () => worldsToPlanetInfoMap(worldsQuery.data),
+    [worldsQuery.data],
+  );
+
   const handingOff = phase === 'handoff';
+  const activeInfo = catalog[activeSlide];
 
   return (
     <motion.div
@@ -38,8 +47,12 @@ export const HomePage = () => {
         activeSlide={activeSlide}
         setActiveSlide={setActiveSlide}
         hiddenBody={handingOff ? transitionBody : null}
+        catalog={catalog}
       />
-      <PlanetHood activeBody={activeSlide} />
+      {/* No dossier until `/worlds` answers — nothing here is invented locally. */}
+      {activeInfo ? (
+        <PlanetHood activeBody={activeSlide} info={activeInfo} />
+      ) : null}
     </motion.div>
   );
 };

@@ -12,15 +12,15 @@ import {
 } from '@/shared/ui';
 
 import type { Metric } from '@/features/ecosystem/model';
-import { WORLDS } from '@/features/ecosystem/model';
 
 import { worldCaseName } from './lib';
 import { Sparkline } from './ui/sparkline';
 
 export const AnalyticsPage = () => {
   const lab = useLab();
-  const { sim, body } = lab;
-  const world = WORLDS[body];
+  const { sim, world } = lab;
+
+  if (!world) return null;
 
   const charts = [
     {

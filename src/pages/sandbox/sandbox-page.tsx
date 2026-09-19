@@ -12,11 +12,16 @@ import {
 export const SandboxPage = () => {
   const lab = useLab();
 
+  // The layout holds the route back until `/worlds` resolves.
+  if (!lab.world) return null;
+
   return (
     <div className="grid h-full grid-cols-[220px_minmax(0,1fr)_270px] group-data-[expanded=true]/lab:grid-cols-1 min-[1600px]:grid-cols-[250px_minmax(0,1fr)_300px] max-[1180px]:grid-cols-[190px_minmax(0,1fr)_235px] max-[980px]:h-auto max-[980px]:grid-cols-[190px_minmax(0,1fr)] max-[700px]:grid-cols-1">
       <EnvironmentPanel
         body={lab.body}
         sim={lab.sim}
+        world={lab.world}
+        worlds={lab.availableWorlds}
         onSelectWorld={lab.selectWorld}
         onSettings={lab.settings}
       />
@@ -24,6 +29,7 @@ export const SandboxPage = () => {
       <main className="flex min-h-0 min-w-0 flex-col bg-background max-[980px]:min-h-[calc(100dvh-1px)]">
         <PlanetViewport
           body={lab.body}
+          world={lab.world}
           sim={lab.sim}
           running={lab.running}
           selected={lab.selected}
@@ -65,6 +71,8 @@ export const SandboxPage = () => {
         colonies={lab.colonies}
         selected={lab.selected}
         aliveCount={lab.alive.length}
+        maxPopulation={lab.world.maxPopulation}
+        maxColonies={lab.world.maxColonies}
         colony={lab.colony}
         group={lab.group}
         focused={lab.focused}

@@ -29,7 +29,12 @@ export const voiceCommands: VoiceCommand[] = [
     },
   },
   {
-    triggers: ['открой about', 'перейди на about', 'страница about', 'о проекте'],
+    triggers: [
+      'открой about',
+      'перейди на about',
+      'страница about',
+      'о проекте',
+    ],
     response: 'Открываю страницу «О проекте»',
     action: () => {
       window.location.href = '/about';
@@ -37,7 +42,7 @@ export const voiceCommands: VoiceCommand[] = [
   },
 
   // --------------------------------------------------
-  // Примеры: добавь свои команды ниже
+  // Примеры
   // --------------------------------------------------
 
   // {

@@ -55,14 +55,15 @@ export function useSpeechRecognition({
     if (!isSupported) return;
 
     const win = window as WindowWithSpeechRecognition;
-    const SpeechRecognitionAPI = win.SpeechRecognition ?? win.webkitSpeechRecognition;
+    const SpeechRecognitionAPI =
+      win.SpeechRecognition ?? win.webkitSpeechRecognition;
 
     if (!SpeechRecognitionAPI) return;
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = lang;
-    recognition.continuous = false;       // останавливаться после одной фразы
-    recognition.interimResults = false;   // ждать финального результата
+    recognition.continuous = false; // останавливаться после одной фразы
+    recognition.interimResults = false; // ждать финального результата
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {

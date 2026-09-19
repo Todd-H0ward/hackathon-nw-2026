@@ -19,6 +19,9 @@ type ColoniesPanelProps = {
   colonies: Colony[];
   selected: number | null;
   aliveCount: number;
+  /** Engine ceilings from `/worlds` — not client-side guesses. */
+  maxPopulation: number;
+  maxColonies: number;
   colony: Colony | undefined;
   group: Individual[];
   focused: Individual | undefined;
@@ -31,6 +34,8 @@ export const ColoniesPanel = ({
   colonies,
   selected,
   aliveCount,
+  maxPopulation,
+  maxColonies,
   colony,
   group,
   focused,
@@ -78,7 +83,7 @@ export const ColoniesPanel = ({
                 </b>
                 <small className="mt-1 block text-[8px] text-muted-foreground max-[700px]:text-[7px]">
                   {population.length} особей ·{' '}
-                  {c.parent ? `потомок C—${pad(c.parent)}` : 'первичная'}
+                  {c.primary ? 'первичная' : 'дочерняя'}
                 </small>
                 <span className="mt-2 block h-0.5 w-full bg-border">
                   <i
@@ -105,7 +110,7 @@ export const ColoniesPanel = ({
       type="button"
       className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-xeno-green/40 bg-xeno-green/5 p-2 text-[10px] text-xeno-green transition-colors hover:bg-xeno-green/10 disabled:opacity-50 max-[980px]:col-start-1 max-[980px]:mt-0"
       onClick={onAddColony}
-      disabled={aliveCount > 172 || colonies.length >= 12}
+      disabled={aliveCount >= maxPopulation || colonies.length >= maxColonies}
     >
       <Plus size={15} />
       Внести зародыши
