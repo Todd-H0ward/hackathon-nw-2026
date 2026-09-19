@@ -1,5 +1,13 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
+
 import { RotateCcw } from 'lucide-react';
 
+import {
+  xenoApiEndpoints as api,
+  type MetricsSnapshot,
+  xenoApi,
+} from '@/shared/api/xenochoice';
 import {
   Button,
   Card,
@@ -9,8 +17,9 @@ import {
   MetricCard,
 } from '@/shared/ui';
 
-import { type Metric, useWorldCatalog } from '@/features/ecosystem';
+import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
 import { useLabBody, useLabSetModal, useLabSim } from '@/store';
+import { useLabStore } from '@/store/lab/store';
 
 import { worldCaseName } from './lib';
 import { Sparkline } from './ui/sparkline';
@@ -21,20 +30,82 @@ export const AnalyticsPage = () => {
   const setModal = useLabSetModal();
   const world = useWorldCatalog().catalog[body];
 
+  const [params, setParams] = useSearchParams();
+  const metric = params.get('metric') ?? 'population';
+  const id = useLabStore((s) => s.recording?.id ?? s.experimentIds[s.body]);
+  const [history, setHistory] = useState<MetricsSnapshot[]>([]);
+  const [comparison, setComparison] = useState<
+    { mode: string; metrics: MetricsSnapshot }[]
+  >([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    const load = () =>
+      api
+        .getMetrics(id)
+        .then((data) => {
+          if (active) setHistory(data);
+        })
+        .catch(() => {
+          if (active) setError('Не удалось загрузить историю');
+        });
+    void load();
+    const timer = setInterval(() => void load(), 3000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [id]);
+  const visible = history.filter((h) => h.tick <= sim.tick);
+  const compare = async () => {
+    if (!id) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { data } = await xenoApi.get(`/experiments/${id}/compare`, {
+        params: { ticks: 300 },
+        timeout: 60000,
+      });
+      setComparison(data.data);
+    } catch {
+      setError('Сравнение не удалось');
+    } finally {
+      setBusy(false);
+    }
+  };
   if (!world) return null;
 
-  const charts = [
+  const definitions = [
     {
+      key: 'population',
       name: 'Численность особей',
-      values: sim.history.map((h: Metric) => h.population),
-      color: 'var(--chart-2)',
+      value: (h: MetricsSnapshot) => h.population,
     },
     {
-      name: 'Информационная энтропия · бит',
-      values: sim.history.map((h: Metric) => h.entropy),
-      color: 'var(--chart-1)',
+      key: 'entropy',
+      name: 'Энтропия решений · бит',
+      value: (h: MetricsSnapshot) => h.decisionEntropy,
+    },
+    {
+      key: 'power',
+      name: 'Входная мощность · EU/TU',
+      value: (h: MetricsSnapshot) => h.inputPower,
+    },
+    {
+      key: 'efficiency',
+      name: 'Использование ресурса · %',
+      value: (h: MetricsSnapshot) => h.efficiency,
     },
   ];
+  const charts = definitions
+    .filter((d) => metric === 'all' || d.key === metric)
+    .map((d) => ({
+      name: d.name,
+      values: visible.map(d.value),
+      color: 'var(--chart-1)',
+    }));
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -46,8 +117,8 @@ export const AnalyticsPage = () => {
           От импульса к сообществу.
         </h1>
         <p className="mb-5 text-[11px] text-muted-foreground">
-          Изменения на {worldCaseName(world.name)} · последние{' '}
-          {sim.history.length} тактов
+          Изменения на {worldCaseName(world.name)} · последние {visible.length}{' '}
+          тактов
         </p>
 
         <div className="mb-3 grid grid-cols-3 gap-3 max-mobile:grid-cols-1">
@@ -56,6 +127,22 @@ export const AnalyticsPage = () => {
           <MetricCard label="Угасших особей" value={sim.deaths} />
         </div>
 
+        <label className="mb-3 block">
+          График{' '}
+          <select
+            aria-label="Выбрать график"
+            className="rounded border p-2"
+            value={metric}
+            onChange={(e) => setParams({ metric: e.target.value })}
+          >
+            <option value="all">Все показатели</option>
+            {definitions.map((d) => (
+              <option key={d.key} value={d.key}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="mb-5 grid grid-cols-2 gap-3 max-tablet:grid-cols-1">
           {charts.map((item) => (
             <Card key={item.name} className="border-border bg-card">
@@ -71,7 +158,7 @@ export const AnalyticsPage = () => {
                   className="w-full h-[65px]"
                 />
                 <span className="mt-2.5 block font-mono text-[8px] text-muted-foreground">
-                  Такт {sim.history[0]?.tick}{' '}
+                  Такт {visible[0]?.tick}{' '}
                   <span className="float-right">{sim.tick}</span>
                 </span>
               </CardContent>
@@ -84,6 +171,45 @@ export const AnalyticsPage = () => {
           одинаковые seed с мутациями и без них.
         </p>
 
+        <div className="mb-4 rounded border p-3">
+          <button
+            type="button"
+            disabled={busy || !id}
+            onClick={() => void compare()}
+            className="rounded border px-3 py-2"
+          >
+            {busy ? 'Сравниваем…' : 'Сравнить 3 режима · 300 тактов'}
+          </button>
+          <p className="my-2 text-xs text-muted-foreground">
+            Одинаковые мир, seed и воздействия до такта 300; переключения режима
+            исключены. Исходный опыт не изменяется.
+          </p>
+          {error && <p role="alert">{error}</p>}
+          {comparison.length > 0 && (
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr>
+                  <th>Режим</th>
+                  <th>Особей</th>
+                  <th>Рождений</th>
+                  <th>Благо %</th>
+                  <th>Энтропия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparison.map((r) => (
+                  <tr key={r.mode}>
+                    <td>{r.mode}</td>
+                    <td>{r.metrics.population}</td>
+                    <td>{r.metrics.birthsTotal}</td>
+                    <td>{r.metrics.meanWelfare.toFixed(1)}</td>
+                    <td>{r.metrics.decisionEntropy.toFixed(3)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
         <Button
           type="button"
           variant="outline"

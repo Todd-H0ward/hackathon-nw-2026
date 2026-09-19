@@ -17,12 +17,12 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
     {
       title: 'Входная мощность',
       value: current.power.toFixed(1),
-      unit: 'EU/такт',
+      unit: 'EU/TU',
       data: history.map((h) => ({ value: h.power })),
       color: 'var(--chart-2)',
     },
     {
-      title: 'Задержка сигнала',
+      title: 'Ответ на воздействие',
       value: current.delay === null ? '—' : current.delay.toFixed(1),
       unit: 'такта',
       data: history.map((h) => ({ value: h.delay ?? 0 })),

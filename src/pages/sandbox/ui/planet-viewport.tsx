@@ -21,6 +21,7 @@ import {
 import { registerSandboxPose } from '@/features/planet-transition';
 import { getTransitionState, useTransitionPhase } from '@/store';
 
+import { ResearchScene } from '../research-scene';
 import { SceneBoundary } from './scene-boundary';
 
 interface PlanetViewportProps {
@@ -160,6 +161,7 @@ export const PlanetViewport = ({
             stars
             interactive
           >
+            <ResearchScene sim={sim} selected={selected} reset={cameraReset} />
             <SurfaceLife
               simulation={sim}
               selected={selected}

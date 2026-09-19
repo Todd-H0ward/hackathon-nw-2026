@@ -38,7 +38,7 @@ export const useEnsureExperiment = () => {
         const experiment = await createExperiment.mutateAsync({
           name: `Лаборатория · ${worlds.catalog[target]?.name ?? target}`,
           worldId: target,
-          mode: 'adaptive',
+          mode: 'evolutionary',
           seed: seedValue,
         });
 

@@ -38,6 +38,13 @@ export const useSpeechSynthesis = ({
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
+      const voices = window.speechSynthesis
+        .getVoices()
+        .filter((v) => v.lang.toLowerCase().startsWith(lang.slice(0, 2)));
+      utterance.voice =
+        voices.find((v) => /natural|neural|google/i.test(v.name)) ??
+        voices[0] ??
+        null;
       utterance.rate = rate;
       utterance.pitch = pitch;
       utterance.volume = volume;

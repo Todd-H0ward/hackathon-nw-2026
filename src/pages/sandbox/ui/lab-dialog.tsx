@@ -79,8 +79,8 @@ export const LabDialog = ({
         </ol>
         <div className="rounded-md border border-xeno-green/25 bg-xeno-green/5 p-3.5 text-[10px] leading-[1.9] text-muted-foreground">
           Планета — реальная. Формы жизни — гипотетические. Модель{' '}
-          {MODEL_VERSION}. В браузере работает отдельный демонстрационный
-          движок; подключение к серверной научной модели ещё не выполнено.
+          {MODEL_VERSION}. Все решения и метрики рассчитывает серверный движок.
+          Условия, действия и seed сохраняются в записи исследования.
           <span className="mt-1.5 block font-mono text-[8px] tracking-[0.5px]">
             XENOCHOICE / КОД МЫСЛИ 2026
           </span>
@@ -95,7 +95,7 @@ export const LabDialog = ({
         </p>
         <DialogTitle>Начать эксперимент заново?</DialogTitle>
         <DialogDescription>
-          Состояние текущего мира будет заменено тремя первичными колониями.
+          Состояние текущего мира будет заменено двумя первичными колониями.
           Другие миры сохранятся.
         </DialogDescription>
         <Input

@@ -6,7 +6,7 @@ import axios from 'axios';
  * `colonyId`, ...), so it must NOT go through the snake_case<->camelCase
  * interceptors the generic `API` client applies.
  */
-const DEFAULT_BASE_URL = 'http://80.78.247.32:8080/api/v2';
+const DEFAULT_BASE_URL = '/api/v2';
 
 export const XENOCHOICE_BASE_URL =
   import.meta.env.VITE_XENOCHOICE_API_URL || DEFAULT_BASE_URL;

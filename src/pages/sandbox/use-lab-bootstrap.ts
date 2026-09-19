@@ -33,6 +33,7 @@ export const useLabBootstrap = () => {
 
   const handleSnapshot = useCallback(
     (snapshot: StateSnapshot, sourceExperimentId: string) => {
+      if (getLabState().recording) return;
       const target = labRuntime.bodyByExperiment[sourceExperimentId];
       if (!target) return;
       applySnapshot(target, snapshot);

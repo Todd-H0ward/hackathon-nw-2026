@@ -6,7 +6,8 @@ import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 
 /** Upstream for the optional `/api/v2` dev proxy — see `.env-example`. */
-const XENOCHOICE_ORIGIN = 'http://80.78.247.32:8080';
+const XENOCHOICE_ORIGIN =
+  process.env.XENOCHOICE_ORIGIN || 'http://127.0.0.1:8080';
 
 // https://vite.dev/config/
 export default defineConfig({

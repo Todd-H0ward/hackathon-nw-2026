@@ -3,6 +3,8 @@ version: '3.8'
 services:
   frontend:
     image: ghcr.io/ix1ax/nwstep-hackaton-2026/frontend:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "80:80"
     restart: always

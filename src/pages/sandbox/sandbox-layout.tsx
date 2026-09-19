@@ -24,6 +24,8 @@ import {
   useTransitionPhase,
 } from '@/store';
 
+import { ColonyBuilder } from './colony-builder';
+import { ResearchPanel } from './research-panel';
 import { LabDialog, LabRail, LabStatus } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabBootstrap } from './use-lab-bootstrap';
@@ -111,14 +113,16 @@ const SandboxShell = () => {
         onGoHome={goHome}
       />
 
-      <div className="relative min-h-0 min-w-0 flex-1">
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+        <ResearchPanel />
+        <ColonyBuilder />
         <LabStatus
           booting={booting}
           streamStatus={streamStatus}
           worldsLoading={worlds.isLoading}
           worldsError={worlds.isError}
         />
-        <div className="h-full overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {world ? <Outlet /> : null}
         </div>
       </div>
