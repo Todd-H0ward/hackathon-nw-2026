@@ -192,7 +192,7 @@ export function position(
   ];
 }
 function seedColony(s: Simulation) {
-  if (living(s).length > 172 || activeColonies(s).length >= 12) return;
+  if (living(s).length > 2000 || activeColonies(s).length >= 100) return;
   const c = s.nextColony++;
   const lat = (random(s) - 0.5) * 1.65;
   const lon = (random(s) - 0.5) * 3.7;
@@ -310,8 +310,22 @@ function metric(s: Simulation, received: number): Metric {
     delay: s.delivered ? s.delayTotal / s.delivered : null,
   };
 }
+function cloneSimulation(state: Simulation): Simulation {
+  return {
+    ...state,
+    individuals: state.individuals.map((i) => ({ ...i })),
+    colonies: state.colonies.map((c) => ({ ...c })),
+    packets: state.packets.map((p) => ({ ...p })),
+    events: [...state.events],
+    history: [...state.history],
+    interventions: [...state.interventions],
+    settings: { ...state.settings },
+    effect: state.effect ? { ...state.effect } : null,
+  };
+}
+
 export function step(state: Simulation): Simulation {
-  const s = structuredClone(state);
+  const s = cloneSimulation(state);
   s.tick++;
   const world = WORLDS[s.body];
   if (s.effect && s.tick > s.effect.until) {
@@ -384,7 +398,7 @@ export function step(state: Simulation): Simulation {
     if (
       i.energy > i.threshold &&
       s.tick - i.born > 12 &&
-      living(s).length < 180
+      living(s).length < 2000
     ) {
       const childEnergy = (i.energy - 4) * 0.45;
       i.energy -= childEnergy + 4;
@@ -414,14 +428,22 @@ export function step(state: Simulation): Simulation {
         `Особь #${child.id} родилась · поколение ${child.generation}`,
       );
     } else if (i.energy > 28 && s.tick % 5 === i.id % 5) {
-      const target = survivors
-        .filter(
-          (n) =>
-            n.id !== i.id &&
-            n.energy < i.energy - 8 &&
-            Math.hypot(n.lat - i.lat, n.lon - i.lon) < 0.75,
-        )
-        .sort((a, b) => a.energy - b.energy || a.id - b.id)[0];
+      let target: Individual | null = null;
+      let minEnergy = Infinity;
+      for (const n of survivors) {
+        if (n.id === i.id) continue;
+        if (n.energy >= i.energy - 8) continue;
+        const dLat = n.lat - i.lat;
+        const dLon = n.lon - i.lon;
+        if (dLat * dLat + dLon * dLon >= 0.5625) continue; // 0.75^2 = 0.5625
+        if (
+          n.energy < minEnergy ||
+          (n.energy === minEnergy && (!target || n.id < target.id))
+        ) {
+          target = n;
+          minEnergy = n.energy;
+        }
+      }
       if (target) {
         i.energy -= 2;
         s.packets.push({
@@ -442,7 +464,7 @@ export function step(state: Simulation): Simulation {
     if (
       group.length >= 18 &&
       s.tick - c.born >= 25 &&
-      activeColonies(s).length < 12
+      activeColonies(s).length < 100
     ) {
       const id = s.nextColony++;
       const daughter = group.slice(Math.floor(group.length / 2));

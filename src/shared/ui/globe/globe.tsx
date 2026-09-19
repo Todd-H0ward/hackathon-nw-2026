@@ -47,7 +47,7 @@ export const Globe = ({
 
   useFrame(() => {
     const cfg = live.current;
-    if (hazeMat.current) syncHazeUniforms(hazeMat.current, cfg);
+    if (hazeMat.current && cfg.HAZE_OPACITY > 0) syncHazeUniforms(hazeMat.current, cfg);
     if (sparkMat.current) {
       syncSparkUniforms(sparkMat.current, cfg, sim.getPositions());
     }
@@ -55,19 +55,21 @@ export const Globe = ({
 
   return (
     <group>
-      <mesh ref={hazeRef} scale={config.RADIUS}>
-        <sphereGeometry args={[config.HAZE_RADIUS, 64, 64]} />
-        <hazeMaterial
-          ref={hazeMat}
-          transparent
-          toneMapped={false}
-          blending={AdditiveBlending}
-          side={BackSide}
-          atmOpacity={config.HAZE_OPACITY}
-          atmPowFactor={config.HAZE_POW}
-          atmMultiplier={config.HAZE_MUL}
-        />
-      </mesh>
+      {config.HAZE_OPACITY > 0 && (
+        <mesh ref={hazeRef} scale={config.RADIUS}>
+          <sphereGeometry args={[config.HAZE_RADIUS, 64, 64]} />
+          <hazeMaterial
+            ref={hazeMat}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            side={BackSide}
+            atmOpacity={config.HAZE_OPACITY}
+            atmPowFactor={config.HAZE_POW}
+            atmMultiplier={config.HAZE_MUL}
+          />
+        </mesh>
+      )}
 
       {sim.ready && sim.seedTexture ? (
         <points frustumCulled={false} geometry={geometry}>

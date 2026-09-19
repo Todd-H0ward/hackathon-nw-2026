@@ -49,8 +49,8 @@ const SIDE_SCALE = 0.62;
 /** Start shrinking toward 0 past the side slot so the ring wrap is invisible. */
 const EDGE_FADE_START = Math.max(1, RING_HALF - 0.45);
 const SWIPE_PX = 56;
-const OFFSET_DAMP = 3.2;
-const POSE_DAMP = 5.5;
+const OFFSET_DAMP = 4.2;
+const POSE_DAMP = 6.0;
 /** If target X jumps farther than this, the ring wrapped — snap, don't lerp through center. */
 const WRAP_SNAP_X = SPACING * (RING_HALF - 0.25);
 
@@ -70,6 +70,30 @@ const wrapCentered = (value: number, length: number) => {
 };
 
 type MeasureBody = (body: GlobeBodyId) => PlanetScreenPose | null;
+
+const HOME_CAROUSEL_LOOK: Record<GlobeBodyId, Partial<GlobeConfig>> = {
+  earth: {
+    HAZE_OPACITY: 0.14,
+    HAZE_MUL: 10.5,
+    BLOOM_INTENSITY: 1.75,
+    SPIN: 0.0001,
+    JITTER: 0.014,
+  },
+  mars: {
+    HAZE_OPACITY: 0.08,
+    HAZE_MUL: 7.5,
+    BLOOM_INTENSITY: 1.35,
+    SPIN: 0.00008,
+    JITTER: 0.014,
+  },
+  venus: {
+    HAZE_OPACITY: 0.28,
+    HAZE_MUL: 14.0,
+    BLOOM_INTENSITY: 2.2,
+    SPIN: 0.00004,
+    JITTER: 0.014,
+  },
+};
 
 export type PlanetHoverPayload = {
   body: GlobeBodyId;
@@ -160,9 +184,11 @@ const CarouselScene = ({
       }
 
       // Ring wrap: slot jumps ±N/2 → targetX flips sides. Damping would slide
-      // through the center — snap while already faded out.
+      // through the center — snap only while already faded out.
       const wrapped =
-        ready.current && Math.abs(group.position.x - targetX) > WRAP_SNAP_X;
+        ready.current &&
+        abs > EDGE_FADE_START &&
+        Math.abs(group.position.x - targetX) > WRAP_SNAP_X;
 
       if (!ready.current || wrapped) {
         group.position.set(targetX, 0, targetZ);
@@ -204,6 +230,7 @@ const CarouselScene = ({
         config: resolveGlobeConfig(body, {
           RADIUS: GLOBE_DEFAULTS.RADIUS,
           RESOLUTION: 280,
+          ...HOME_CAROUSEL_LOOK[body],
         }),
         colorUrl: GLOBE_MAPS[body].color,
       })),
@@ -294,6 +321,7 @@ export const GlobeCarouselCanvas = ({
   const hiddenBodyRef = useRef<GlobeBodyId | null>(hiddenBody);
   hiddenBodyRef.current = hiddenBody;
   const measureRef = useRef<MeasureBody | null>(null);
+  const lastSwipeTimeRef = useRef(0);
 
   // Hit meshes set a pointer cursor; don't leak it past unmount (e.g. navigation on click).
   useEffect(
@@ -303,9 +331,14 @@ export const GlobeCarouselCanvas = ({
     [],
   );
 
-  const fxConfigRef = useRef(resolveGlobeConfig(activeBody));
+  const fxConfigRef = useRef(
+    resolveGlobeConfig(activeBody, HOME_CAROUSEL_LOOK[activeBody]),
+  );
   useEffect(() => {
-    fxConfigRef.current = resolveGlobeConfig(activeBody);
+    fxConfigRef.current = resolveGlobeConfig(
+      activeBody,
+      HOME_CAROUSEL_LOOK[activeBody],
+    );
   }, [activeBody]);
 
   // Keep continuous offset in sync with external activeBody (buttons / parent).
@@ -351,10 +384,14 @@ export const GlobeCarouselCanvas = ({
 
     const deltaPx = clientX - pointerX.current;
     const clickedBody = clickBodyRef.current;
+    const currentDragOffset = dragOffsetRef.current;
     dragging.current = false;
     pointerX.current = null;
-    dragOffsetRef.current = 0;
     clickBodyRef.current = null;
+
+    // Smoothly absorb the drag offset into offsetRef so position is 100% continuous
+    offsetRef.current += currentDragOffset;
+    dragOffsetRef.current = 0;
 
     if (Math.abs(deltaPx) < SWIPE_PX) {
       if (!dragMoved.current && clickedBody) {
@@ -364,10 +401,15 @@ export const GlobeCarouselCanvas = ({
       return;
     }
 
-    // Snap to the next slot — no residual drag / damp coast.
+    const now = Date.now();
+    if (now - lastSwipeTimeRef.current < 280) {
+      dragMoved.current = false;
+      return;
+    }
+    lastSwipeTimeRef.current = now;
+
     const step = deltaPx < 0 ? 1 : -1;
     targetOffsetRef.current += step;
-    offsetRef.current = targetOffsetRef.current;
     const nextIndex =
       ((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
       BODY_COUNT;
