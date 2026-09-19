@@ -57,12 +57,7 @@ export function damerauLevenshtein(a: string, b: string): number {
         d[i][j - 1] + 1, // вставка
         d[i - 1][j - 1] + cost, // замена
       );
-      if (
-        i > 1 &&
-        j > 1 &&
-        a[i - 1] === b[j - 2] &&
-        a[i - 2] === b[j - 1]
-      ) {
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
         d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1); // перестановка (transposition)
       }
     }
@@ -143,7 +138,7 @@ function extractNumber(text: string): number | null {
     const cleanWord = word.replace(/[ьъ]/g, '');
     for (const [numWord, val] of Object.entries(RUSSIAN_NUMBER_WORDS)) {
       const cleanNumWord = numWord.replace(/[ьъ]/g, '');
-      if (cleanWord === cleanNumWord || damerauLevenshtein(cleanWord, cleanNumWord) <= 1) {
+      if (cleanWord === cleanNumWord) {
         total += val;
         found = true;
         break;
@@ -161,7 +156,11 @@ function matchesFuzzyWord(word: string, target: string, maxDist = 2): boolean {
   const normWord = normalizeFuzzy(word);
   const normTarget = normalizeFuzzy(target);
   if (normWord === normTarget) return true;
-  if (normWord.startsWith(normTarget) && normWord.length <= normTarget.length + 2) return true;
+  if (
+    normWord.startsWith(normTarget) &&
+    normWord.length <= normTarget.length + 2
+  )
+    return true;
   if (Math.abs(normWord.length - normTarget.length) > maxDist) return false;
   return damerauLevenshtein(normWord, normTarget) <= maxDist;
 }
@@ -169,7 +168,11 @@ function matchesFuzzyWord(word: string, target: string, maxDist = 2): boolean {
 /**
  * Проверяет наличие ключевого слова в наборе слов фразы.
  */
-function containsFuzzyKeyword(words: string[], targets: string[], maxDist = 2): boolean {
+function containsFuzzyKeyword(
+  words: string[],
+  targets: string[],
+  maxDist = 2,
+): boolean {
   for (const word of words) {
     for (const target of targets) {
       if (matchesFuzzyWord(word, target, maxDist)) {
@@ -191,26 +194,34 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
   const normalized = rawText.toLowerCase().replace(/ё/g, 'е').trim();
 
   // 1. Мутации при делении: включить / выключить
-  const mutationKeywords = ['мутаци', 'мутации', 'мутацию', 'мутация', 'мутаций'];
+  const mutationKeywords = [
+    'мутаци',
+    'мутации',
+    'мутацию',
+    'мутация',
+    'мутаций',
+  ];
   const hasMutation = mutationKeywords.some((k) => normalized.includes(k));
   if (hasMutation) {
-    if (/(?:включ\S*|активир\S*|вруб\S*|подключ\S*|\bвкл\b)/.test(normalized)) {
-      return { type: 'mutation', value: true };
-    }
-    if (/(?:выключ\S*|отключ\S*|деактивир\S*|убер\S*|\bвыкл\b)/.test(normalized)) {
+    if (/(?:выключ\S*|отключ\S*|деактивир\S*|убер\S*|выкл)/.test(normalized))
       return { type: 'mutation', value: false };
-    }
+    if (/(?:включ\S*|активир\S*|вруб\S*|подключ\S*|вкл)/.test(normalized))
+      return { type: 'mutation', value: true };
   }
 
   // 2. Скорость симуляции
-  if (/(?:скорост\S*|темп|быстрее|замедл\S*|ускор\S*|медленнее)/.test(normalized)) {
-    if (/\b(?:5|пять|максимум|максимальн\S*)\b/.test(normalized)) {
+  if (
+    /(?:скорост\S*|темп|быстрее|замедл\S*|ускор\S*|медленнее)/.test(normalized)
+  ) {
+    if (/(?:^|\s)(?:5|пять|максимум|максимальн\S*)(?:\s|$)/.test(normalized)) {
       return { type: 'speed', value: 5 };
     }
-    if (/\b(?:2|два|две|двойк\S*)\b/.test(normalized)) {
+    if (/(?:^|\s)(?:2|два|две|двойк\S*)(?:\s|$)/.test(normalized)) {
       return { type: 'speed', value: 2 };
     }
-    if (/\b(?:1|один|одна|нормальн\S*|единиц\S*)\b/.test(normalized)) {
+    if (
+      /(?:^|\s)(?:1|один|одна|нормальн\S*|единиц\S*)(?:\s|$)/.test(normalized)
+    ) {
       return { type: 'speed', value: 1 };
     }
     if (/(?:быстрее|ускор\S*|увелич\S*)/.test(normalized)) {
@@ -229,8 +240,14 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
     const setting: FieldSetting = isResource ? 'resource' : 'noise';
 
     // Определяем знак/направление изменения
-    const isIncrease = /(?:увелич\S*|прибав\S*|подним\S*|повыс\S*|добав\S*|\bплюс\b|\+)/.test(normalized);
-    const isDecrease = /(?:уменьш\S*|сниз\S*|убав\S*|пониз\S*|отним\S*|\bминус\b|-)/.test(normalized);
+    const isIncrease =
+      /(?:увелич\S*|прибав\S*|подним\S*|повыс\S*|добав\S*|\bплюс\b|\+)/.test(
+        normalized,
+      );
+    const isDecrease =
+      /(?:уменьш\S*|сниз\S*|убав\S*|пониз\S*|отним\S*|\bминус\b|-)/.test(
+        normalized,
+      );
 
     const num = extractNumber(normalized);
 
@@ -270,7 +287,10 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
       }
 
       // Если сказано: "поменяй приток на 70%" или "приток 50" -> абсолютное значение
-      if (/(?:поменяй|измени|установи|поставь|сделай|на)/.test(normalized) || !isIncrease && !isDecrease) {
+      if (
+        /(?:поменяй|измени|установи|поставь|сделай|на)/.test(normalized) ||
+        (!isIncrease && !isDecrease)
+      ) {
         return {
           type: 'setting',
           setting,
@@ -335,7 +355,8 @@ const INTENT_PREDICTORS: {
     intent: 'start',
     keywords: ['старт', 'запусти', 'продолжи', 'поехали', 'пуск', 'возобнови'],
     maxDist: 1,
-    regex: /(?:^|\s)(?:запусти\S*|продолжи\S*|старт|пуск|поехали|возобнови\S*)(?:\s|$)/i,
+    regex:
+      /(?:^|\s)(?:запусти\S*|продолжи\S*|старт|пуск|поехали|возобнови\S*)(?:\s|$)/i,
   },
   {
     intent: 'step',
@@ -383,7 +404,8 @@ const INTENT_PREDICTORS: {
     intent: 'colony',
     keywords: ['колония', 'колонию', 'зародыш'],
     maxDist: 2,
-    regex: /(?:^|\s)(?:создай колонию|добавь колонию|новая колония|зародыш)(?:\s|$)/i,
+    regex:
+      /(?:^|\s)(?:создай колонию|добавь колонию|новая колония|зародыш)(?:\s|$)/i,
   },
 ];
 
@@ -392,7 +414,9 @@ const INTENT_PREDICTORS: {
  * Сначала проверяет команды управления полями/параметрами среды,
  * затем нечетко ищет намерения симуляции с предсказанием искаженных слов.
  */
-export function parseResearchVoiceCommand(text: string): VoiceCommandResult | null {
+export function parseResearchVoiceCommand(
+  text: string,
+): VoiceCommandResult | null {
   const normalized = text
     .toLowerCase()
     .replace(/ё/g, 'е')
@@ -403,23 +427,45 @@ export function parseResearchVoiceCommand(text: string): VoiceCommandResult | nu
   // Отрицание отменяет команду
   if (/(?:^|\s)(?:не|нет|отмени|нельзя)(?:\s|$)/.test(normalized)) return null;
 
+  if (/(?:^|\s)(?:и|затем|потом|одновременно)(?:\s|$)/.test(normalized))
+    return null;
+
   // 1. Проверяем команды изменения полей и настроек
   const fieldCmd = parseFieldCommand(text);
-  if (fieldCmd) {
-    return fieldCmd;
-  }
 
   // 2. Проверяем интенты (регулярки + нечеткое сопоставление)
-  const words = normalized.split(/\s+/).filter(Boolean);
+  const words = normalized
+    .split(/\s+/)
+    .filter(
+      (w) =>
+        w &&
+        ![
+          'бро',
+          'брат',
+          'пожалуйста',
+          'сделай',
+          'мне',
+          'давай',
+          'ну',
+          'ка',
+          'покажи',
+          'установи',
+          'поставь',
+          'измени',
+          'поменяй',
+        ].includes(w),
+    );
   const matchedIntents: ResearchIntent[] = [];
 
   for (const predictor of INTENT_PREDICTORS) {
     let matched = false;
 
     // Сначала быстрая проверка регулярным выражением
-    if (predictor.regex && predictor.regex.test(normalized)) {
+    if (predictor.regex?.test(normalized)) {
       matched = true;
-    } else if (containsFuzzyKeyword(words, predictor.keywords, predictor.maxDist ?? 2)) {
+    } else if (
+      containsFuzzyKeyword(words, predictor.keywords, predictor.maxDist ?? 2)
+    ) {
       matched = true;
     }
 
@@ -438,13 +484,22 @@ export function parseResearchVoiceCommand(text: string): VoiceCommandResult | nu
     filtered = filtered.filter((i) => i !== 'analytics');
   }
 
+  if (fieldCmd) {
+    const fieldCount = [
+      /(?:приток|ресурс|поток)/,
+      /(?:шум|помех)/,
+      /мутаци/,
+      /(?:скорост|темп)/,
+    ].filter((r) => r.test(normalized)).length;
+    if (
+      fieldCount > 1 ||
+      filtered.some((i) => !['power', 'analytics'].includes(i))
+    )
+      return null;
+    return fieldCmd;
+  }
   if (filtered.length === 1) {
     return { type: 'intent', intent: filtered[0] };
-  }
-
-  // Если найдено несколько, но среди них есть 'impulse' и нет противоречий
-  if (filtered.includes('impulse') && filtered.length <= 2) {
-    return { type: 'intent', intent: 'impulse' };
   }
 
   return null;

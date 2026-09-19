@@ -1,16 +1,21 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
+import { Mic } from 'lucide-react';
+
+import { xenoApiEndpoints as api } from '@/shared/api/xenochoice';
 import { useSpeechRecognition, useSpeechSynthesis } from '@/shared/voice';
+import { useAudioPreferences } from '@/shared/voice/action-speech';
 import { parseResearchVoiceCommand } from '@/shared/voice/intents';
 
 import { getLabState } from '@/store';
 
-import { useLabActions } from './use-lab-actions';
+import { applySnapshot } from './lab-runtime';
+import { performIntervention } from './research-api';
 
 export const ResearchVoice = () => {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const actions = useLabActions();
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
@@ -34,28 +39,60 @@ export const ResearchVoice = () => {
       const state = getLabState();
       const id = state.experimentIds[state.body];
 
+      if (state.recording && cmd.type !== 'intent')
+        throw new Error('Сначала выйдите из записи');
+      const sendCommand = async (command: string, speed?: 1 | 2 | 5) => {
+        if (!id) throw new Error('Эксперимент ещё не готов');
+        const result = await api.postCommand(id, {
+          command: command as 'start' | 'pause' | 'step' | 'setSpeed',
+          speed,
+        });
+        if (speed) getLabState().setSpeed(speed);
+        if (!getLabState().recording) {
+          getLabState().patchSim(state.body, { status: result.status });
+          applySnapshot(state.body, await api.getExperimentState(id));
+        }
+      };
       if (cmd.type === 'setting') {
         if (!id) throw new Error('Эксперимент ещё не готов');
         const sim = state.sims[state.body];
         const currentVal = sim?.settings[cmd.setting] ?? 50;
         let nextVal: number;
         if (cmd.mode === 'relative') {
-          nextVal = Math.max(0, Math.min(100, Math.round(currentVal + cmd.value)));
+          nextVal = Math.max(
+            0,
+            Math.min(100, Math.round(currentVal + cmd.value)),
+          );
         } else {
           nextVal = Math.max(0, Math.min(100, Math.round(cmd.value)));
         }
-        actions.applySettings({ [cmd.setting]: nextVal });
-        const name = cmd.setting === 'resource' ? 'Приток ресурса' : 'Шум среды';
+        await performIntervention(
+          {
+            type: cmd.setting === 'resource' ? 'set_flow' : 'set_noise',
+            targetId: state.body,
+            value: nextVal / (cmd.setting === 'resource' ? 50 : 100),
+          },
+          false,
+        );
+        const name =
+          cmd.setting === 'resource' ? 'Приток ресурса' : 'Шум среды';
         response = `${name} установлен на ${nextVal}%`;
       } else if (cmd.type === 'mutation') {
         if (!id) throw new Error('Эксперимент ещё не готов');
-        actions.applySettings({ mutation: cmd.value });
+        await performIntervention(
+          {
+            type: 'toggle_mutations',
+            targetId: state.body,
+            value: cmd.value ? 1 : 0,
+          },
+          false,
+        );
         response = cmd.value
           ? 'Мутации при делении включены'
           : 'Мутации при делении отключены';
       } else if (cmd.type === 'speed') {
         if (!id) throw new Error('Эксперимент ещё не готов');
-        actions.setSpeed(cmd.value);
+        await sendCommand('setSpeed', cmd.value);
         response = `Скорость симуляции: x${cmd.value}`;
       } else if (cmd.type === 'intent') {
         const intent = cmd.intent;
@@ -89,18 +126,23 @@ export const ResearchVoice = () => {
           if (intent === 'colony') {
             state.setColonyDraft({ lat: 20, lng: 10 });
             navigate('/sandbox');
-            response = 'Конструктор колонии открыт. Выберите место и параметры.';
+            response =
+              'Конструктор колонии открыт. Выберите место и параметры.';
           } else if (['impulse', 'storm', 'depletion'].includes(intent)) {
-            const uiType =
-              intent === 'impulse'
-                ? 'pulse'
-                : intent === 'storm'
-                  ? 'storm'
-                  : 'scarcity';
-            actions.applyIntervention({ type: uiType });
-            if (state.sims[state.body]?.status !== 'running') {
-              actions.step();
-            }
+            await performIntervention(
+              {
+                type:
+                  intent === 'storm'
+                    ? 'perturbation'
+                    : intent === 'impulse'
+                      ? 'impulse'
+                      : 'depletion',
+                targetId: state.body,
+                value: intent === 'impulse' ? 2 : 1,
+                duration: 60,
+              },
+              false,
+            );
             response =
               intent === 'impulse'
                 ? 'Импульс выполнен'
@@ -109,16 +151,16 @@ export const ResearchVoice = () => {
                   : 'Истощение выполнено';
           } else if (intent === 'pause') {
             if (state.sims[state.body]?.status === 'running') {
-              actions.toggleRunning();
+              await sendCommand('pause');
             }
             response = 'Эксперимент на паузе';
           } else if (intent === 'start') {
             if (state.sims[state.body]?.status !== 'running') {
-              actions.toggleRunning();
+              await sendCommand('start');
             }
             response = 'Эксперимент запущен';
           } else if (intent === 'step') {
-            actions.step();
+            await sendCommand('step');
             response = 'Один такт выполнен';
           }
         }
@@ -130,6 +172,10 @@ export const ResearchVoice = () => {
 
     setMessage(response);
     setBusy(false);
+    if (!useAudioPreferences.getState().enabled) {
+      locked.current = false;
+      return;
+    }
     speak(response, () => {
       locked.current = false;
     });
@@ -146,34 +192,52 @@ export const ResearchVoice = () => {
     });
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="relative">
       <button
         type="button"
-        className="rounded border border-primary/40 px-2 py-1 disabled:opacity-50"
-        disabled={!isSupported || !window.isSecureContext || busy || isSpeaking}
-        onClick={() => {
-          if (isListening) {
-            stopListening();
-            return;
-          }
-          cancel();
-          locked.current = false;
-          setMessage('Слушаю одну команду…');
-          startListening();
-        }}
+        aria-label="Голосовое управление"
+        title="Голосовое управление"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="grid size-9 place-items-center rounded-md text-muted-foreground hover:bg-secondary"
       >
-        {isListening ? '■ Остановить' : '🎙 Голос'}
+        <Mic size={17} />
       </button>
-      <span
-        role="status"
-        className="max-w-72 text-[11px] text-muted-foreground"
+      <div
+        hidden={!open}
+        className="absolute bottom-0 left-11 z-50 w-72 rounded-xl border border-border bg-card p-3 shadow-xl max-mobile:top-11 max-mobile:bottom-auto max-mobile:left-auto max-mobile:right-0"
       >
-        {!window.isSecureContext
-          ? 'Для микрофона нужен HTTPS'
-          : !isSupported
-            ? 'Голос доступен в Chrome / Edge'
-            : message || 'Одна фраза — одно действие'}
-      </span>
+        <p className="mb-2 text-xs">Голосовое управление · одна команда</p>
+        <button
+          type="button"
+          className="rounded border border-primary/40 px-2 py-1 disabled:opacity-50"
+          disabled={
+            !isSupported || !window.isSecureContext || busy || isSpeaking
+          }
+          onClick={() => {
+            if (isListening) {
+              stopListening();
+              return;
+            }
+            cancel();
+            locked.current = false;
+            setMessage('Слушаю одну команду…');
+            startListening();
+          }}
+        >
+          {isListening ? '■ Остановить' : '🎙 Голос'}
+        </button>
+        <span
+          role="status"
+          className="max-w-72 text-[11px] text-muted-foreground"
+        >
+          {!window.isSecureContext
+            ? 'Для микрофона нужен HTTPS'
+            : !isSupported
+              ? 'Голос доступен в Chrome / Edge'
+              : message || 'Одна фраза — одно действие'}
+        </span>
+      </div>
     </div>
   );
 };

@@ -8,10 +8,18 @@ import {
   CircleHelp,
   Globe2,
   Microscope,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
+import {
+  announceAction,
+  useAudioPreferences,
+} from '@/shared/voice/action-speech';
+
+import { ResearchVoice } from '../research-voice';
 
 interface LabRailProps {
   seed: number;
@@ -44,6 +52,7 @@ const RailLink = ({ to, end, label, children }: RailLinkProps) => (
     className={navClass}
     title={label}
     aria-label={label}
+    onClick={() => announceAction(label)}
   >
     {children}
   </NavLink>
@@ -55,59 +64,84 @@ export const LabRail = ({
   onExport,
   onOpenGuide,
   onGoHome,
-}: LabRailProps) => (
-  <nav
-    aria-label="Навигация лаборатории"
-    className="flex w-12 shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card py-2.5 max-mobile:h-12 max-mobile:w-full max-mobile:flex-row max-mobile:border-r-0 max-mobile:border-b max-mobile:px-2.5 max-mobile:py-0"
-  >
-    <button
-      type="button"
-      onClick={onGoHome}
-      className={cn(
-        itemClass,
-        'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
-      )}
-      title="XenoChoice — к выбору планеты"
-      aria-label="XenoChoice — к выбору планеты"
+}: LabRailProps) => {
+  const audio = useAudioPreferences();
+  return (
+    <nav
+      aria-label="Навигация лаборатории"
+      className="flex w-12 shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card py-2.5 max-mobile:h-12 max-mobile:w-full max-mobile:flex-row max-mobile:border-r-0 max-mobile:border-b max-mobile:px-2.5 max-mobile:py-0"
     >
-      <Atom size={20} />
-    </button>
+      <button
+        type="button"
+        onClick={onGoHome}
+        className={cn(
+          itemClass,
+          'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
+        )}
+        title="XenoChoice — к выбору планеты"
+        aria-label="XenoChoice — к выбору планеты"
+      >
+        <Atom size={20} />
+      </button>
 
-    <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
-      <Microscope size={17} />
-    </RailLink>
-    <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
-      <Activity size={17} />
-    </RailLink>
-    <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
-      <Globe2 size={17} />
-    </RailLink>
+      <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
+        <Microscope size={17} />
+      </RailLink>
+      <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
+        <Activity size={17} />
+      </RailLink>
+      <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
+        <Globe2 size={17} />
+      </RailLink>
 
-    <div className="flex-1" />
+      <div className="flex-1" />
 
-    <button
-      type="button"
-      className={itemClass}
-      title={`Экспорт эксперимента · seed ${seed}`}
-      aria-label="Экспорт эксперимента"
-      onClick={onExport}
-    >
-      <ArrowDownToLine size={17} />
-    </button>
-    <button
-      type="button"
-      className={itemClass}
-      title="О модели и роли исследователя"
-      aria-label="О модели и роли исследователя"
-      onClick={onOpenGuide}
-    >
-      <CircleHelp size={17} />
-    </button>
-    <span
-      className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
-      title="Локальная модель"
-      role="img"
-      aria-label="Локальная модель активна"
-    />
-  </nav>
-);
+      <button
+        type="button"
+        className={itemClass}
+        title={`Экспорт эксперимента · seed ${seed}`}
+        aria-label="Экспорт эксперимента"
+        onClick={onExport}
+      >
+        <ArrowDownToLine size={17} />
+      </button>
+      <button
+        type="button"
+        className={itemClass}
+        title="О модели и роли исследователя"
+        aria-label="О модели и роли исследователя"
+        onClick={onOpenGuide}
+      >
+        <CircleHelp size={17} />
+      </button>
+      <ResearchVoice />
+      <button
+        type="button"
+        className={itemClass}
+        aria-label={
+          audio.enabled
+            ? 'Выключить озвучку действий'
+            : 'Включить озвучку действий'
+        }
+        title={
+          audio.enabled
+            ? 'Выключить озвучку действий'
+            : 'Включить озвучку действий'
+        }
+        aria-pressed={audio.enabled}
+        onClick={() => {
+          audio.toggle();
+          if (!audio.enabled) announceAction('Озвучка действий включена');
+        }}
+      >
+        {audio.enabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
+      </button>
+      <span
+        className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
+        title="Локальная модель"
+        role="img"
+        aria-label="Локальная модель активна"
+      />
+    </nav>
+  );
+};

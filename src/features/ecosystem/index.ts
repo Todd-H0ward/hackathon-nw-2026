@@ -22,11 +22,13 @@ export {
   remoteIndividualId,
   snapshotToSimulation,
 } from './model';
-
 export { SurfaceLife } from './surface-life';
-
 export type { WorldCatalogState } from './use-world-catalog';
 export { useWorldCatalog } from './use-world-catalog';
-
 export type { WorldCatalog, WorldInfo } from './world-info';
-export { MODEL_VERSION, WORLD_COLORS, worldToInfo, worldsToInfoMap } from './world-info';
+export {
+  MODEL_VERSION,
+  WORLD_COLORS,
+  worldsToInfoMap,
+  worldToInfo,
+} from './world-info';

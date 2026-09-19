@@ -2,18 +2,17 @@ import {
   downloadExperimentExport,
   type InterventionType,
   useCommand,
-  useIntervention,
   useReplayExperiment,
   xenoApiEndpoints,
 } from '@/shared/api/xenochoice';
 import { useToast } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
+import { announceAction } from '@/shared/voice/action-speech';
 
 import {
   activeColonies,
   emptySimulation,
   living,
-  logIntervention,
   type Settings,
   useWorldCatalog,
 } from '@/features/ecosystem';
@@ -27,6 +26,7 @@ import {
   rememberExperiment,
   resetLabRuntime,
 } from './lab-runtime';
+import { performIntervention } from './research-api';
 import { useEnsureExperiment } from './use-ensure-experiment';
 
 type UiIntervention = 'pulse' | 'storm' | 'scarcity';
@@ -56,12 +56,15 @@ export const useLabActions = () => {
   const { toast: notify } = useToast();
   const worlds = useWorldCatalog();
   const command = useCommand();
-  const intervention = useIntervention();
   const replay = useReplayExperiment();
   const ensureExperiment = useEnsureExperiment();
 
   const withExperiment = (fn: (id: string) => void | Promise<void>) => {
-    const { body, experimentIds } = getLabState();
+    const { body, experimentIds, recording } = getLabState();
+    if (recording) {
+      notify('Сначала выйдите из записи');
+      return;
+    }
     const id = experimentIds[body];
     if (!id) {
       notify('Эксперимент ещё не готов');
@@ -81,6 +84,14 @@ export const useLabActions = () => {
       const target = labRuntime.bodyByExperiment[id];
       if (!target) return;
       getLabState().patchSim(target, { status: result.status });
+      const messages: Record<string, string> = {
+        pause: 'Эксперимент на паузе',
+        start: 'Эксперимент запущен',
+        resume: 'Эксперимент продолжен',
+        step: 'Один такт выполнен',
+        setSpeed: `Скорость ${request.speed}`,
+      };
+      announceAction(messages[request.command] ?? 'Готово');
     } catch (error) {
       notify(errorMessage(error, fallbackMessage));
     }
@@ -111,6 +122,7 @@ export const useLabActions = () => {
 
   const setSpeed = (next: number) => {
     const value = (next === 2 || next === 5 ? next : 1) as 1 | 2 | 5;
+    if (getLabState().recording) return;
     getLabState().setSpeed(value);
     withExperiment((id) =>
       runCommand(
@@ -132,8 +144,13 @@ export const useLabActions = () => {
   };
 
   const selectWorld = (next: GlobeBodyId) => {
+    if (getLabState().recording) {
+      notify('Сначала выйдите из записи');
+      return;
+    }
     const { setBody, setSelected, setSeed } = getLabState();
     setBody(next);
+    announceAction(`Планета: ${worlds.catalog[next]?.name ?? next}`);
     setSelected(null);
     setSeed(String(labRuntime.seedByBody[next] ?? clampSeed('')));
   };
@@ -156,77 +173,65 @@ export const useLabActions = () => {
   };
 
   const applySettings = (partial: Partial<Settings>) => {
+    if (getLabState().recording) return;
+    const sanitized: Partial<Settings> = {
+      ...partial,
+      ...(partial.resource !== undefined
+        ? { resource: Math.round(partial.resource) }
+        : {}),
+      ...(partial.noise !== undefined
+        ? { noise: Math.round(partial.noise) }
+        : {}),
+    };
     const { body, sims, patchSim } = getLabState();
-    const sim = sims[body];
     const carry = labRuntime.carries[body];
-
-    carry.settings = { ...sim.settings, ...partial };
+    labRuntime.pendingSettings[body] = {
+      ...labRuntime.pendingSettings[body],
+      ...sanitized,
+    };
+    carry.settings = { ...sims[body].settings, ...sanitized };
     patchSim(body, { settings: carry.settings });
-
-    withExperiment((id) => {
-      const baseFlow = worlds.catalog[body]?.baseFlow ?? 1;
-
-      if (partial.resource !== undefined) {
-        const value = (partial.resource / 100) * Math.max(baseFlow, 1) * 2;
-        scheduleSetting('resource', () => {
-          logIntervention(carry, sim.tick, 'set_flow');
-          return intervention.mutateAsync({
-            experimentId: id,
-            type: 'set_flow',
+    for (const [key, value] of Object.entries(sanitized)) {
+      scheduleSetting(key as keyof Settings, async () => {
+        if (getLabState().body !== body || getLabState().recording) return;
+        try {
+          await performIntervention({
+            type:
+              key === 'resource'
+                ? 'set_flow'
+                : key === 'noise'
+                  ? 'set_noise'
+                  : 'toggle_mutations',
             targetId: body,
-            value,
+            value:
+              key === 'resource'
+                ? Number(value) / 50
+                : key === 'noise'
+                  ? Number(value) / 100
+                  : value
+                    ? 1
+                    : 0,
           });
-        });
-      }
-
-      if (partial.noise !== undefined) {
-        const value = partial.noise / 100;
-        scheduleSetting('noise', () => {
-          logIntervention(carry, sim.tick, 'set_noise');
-          return intervention.mutateAsync({
-            experimentId: id,
-            type: 'set_noise',
-            targetId: body,
-            value,
-          });
-        });
-      }
-
-      if (partial.mutation !== undefined) {
-        const value = partial.mutation ? 1 : 0;
-        scheduleSetting('mutation', () => {
-          logIntervention(carry, sim.tick, 'toggle_mutations');
-          return intervention.mutateAsync({
-            experimentId: id,
-            type: 'toggle_mutations',
-            targetId: body,
-            value,
-          });
-        });
-      }
-    });
+        } finally {
+          const pending = labRuntime.pendingSettings[body];
+          if (pending?.[key as keyof Settings] === value)
+            delete pending[key as keyof Settings];
+          const snapshot = getLabState().sims[body].snapshot;
+          if (snapshot && !getLabState().recording)
+            applySnapshot(body, snapshot);
+        }
+      });
+    }
   };
 
   const applyIntervention = (payload: { type: UiIntervention }) => {
-    const { body, sims, patchSim } = getLabState();
-    const sim = sims[body];
-    const carry = labRuntime.carries[body];
-    const apiType = UI_TO_API[payload.type];
-
-    carry.effect = { kind: payload.type, until: sim.tick + EFFECT_UNTIL };
-    logIntervention(carry, sim.tick, apiType);
-    patchSim(body, {
-      effect: carry.effect,
-      interventions: [...carry.interventions],
-    });
-
-    withExperiment(async (id) => {
+    withExperiment(async () => {
       try {
-        await intervention.mutateAsync({
-          experimentId: id,
-          type: apiType,
-          targetId: body,
+        await performIntervention({
+          type: UI_TO_API[payload.type],
+          targetId: getLabState().body,
           value: payload.type === 'pulse' ? 2 : 1,
+          duration: EFFECT_UNTIL,
         });
         notify(INTERVENTION_LABELS[payload.type]);
       } catch (error) {
@@ -254,23 +259,22 @@ export const useLabActions = () => {
       return;
     }
 
-    withExperiment(async (id) => {
-      try {
-        await intervention.mutateAsync({
-          experimentId: id,
-          type: 'add_inoculum',
-          targetId: body,
-          value: 1,
-        });
-        logIntervention(labRuntime.carries[body], sim.tick, 'add_inoculum');
-        notify('Зародыш внесён. Внешний ресурс зарегистрирован.');
-      } catch (error) {
-        notify(errorMessage(error, 'Не удалось внести зародыш'));
-      }
+    withExperiment(() => {
+      getLabState().setColonyDraft({ lat: 0, lng: 0 });
     });
   };
 
   const resetExperiment = async () => {
+    if (getLabState().recording) return;
+    const previous = getLabState().experimentIds[getLabState().body];
+    if (previous) {
+      try {
+        await xenoApiEndpoints.postCommand(previous, { command: 'pause' });
+      } catch (error) {
+        notify(errorMessage(error, 'Не удалось остановить эксперимент'));
+        return;
+      }
+    }
     const { body, seed, setModal, setSim, setSelected, setSeed } =
       getLabState();
     const nextSeed = clampSeed(seed);
@@ -287,6 +291,7 @@ export const useLabActions = () => {
 
     if (getLabState().experimentIds[body]) {
       notify('Исходный эксперимент восстановлен');
+      announceAction('Исходный эксперимент восстановлен');
     }
   };
 
@@ -314,15 +319,20 @@ export const useLabActions = () => {
     });
   };
 
-  const exportExperiment = () => {
-    withExperiment(async (id) => {
-      try {
-        await downloadExperimentExport(id, 'json');
-        notify('Эксперимент экспортирован в JSON');
-      } catch (error) {
-        notify(errorMessage(error, 'Экспорт не удался'));
-      }
-    });
+  const exportExperiment = async () => {
+    const state = getLabState();
+    const id = state.recording?.id ?? state.experimentIds[state.body];
+    if (!id) {
+      notify('Эксперимент ещё не готов');
+      return;
+    }
+    try {
+      await downloadExperimentExport(id, 'json');
+      notify('Эксперимент экспортирован в JSON');
+      announceAction('Эксперимент экспортирован в JSON');
+    } catch (error) {
+      notify(errorMessage(error, 'Экспорт не удался'));
+    }
   };
 
   return {

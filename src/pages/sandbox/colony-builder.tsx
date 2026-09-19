@@ -28,6 +28,9 @@ export const ColonyBuilder = () => {
           : strategy === 'cooperation'
             ? [0.2, 0.2, 0.4, 0.1, 0.1]
             : [0.3, 0.25, 0.2, 0.15, 0.1];
+      const existing = new Set(
+        useLabStore.getState().sims[body].snapshot?.colonies.map((c) => c.id),
+      );
       const snapshot = await performIntervention({
         type: 'add_inoculum',
         targetId: body,
@@ -45,10 +48,13 @@ export const ColonyBuilder = () => {
           hThreshold: 0.005,
         },
       });
-      const colony =
-        snapshot.colonies.find(
-          (c) => c.name === name && c.formedAtTick === snapshot.tick,
-        ) ?? snapshot.colonies.at(-1);
+      const colony = snapshot.colonies.find(
+        (c) => !existing.has(c.id) && c.name === name && !c.parentColonyId,
+      );
+      if (!colony)
+        throw new Error(
+          'Колония не создана: проверьте лимиты популяции и сообществ',
+        );
       useLabStore.getState().setColonyDraft(null);
       if (colony)
         useLabStore
