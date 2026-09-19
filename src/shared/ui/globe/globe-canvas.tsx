@@ -1,0 +1,181 @@
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+
+import { OrbitControls, Stars } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
+
+import { cn } from '@/shared/lib/utils';
+
+import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
+import { GLOBE_DEFAULTS } from './config';
+import { Globe } from './globe';
+
+const CAMERA = {
+  fov: 35,
+  near: 0.1,
+  far: 100,
+  position: [0, 0, 7] as [number, number, number],
+};
+
+/** Wider freer view for lab / sandbox full-bleed canvas. */
+export const GLOBE_FILL_CAMERA = {
+  fov: 42,
+  near: 0.1,
+  far: 100,
+  position: [0, 0, 8.6] as [number, number, number],
+};
+
+const GL = {
+  alpha: true,
+  antialias: true,
+  powerPreference: 'high-performance' as const,
+  precision: 'highp' as const,
+  preserveDrawingBuffer: false,
+};
+
+/** Keeps the projection matrix matching the real drawable aspect (avoids ellipse squash). */
+const SquareCameraRig = () => {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    const side = Math.min(size.width, size.height);
+    if (side <= 0) return;
+
+    if ('aspect' in camera) {
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, size.height, size.width]);
+
+  return null;
+};
+
+export type GlobeCanvasProps = {
+  body?: GlobeBodyId;
+  /** World-space globe radius. Defaults to `GLOBE_DEFAULTS.RADIUS`. */
+  radius?: number;
+  /** Enable orbit drag. Off by default for carousel slides. */
+  interactive?: boolean;
+  /** Full-bleed canvas (lab/sandbox). Default keeps square letterboxed host. */
+  fill?: boolean;
+  /** Soft starfield background (typically with `fill`). */
+  stars?: boolean;
+  /** Remount orbit controls (e.g. after camera reset in lab). */
+  cameraReset?: number;
+  className?: string;
+  children?: ReactNode;
+};
+
+export const GlobeCanvas = ({
+  body = 'earth',
+  radius = GLOBE_DEFAULTS.RADIUS,
+  interactive = false,
+  fill = false,
+  stars = false,
+  cameraReset = 0,
+  className,
+  children,
+}: GlobeCanvasProps) => {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [pixelSize, setPixelSize] = useState(0);
+
+  const config = useMemo(
+    () => resolveGlobeConfig(body, { RADIUS: radius }),
+    [body, radius],
+  );
+  const maps = useMemo(() => GLOBE_MAPS[body], [body]);
+
+  useEffect(() => {
+    if (fill) return;
+    const host = hostRef.current;
+    if (!host) return;
+
+    const measure = () => {
+      const { width, height } = host.getBoundingClientRect();
+      setPixelSize(Math.max(1, Math.floor(Math.min(width, height))));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [fill]);
+
+  const scene = (
+    <>
+      <ambientLight intensity={fill ? 0.5 : 0.55} />
+      {stars ? (
+        <Stars
+          radius={70}
+          depth={30}
+          count={1300}
+          factor={2}
+          saturation={0}
+          fade
+          speed={0.15}
+        />
+      ) : null}
+      <Globe config={config} colorUrl={maps.color} />
+      {interactive ? (
+        fill ? (
+          <OrbitControls
+            key={`${body}-${cameraReset}`}
+            makeDefault
+            enablePan={false}
+            minDistance={3.4}
+            maxDistance={12}
+            enableDamping
+          />
+        ) : (
+          <OrbitControls enableZoom={false} enablePan={false} />
+        )
+      ) : null}
+      {children}
+    </>
+  );
+
+  if (fill) {
+    return (
+      <div ref={hostRef} className={cn('relative size-full', className)}>
+        <Canvas
+          camera={GLOBE_FILL_CAMERA}
+          dpr={[1, 2]}
+          gl={GL}
+          className="!block !h-full !w-full"
+          style={{ width: '100%', height: '100%', touchAction: 'none' }}
+          flat={false}
+        >
+          {scene}
+        </Canvas>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={hostRef}
+      className={cn(
+        'relative flex aspect-square size-full max-h-full max-w-full items-center justify-center',
+        className,
+      )}
+    >
+      {pixelSize > 0 ? (
+        <div
+          className="relative overflow-hidden"
+          style={{ width: pixelSize, height: pixelSize }}
+        >
+          <Canvas
+            camera={CAMERA}
+            dpr={interactive ? [1, 2] : [1, 1.5]}
+            gl={GL}
+            className="!block !size-full"
+            style={{ width: pixelSize, height: pixelSize, touchAction: 'none' }}
+            flat={false}
+          >
+            <SquareCameraRig />
+            {scene}
+          </Canvas>
+        </div>
+      ) : null}
+    </div>
+  );
+};

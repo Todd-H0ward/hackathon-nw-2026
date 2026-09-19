@@ -1,22 +1,45 @@
-import { Link } from 'react-router';
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 
-import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
-import { Button } from '@/shared/ui/button';
+import { motion } from 'motion/react';
+
+import { PlanetHood } from '@/pages/home/planet-hood';
+import { PlanetSlider } from '@/pages/home/planet-slider';
+
+import { STATIC_ROUTES } from '@/shared/constants/routes';
+import type { GlobeBodyId } from '@/shared/ui/globe';
+
+import { usePlanetTransition } from '@/features/planet-transition';
 
 export const HomePage = () => {
-  return (
-    <div className="flex h-full flex-col gap-6 p-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Home</h1>
-      </div>
+  const navigate = useNavigate();
+  const [activeSlide, setActiveSlide] = useState<GlobeBodyId>('earth');
+  const phase = usePlanetTransition((s) => s.phase);
+  const transitionBody = usePlanetTransition((s) => s.body);
+  const navigated = useRef(false);
 
-      <nav className="flex flex-wrap gap-2">
-        <Button render={<Link to={STATIC_ROUTES.ABOUT} />}>About</Button>
-        <Button render={<Link to={STATIC_ROUTES.VOICE} />}>🎙 Голос</Button>
-        <Button variant="outline" render={<Link to={DYNAMIC_ROUTES.POST(1)} />}>
-          Sample post
-        </Button>
-      </nav>
-    </div>
+  // The overlay has taken over the planet: hide ours, fade the page, then leave.
+  const handingOff = phase === 'handoff';
+
+  return (
+    <motion.div
+      className="fixed inset-0 h-dvh w-dvw overflow-hidden bg-black"
+      style={{ pointerEvents: phase === 'idle' ? undefined : 'none' }}
+      animate={{ opacity: handingOff ? 0 : 1 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      onAnimationComplete={() => {
+        if (navigated.current) return;
+        if (usePlanetTransition.getState().phase !== 'handoff') return;
+        navigated.current = true;
+        navigate(STATIC_ROUTES.SANDBOX);
+      }}
+    >
+      <PlanetSlider
+        activeSlide={activeSlide}
+        setActiveSlide={setActiveSlide}
+        hiddenBody={handingOff ? transitionBody : null}
+      />
+      <PlanetHood activeBody={activeSlide} />
+    </motion.div>
   );
 };

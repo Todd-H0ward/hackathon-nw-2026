@@ -16,6 +16,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-xeno-green: var(--xeno-green);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -124,10 +125,10 @@
   }
 
   body {
-    @apply bg-background text-foreground h-full;
+    @apply bg-background text-foreground h-full overflow-hidden;
   }
 
   #root {
-    @apply h-full;
+    @apply h-full min-h-dvh;
   }
 }
