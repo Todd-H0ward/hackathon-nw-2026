@@ -1,10 +1,20 @@
-import { Focus, Layers3, Maximize2, Radio, Zap } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
-import { type GlobeBodyId, GlobeCanvas } from '@/shared/ui/globe';
+import { Focus, Layers3, Maximize2, Radio, Zap } from 'lucide-react';
+import { motion } from 'motion/react';
+
 import { cn } from '@/shared/lib/utils';
+import {
+  GLOBE_DEFAULTS,
+  GLOBE_FILL_CAMERA,
+  type GlobeBodyId,
+  GlobeCanvas,
+  projectedRadius,
+} from '@/shared/ui/globe';
 
 import { type Simulation, WORLDS } from '@/features/ecosystem/model';
 import { SurfaceLife } from '@/features/ecosystem/surface-life';
+import { usePlanetTransition } from '@/features/planet-transition';
 
 import { SceneBoundary } from './scene-boundary';
 
@@ -44,9 +54,41 @@ export const PlanetViewport = ({
   onToggleExpanded,
 }: PlanetViewportProps) => {
   const world = WORLDS[body];
+  const sectionRef = useRef<HTMLElement>(null);
+  const transitionPhase = usePlanetTransition((s) => s.phase);
+  // The planet is still in flight from the home page — show ours once it lands.
+  const sceneHidden =
+    transitionPhase === 'launch' ||
+    transitionPhase === 'handoff' ||
+    transitionPhase === 'flight';
+
+  useEffect(() => {
+    const { phase, setTarget } = usePlanetTransition.getState();
+    if (phase === 'idle') return;
+
+    setTarget(() => {
+      const el = sectionRef.current;
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      const distance = GLOBE_FILL_CAMERA.position[2];
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        radius: projectedRadius(
+          GLOBE_DEFAULTS.RADIUS,
+          distance,
+          GLOBE_FILL_CAMERA.fov,
+          rect.height,
+        ),
+        distance,
+      };
+    });
+    return () => usePlanetTransition.getState().setTarget(null);
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       className={cn(
         'h-[496px] relative overflow-hidden bg-[radial-gradient(ellipse_at_45%_50%,#152b3840,transparent_62%)]',
         'group-data-[expanded=true]/lab:h-[65vh] group-data-[expanded=true]/lab:min-h-[480px]',
@@ -78,7 +120,12 @@ export const PlanetViewport = ({
           {running ? 'НАБЛЮДЕНИЕ' : 'ПАУЗА'}
         </span>
       </div>
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={false}
+        animate={{ opacity: sceneHidden ? 0 : 1 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+      >
         <SceneBoundary key={body}>
           <GlobeCanvas
             body={body}
@@ -96,7 +143,7 @@ export const PlanetViewport = ({
             />
           </GlobeCanvas>
         </SceneBoundary>
-      </div>
+      </motion.div>
       <div className="absolute right-[15px] top-[100px] grid gap-1.5 z-[11]">
         <button
           type="button"

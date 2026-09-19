@@ -1,8 +1,10 @@
-import type { CSSProperties } from 'react';
+import { type CSSProperties, useState } from 'react';
 
+import { motion } from 'motion/react';
 import { Outlet } from 'react-router';
 
 import { LabProvider, useLab } from '@/contexts/lab';
+import { usePlanetTransition } from '@/features/planet-transition';
 import { ToastProvider } from '@/shared/ui';
 
 import { downloadExperiment } from './lib';
@@ -13,10 +15,17 @@ const shellClassName =
 
 const SandboxShell = () => {
   const lab = useLab();
+  // Arriving with a planet in flight: fade the lab in around it.
+  const [arriving] = useState(
+    () => usePlanetTransition.getState().phase !== 'idle',
+  );
 
   return (
-    <div
+    <motion.div
       className={shellClassName}
+      initial={arriving ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
       data-expanded={lab.expanded || undefined}
       style={{ '--world-color': lab.world.color } as CSSProperties}
     >
@@ -48,7 +57,7 @@ const SandboxShell = () => {
         onReset={lab.resetExperiment}
         onReplay={lab.runReplay}
       />
-    </div>
+    </motion.div>
   );
 };
 

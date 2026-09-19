@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { Button } from '@/shared/ui/button';
@@ -10,7 +11,10 @@ import {
   type GlobeBodyId,
   GlobeCarouselCanvas,
   type PlanetHoverPayload,
+  type PlanetScreenPose,
 } from '@/shared/ui/globe';
+
+import { usePlanetTransition } from '@/features/planet-transition';
 import { useLabStore } from '@/store';
 
 import {
@@ -21,6 +25,7 @@ import {
 interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
+  hiddenBody?: GlobeBodyId | null;
 }
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
@@ -34,9 +39,12 @@ const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
 export const PlanetSlider = ({
   activeSlide,
   setActiveSlide,
+  hiddenBody = null,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
   const setBody = useLabStore((s) => s.setBody);
+  const launchTransition = usePlanetTransition((s) => s.launch);
+  const reduceMotion = useReducedMotion();
   const cursorRef = useRef<PlanetHoverCursorHandle>(null);
   const lastBodyRef = useRef<GlobeBodyId | null>(null);
 
@@ -59,8 +67,18 @@ export const PlanetSlider = ({
     cursor.move(payload.clientX, payload.clientY);
   };
 
-  const handlePlanetClick = (body: GlobeBodyId) => {
+  const handlePlanetClick = (
+    body: GlobeBodyId,
+    pose: PlanetScreenPose | null,
+  ) => {
+    cursorRef.current?.hide();
     setBody(body);
+
+    // HomePage navigates once the overlay has picked the planet up.
+    if (pose && !reduceMotion) {
+      launchTransition(body, pose);
+      return;
+    }
     navigate(STATIC_ROUTES.SANDBOX);
   };
 
@@ -77,6 +95,7 @@ export const PlanetSlider = ({
         onBodyChange={setActiveSlide}
         onHoverPlanet={handleHoverPlanet}
         onPlanetClick={handlePlanetClick}
+        hiddenBody={hiddenBody}
       />
 
       <PlanetHoverCursor ref={cursorRef} />

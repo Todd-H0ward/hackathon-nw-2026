@@ -17,7 +17,7 @@ const CAMERA = {
 };
 
 /** Wider freer view for lab / sandbox full-bleed canvas. */
-const FILL_CAMERA = {
+export const GLOBE_FILL_CAMERA = {
   fov: 42,
   near: 0.1,
   far: 100,
@@ -137,7 +137,7 @@ export const GlobeCanvas = ({
     return (
       <div ref={hostRef} className={cn('relative size-full', className)}>
         <Canvas
-          camera={FILL_CAMERA}
+          camera={GLOBE_FILL_CAMERA}
           dpr={[1, 2]}
           gl={GL}
           className="!block !h-full !w-full"
