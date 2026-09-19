@@ -9,10 +9,10 @@ import { Button } from '@/shared/ui';
 import {
   GLOBE_BODY_IDS,
   type GlobeBodyId,
+  GlobeCarouselCanvas,
   type PlanetHoverPayload,
   type PlanetScreenPose,
 } from '@/shared/ui/globe';
-import { GlobeCarouselCanvas } from '@/shared/ui/globe/globe-carousel-canvas';
 
 import { useLabSetBody, useTransitionLaunch } from '@/store';
 
@@ -22,7 +22,7 @@ import {
 } from './planet-hover-cursor';
 import type { PlanetInfoCatalog } from './planet-info';
 
-type PlanetSliderProps = {
+interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
@@ -30,7 +30,7 @@ type PlanetSliderProps = {
   poseMeasureRef?: RefObject<
     ((body: GlobeBodyId) => PlanetScreenPose | null) | null
   >;
-};
+}
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
   const index = GLOBE_BODY_IDS.indexOf(current);

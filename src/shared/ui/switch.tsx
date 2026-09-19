@@ -2,10 +2,11 @@ import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
+interface SwitchProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: ReactNode;
   description?: ReactNode;
-};
+}
 
 export const Switch = ({
   className,

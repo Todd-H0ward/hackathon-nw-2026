@@ -4,8 +4,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-type StatusDotProps = HTMLAttributes<HTMLSpanElement> &
-  VariantProps<typeof statusDotVariants>;
+interface StatusDotProps
+  extends HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof statusDotVariants> {}
 
 export const statusDotVariants = cva('inline-block rounded-full shrink-0', {
   variants: {

@@ -2,11 +2,11 @@ import { ShieldAlert, Sparkles, Waves, Zap } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 
-type InterventionBarProps = {
+interface InterventionBarProps {
   onPulse: () => void;
   onStorm: () => void;
   onScarcity: () => void;
-};
+}
 
 export const InterventionBar = ({
   onPulse,

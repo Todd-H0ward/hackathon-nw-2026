@@ -14,20 +14,20 @@ type TabsContextValue = {
   onChange: (v: string) => void;
 };
 
-type TabsProps = HTMLAttributes<HTMLDivElement> & {
+interface TabsProps extends HTMLAttributes<HTMLDivElement> {
   defaultValue?: string;
   value?: string;
   onValueChange?: (v: string) => void;
-};
+}
 
-type TabsTriggerProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
   badge?: ReactNode;
-};
+}
 
-type TabsContentProps = HTMLAttributes<HTMLDivElement> & {
+interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-};
+}
 
 const TabsContext = createContext<TabsContextValue>({
   value: '',

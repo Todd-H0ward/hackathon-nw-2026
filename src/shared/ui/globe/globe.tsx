@@ -17,13 +17,13 @@ import { syncHazeUniforms, syncSparkUniforms } from './lib/sync-uniforms';
 import './materials/haze';
 import './materials/spark';
 
-export type GlobeProps = {
+export interface GlobeProps {
   config?: GlobeConfig;
   colorUrl?: string;
   enableFx?: boolean;
   /** When set, GPGPU position evolve follows this flag (carousel visibility). */
   simEnabledRef?: RefObject<boolean>;
-};
+}
 
 const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
 

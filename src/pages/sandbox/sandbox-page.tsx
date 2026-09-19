@@ -1,4 +1,4 @@
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useWorldCatalog } from '@/features/ecosystem';
 import {
   useLabBody,
   useLabBumpCameraReset,

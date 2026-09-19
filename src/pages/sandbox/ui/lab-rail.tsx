@@ -13,12 +13,12 @@ import {
 import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 
-type LabRailProps = {
+interface LabRailProps {
   seed: number;
   onExport: () => void;
   onOpenGuide: () => void;
   onGoHome: () => void;
-};
+}
 
 const itemClass =
   'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary';
@@ -30,17 +30,14 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
       "bg-secondary text-foreground before:absolute before:-left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:rounded-full before:bg-primary before:content-[''] max-mobile:before:hidden",
   );
 
-const RailLink = ({
-  to,
-  end,
-  label,
-  children,
-}: {
+interface RailLinkProps {
   to: string;
   end?: boolean;
   label: string;
   children: ReactNode;
-}) => (
+}
+
+const RailLink = ({ to, end, label, children }: RailLinkProps) => (
   <NavLink
     to={to}
     end={end}

@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { ToastProvider } from '@/shared/ui';
 
-import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { useWorldCatalog } from '@/features/ecosystem';
 import { readSandboxPose } from '@/features/planet-transition';
 import {
   getTransitionState,

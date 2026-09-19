@@ -134,13 +134,13 @@ type PacketView = {
   head: Vec3;
 };
 
-type SurfaceLifeProps = {
+interface SurfaceLifeProps {
   simulation: Simulation;
   selected: number | null;
   showLinks: boolean;
   showLabels: boolean;
   onSelect: (id: number) => void;
-};
+}
 
 /**
  * Build the per-colony / per-packet line geometry in one O(n) pass. The WS
@@ -259,14 +259,14 @@ const buildSceneViews = (
   return { colonyViews, packetViews };
 };
 
-type ColonyOverlayProps = {
+interface ColonyOverlayProps {
   view: ColonyView;
   selected: boolean;
   showLinks: boolean;
   showLabels: boolean;
   occluder: RefObject<Mesh | null>;
   onSelect: (id: number) => void;
-};
+}
 
 /** Horizon occlusion + bright colony chrome; geometry comes from the parent memo. */
 const ColonyOverlay = ({
@@ -352,9 +352,9 @@ const ColonyOverlay = ({
   );
 };
 
-type PacketOverlayProps = {
+interface PacketOverlayProps {
   view: PacketView;
-};
+}
 
 const PacketOverlay = ({ view }: PacketOverlayProps) => {
   const groupRef = useRef<Group>(null);

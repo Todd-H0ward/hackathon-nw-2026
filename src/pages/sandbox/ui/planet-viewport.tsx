@@ -6,22 +6,25 @@ import { motion } from 'motion/react';
 import { cn } from '@/shared/lib/utils';
 import {
   GLOBE_DEFAULTS,
+  GLOBE_FILL_CAMERA,
   type GlobeBodyId,
+  GlobeCanvas,
   type PlanetScreenPose,
   projectedRadius,
 } from '@/shared/ui/globe';
-import { GLOBE_FILL_CAMERA, GlobeCanvas } from '@/shared/ui/globe/globe-canvas';
 
-import type { Simulation } from '@/features/ecosystem/model';
-import { SurfaceLife } from '@/features/ecosystem/surface-life';
-import type { WorldInfo } from '@/features/ecosystem/world-info';
+import {
+  type Simulation,
+  SurfaceLife,
+  type WorldInfo,
+} from '@/features/ecosystem';
 import { registerSandboxPose } from '@/features/planet-transition';
 import { getTransitionState, useTransitionPhase } from '@/store';
 
 import { ResearchScene } from '../research-scene';
 import { SceneBoundary } from './scene-boundary';
 
-type PlanetViewportProps = {
+interface PlanetViewportProps {
   body: GlobeBodyId;
   world: WorldInfo;
   sim: Simulation;
@@ -38,7 +41,7 @@ type PlanetViewportProps = {
   onToggleLabels: () => void;
   onResetCamera: () => void;
   onToggleExpanded: () => void;
-};
+}
 
 const toolClass =
   'inline-flex size-8 items-center justify-center rounded-[5px] border border-border bg-card/80 text-muted-foreground backdrop-blur transition-colors hover:bg-secondary hover:text-foreground aria-pressed:border-primary/50 aria-pressed:bg-secondary aria-pressed:text-foreground';

@@ -7,11 +7,10 @@ import {
   Input,
 } from '@/shared/ui';
 
-import type { Simulation } from '@/features/ecosystem/model';
-import { MODEL_VERSION } from '@/features/ecosystem/world-info';
+import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
 import type { LabModal } from '@/store';
 
-type LabDialogProps = {
+interface LabDialogProps {
   modal: LabModal;
   sim: Simulation;
   seed: string;
@@ -20,7 +19,7 @@ type LabDialogProps = {
   onDownload: () => void;
   onReset: () => void;
   onReplay: () => void;
-};
+}
 
 export const LabDialog = ({
   modal,

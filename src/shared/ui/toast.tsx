@@ -19,10 +19,10 @@ type ToastContextValue = {
   toast: (message: ReactNode) => void;
 };
 
-type ToastProviderProps = {
+interface ToastProviderProps {
   children: ReactNode;
   duration?: number;
-};
+}
 
 const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
@@ -30,10 +30,9 @@ export const useToast = () => {
   return useContext(ToastContext);
 };
 
-export const Toast = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+interface ToastProps extends HTMLAttributes<HTMLDivElement> {}
+
+export const Toast = ({ className, ...props }: ToastProps) => {
   return (
     <div
       role="status"

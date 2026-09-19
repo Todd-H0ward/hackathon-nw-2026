@@ -10,10 +10,13 @@ import { useToast } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import {
+  activeColonies,
   emptySimulation,
+  living,
   logIntervention,
   type Settings,
-} from '@/features/ecosystem/model';
+  useWorldCatalog,
+} from '@/features/ecosystem';
 import { getLabState } from '@/store';
 
 import {
@@ -51,6 +54,7 @@ const SETTINGS_DEBOUNCE_MS = 300;
  */
 export const useLabActions = () => {
   const { toast: notify } = useToast();
+  const worlds = useWorldCatalog();
   const command = useCommand();
   const intervention = useIntervention();
   const replay = useReplayExperiment();
@@ -58,10 +62,6 @@ export const useLabActions = () => {
 
   const withExperiment = (fn: (id: string) => void | Promise<void>) => {
     const { body, experimentIds } = getLabState();
-    if (getLabState().recording) {
-      notify('Выйдите из просмотра записи, чтобы изменить опыт');
-      return;
-    }
     const id = experimentIds[body];
     if (!id) {
       notify('Эксперимент ещё не готов');
@@ -164,8 +164,10 @@ export const useLabActions = () => {
     patchSim(body, { settings: carry.settings });
 
     withExperiment((id) => {
+      const baseFlow = worlds.catalog[body]?.baseFlow ?? 1;
+
       if (partial.resource !== undefined) {
-        const value = partial.resource / 50;
+        const value = (partial.resource / 100) * Math.max(baseFlow, 1) * 2;
         scheduleSetting('resource', () => {
           logIntervention(carry, sim.tick, 'set_flow');
           return intervention.mutateAsync({
@@ -234,7 +236,38 @@ export const useLabActions = () => {
   };
 
   const addColony = () => {
-    getLabState().setColonyDraft({ lat: 20, lng: 10 });
+    const { body, sims } = getLabState();
+    const sim = sims[body];
+    const world = worlds.catalog[body];
+
+    if (!world) {
+      notify('Параметры планеты ещё не загружены');
+      return;
+    }
+    if (
+      living(sim).length >= world.maxPopulation ||
+      activeColonies(sim).length >= world.maxColonies
+    ) {
+      notify(
+        `Достигнут лимит: ${world.maxPopulation} особей или ${world.maxColonies} колоний`,
+      );
+      return;
+    }
+
+    withExperiment(async (id) => {
+      try {
+        await intervention.mutateAsync({
+          experimentId: id,
+          type: 'add_inoculum',
+          targetId: body,
+          value: 1,
+        });
+        logIntervention(labRuntime.carries[body], sim.tick, 'add_inoculum');
+        notify('Зародыш внесён. Внешний ресурс зарегистрирован.');
+      } catch (error) {
+        notify(errorMessage(error, 'Не удалось внести зародыш'));
+      }
+    });
   };
 
   const resetExperiment = async () => {
@@ -243,9 +276,6 @@ export const useLabActions = () => {
     const nextSeed = clampSeed(seed);
 
     setModal(null);
-    const oldId = getLabState().experimentIds[body];
-    if (oldId)
-      await command.mutateAsync({ experimentId: oldId, command: 'pause' });
     rememberExperiment(body, null);
     labRuntime.creating[body] = false;
     resetLabRuntime(body, nextSeed);

@@ -63,7 +63,7 @@
 }
 
 /*
- * ── XenoChoice Dark Theme ──
+ * XenoChoice dark theme.
  * Hex values in comments are the actual sRGB result of each oklch() colour.
  * Keep them in sync when tweaking: stale comments here are what pushed parts
  * of `shared/ui` to hardcode hex instead of using these tokens.

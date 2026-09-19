@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import type { StreamStatus } from '@/shared/api/xenochoice';
 import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
-import { emptySimulation, type Simulation } from '@/features/ecosystem/model';
+import { emptySimulation, type Simulation } from '@/features/ecosystem';
 
 export type LabModal = 'guide' | 'reset' | 'replay' | null;
 

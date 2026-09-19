@@ -6,7 +6,7 @@ import {
   createAdapterCarry,
   type Settings,
   snapshotToSimulation,
-} from '@/features/ecosystem/model';
+} from '@/features/ecosystem';
 import { DEFAULT_SEED, getLabState } from '@/store';
 
 const initialCarries = () =>

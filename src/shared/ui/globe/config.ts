@@ -24,6 +24,15 @@ export type GlobeConfig = {
   BLOOM_RADIUS: number;
 };
 
+/**
+ * Cap for fullscreen bloom canvases. Retina `dpr=2` with a bloom composer is
+ * ~4× CSS pixels; during route transitions two canvases are live at once.
+ */
+export const GLOBE_BLOOM_DPR: [number, number] = [1, 1.5];
+
+/** Overlay canvas that shares the screen with the page globe during ferry. */
+export const GLOBE_TRANSITION_DPR = 1;
+
 export const GLOBE_DEFAULTS: GlobeConfig = {
   RESOLUTION: 400,
   RADIUS: 2.3,

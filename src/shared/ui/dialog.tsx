@@ -14,16 +14,16 @@ type DialogContextValue = {
   close: () => void;
 };
 
-type DialogProps = HTMLAttributes<HTMLDialogElement> & {
+interface DialogProps extends HTMLAttributes<HTMLDialogElement> {
   open?: boolean;
   onClose?: () => void;
-};
+}
 
 const DialogContext = createContext<DialogContextValue>({ close: () => {} });
 
 const useDialogContext = () => useContext(DialogContext);
 
-const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
+export const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
   ({ className, open, onClose, children, ...props }, forwardedRef) => {
     const internalRef = useRef<HTMLDialogElement>(null);
     const ref =
@@ -89,10 +89,9 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
 );
 Dialog.displayName = 'Dialog';
 
-export const DialogTitle = ({
-  className,
-  ...props
-}: HTMLAttributes<HTMLHeadingElement>) => {
+interface DialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+
+export const DialogTitle = ({ className, ...props }: DialogTitleProps) => {
   return (
     <h2
       data-slot="dialog-title"
@@ -102,10 +101,12 @@ export const DialogTitle = ({
   );
 };
 
+interface DialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
+
 export const DialogDescription = ({
   className,
   ...props
-}: HTMLAttributes<HTMLParagraphElement>) => {
+}: DialogDescriptionProps) => {
   return (
     <p
       data-slot="dialog-description"
@@ -118,10 +119,9 @@ export const DialogDescription = ({
   );
 };
 
-export const DialogClose = ({
-  className,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) => {
+interface DialogCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+
+export const DialogClose = ({ className, ...props }: DialogCloseProps) => {
   const { close } = useDialogContext();
   return (
     <button
@@ -138,5 +138,3 @@ export const DialogClose = ({
     />
   );
 };
-
-export { Dialog };
