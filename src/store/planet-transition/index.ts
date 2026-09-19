@@ -1,6 +1,7 @@
 export {
   getTransitionState,
   useTransitionBody,
+  useTransitionDirection,
   useTransitionFrom,
   useTransitionHasTarget,
   useTransitionLaunch,

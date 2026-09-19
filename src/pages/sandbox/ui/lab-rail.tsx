@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link, NavLink } from 'react-router';
+import { NavLink } from 'react-router';
 
 import {
   Activity,
@@ -17,6 +17,7 @@ type LabRailProps = {
   seed: number;
   onExport: () => void;
   onOpenGuide: () => void;
+  onGoHome: () => void;
 };
 
 const itemClass =
@@ -52,13 +53,19 @@ const RailLink = ({
 );
 
 /** Compact vertical navigation for the lab — replaces the page header. */
-export const LabRail = ({ seed, onExport, onOpenGuide }: LabRailProps) => (
+export const LabRail = ({
+  seed,
+  onExport,
+  onOpenGuide,
+  onGoHome,
+}: LabRailProps) => (
   <nav
     aria-label="Навигация лаборатории"
     className="flex w-12 shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card py-2.5 max-mobile:h-12 max-mobile:w-full max-mobile:flex-row max-mobile:border-r-0 max-mobile:border-b max-mobile:px-2.5 max-mobile:py-0"
   >
-    <Link
-      to={STATIC_ROUTES.HOME}
+    <button
+      type="button"
+      onClick={onGoHome}
       className={cn(
         itemClass,
         'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
@@ -67,7 +74,7 @@ export const LabRail = ({ seed, onExport, onOpenGuide }: LabRailProps) => (
       aria-label="XenoChoice — к выбору планеты"
     >
       <Atom size={20} />
-    </Link>
+    </button>
 
     <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
       <Microscope size={17} />

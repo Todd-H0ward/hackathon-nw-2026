@@ -305,6 +305,8 @@ export type GlobeCarouselCanvasProps = {
   onPlanetClick?: (body: GlobeBodyId, pose: PlanetScreenPose | null) => void;
   /** Planet taken over by another canvas — not drawn here. */
   hiddenBody?: GlobeBodyId | null;
+  /** Lets a parent read live screen poses (reverse transition landing). */
+  poseMeasureRef?: RefObject<MeasureBody | null>;
   className?: string;
 };
 
@@ -314,6 +316,7 @@ export const GlobeCarouselCanvas = ({
   onHoverPlanet,
   onPlanetClick,
   hiddenBody = null,
+  poseMeasureRef,
   className,
 }: GlobeCarouselCanvasProps) => {
   const activeIndex = Math.max(0, GLOBE_BODY_IDS.indexOf(activeBody));
@@ -328,7 +331,8 @@ export const GlobeCarouselCanvas = ({
   const clickBodyRef = useRef<GlobeBodyId | null>(null);
   const hiddenBodyRef = useRef<GlobeBodyId | null>(hiddenBody);
   hiddenBodyRef.current = hiddenBody;
-  const measureRef = useRef<MeasureBody | null>(null);
+  const internalMeasureRef = useRef<MeasureBody | null>(null);
+  const measureRef = poseMeasureRef ?? internalMeasureRef;
   const lastSwipeTimeRef = useRef(0);
 
   // Hit meshes set a pointer cursor; don't leak it past unmount (e.g. navigation on click).

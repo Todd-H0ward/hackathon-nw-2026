@@ -7,6 +7,7 @@ import { cn } from '@/shared/lib/utils';
 import {
   GLOBE_DEFAULTS,
   type GlobeBodyId,
+  type PlanetScreenPose,
   projectedRadius,
 } from '@/shared/ui/globe';
 import { GLOBE_FILL_CAMERA, GlobeCanvas } from '@/shared/ui/globe/globe-canvas';
@@ -14,6 +15,7 @@ import { GLOBE_FILL_CAMERA, GlobeCanvas } from '@/shared/ui/globe/globe-canvas';
 import type { Simulation } from '@/features/ecosystem/model';
 import { SurfaceLife } from '@/features/ecosystem/surface-life';
 import type { WorldInfo } from '@/features/ecosystem/world-info';
+import { registerSandboxPose } from '@/features/planet-transition';
 import { getTransitionState, useTransitionPhase } from '@/store';
 
 import { SceneBoundary } from './scene-boundary';
@@ -40,6 +42,26 @@ type PlanetViewportProps = {
 const toolClass =
   'inline-flex size-8 items-center justify-center rounded-[5px] border border-border bg-card/80 text-muted-foreground backdrop-blur transition-colors hover:bg-secondary hover:text-foreground aria-pressed:border-primary/50 aria-pressed:bg-secondary aria-pressed:text-foreground';
 
+const measureViewportPose = (
+  el: HTMLElement | null,
+): PlanetScreenPose | null => {
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  if (rect.width < 8 || rect.height < 8) return null;
+  const distance = GLOBE_FILL_CAMERA.position[2];
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    radius: projectedRadius(
+      GLOBE_DEFAULTS.RADIUS,
+      distance,
+      GLOBE_FILL_CAMERA.fov,
+      rect.height,
+    ),
+    distance,
+  };
+};
+
 export const PlanetViewport = ({
   body,
   world,
@@ -60,34 +82,28 @@ export const PlanetViewport = ({
 }: PlanetViewportProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const transitionPhase = useTransitionPhase();
-  // The planet is still in flight from the home page — show ours once it lands.
+  // The planet is still in flight — show ours once it lands.
   const sceneHidden =
     transitionPhase === 'launch' ||
     transitionPhase === 'handoff' ||
     transitionPhase === 'flight';
 
   useEffect(() => {
-    const { phase, setTarget } = getTransitionState();
-    if (phase === 'idle') return;
+    const resolve = () => measureViewportPose(sectionRef.current);
+    registerSandboxPose(resolve);
+    return () => registerSandboxPose(null);
+  }, []);
 
-    setTarget(() => {
-      const el = sectionRef.current;
-      if (!el) return null;
-      const rect = el.getBoundingClientRect();
-      const distance = GLOBE_FILL_CAMERA.position[2];
-      return {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-        radius: projectedRadius(
-          GLOBE_DEFAULTS.RADIUS,
-          distance,
-          GLOBE_FILL_CAMERA.fov,
-          rect.height,
-        ),
-        distance,
-      };
-    });
-    return () => getTransitionState().setTarget(null);
+  // Forward arrival only — reverse lands on the home carousel.
+  useEffect(() => {
+    const { phase, direction, setTarget } = getTransitionState();
+    if (phase === 'idle' || direction !== 'forward') return;
+
+    setTarget(() => measureViewportPose(sectionRef.current));
+    return () => {
+      const state = getTransitionState();
+      if (state.direction === 'forward') state.setTarget(null);
+    };
   }, []);
 
   return (

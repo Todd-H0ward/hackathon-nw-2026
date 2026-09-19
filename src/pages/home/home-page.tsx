@@ -8,11 +8,12 @@ import { PlanetSlider } from '@/pages/home/planet-slider';
 
 import { useWorlds } from '@/shared/api/xenochoice';
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import type { GlobeBodyId } from '@/shared/ui/globe';
+import type { GlobeBodyId, PlanetScreenPose } from '@/shared/ui/globe';
 
 import {
   getTransitionState,
   useTransitionBody,
+  useTransitionDirection,
   useTransitionPhase,
 } from '@/store';
 
@@ -20,10 +21,18 @@ import { worldsToPlanetInfoMap } from './planet-info';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const [activeSlide, setActiveSlide] = useState<GlobeBodyId>('earth');
+  const [activeSlide, setActiveSlide] = useState<GlobeBodyId>(() => {
+    const { body, direction, phase } = getTransitionState();
+    if (phase !== 'idle' && direction === 'back' && body) return body;
+    return 'earth';
+  });
   const phase = useTransitionPhase();
+  const direction = useTransitionDirection();
   const transitionBody = useTransitionBody();
   const navigated = useRef(false);
+  const poseMeasureRef = useRef<
+    ((body: GlobeBodyId) => PlanetScreenPose | null) | null
+  >(null);
 
   const worldsQuery = useWorlds();
   const catalog = useMemo(
@@ -31,7 +40,11 @@ export const HomePage = () => {
     [worldsQuery.data],
   );
 
-  const handingOff = phase === 'handoff';
+  const handingOffForward = phase === 'handoff' && direction === 'forward';
+  const hideTransitionBody =
+    !!transitionBody &&
+    phase !== 'idle' &&
+    (direction === 'forward' ? phase === 'handoff' : phase !== 'launch');
   const activeInfo = catalog[activeSlide];
 
   useEffect(() => {
@@ -48,15 +61,50 @@ export const HomePage = () => {
     return () => window.clearTimeout(timer);
   }, []);
 
+  // Reverse: arm carousel landing once it can report a pose.
+  useEffect(() => {
+    if (direction !== 'back' || phase === 'idle') return;
+    const body = getTransitionState().body;
+    if (!body) return;
+
+    setActiveSlide(body);
+
+    let raf = 0;
+    let cancelled = false;
+
+    const arm = () => {
+      if (cancelled) return;
+      if (!poseMeasureRef.current?.(body)) {
+        raf = window.requestAnimationFrame(arm);
+        return;
+      }
+      getTransitionState().setTarget(
+        () => poseMeasureRef.current?.(body) ?? null,
+      );
+    };
+    arm();
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(raf);
+      const state = getTransitionState();
+      if (state.direction === 'back') state.setTarget(null);
+    };
+  }, [direction, phase]);
+
   return (
     <motion.div
       className="fixed inset-0 h-dvh w-dvw overflow-hidden bg-black"
       style={{ pointerEvents: phase === 'idle' ? undefined : 'none' }}
-      animate={{ opacity: handingOff ? 0 : 1 }}
+      initial={
+        direction === 'back' && phase !== 'idle' ? { opacity: 0 } : false
+      }
+      animate={{ opacity: handingOffForward ? 0 : 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
       onAnimationComplete={() => {
         if (navigated.current) return;
         if (getTransitionState().phase !== 'handoff') return;
+        if (getTransitionState().direction !== 'forward') return;
         navigated.current = true;
         navigate(STATIC_ROUTES.SANDBOX);
       }}
@@ -64,8 +112,9 @@ export const HomePage = () => {
       <PlanetSlider
         activeSlide={activeSlide}
         setActiveSlide={setActiveSlide}
-        hiddenBody={handingOff ? transitionBody : null}
+        hiddenBody={hideTransitionBody ? transitionBody : null}
         catalog={catalog}
+        poseMeasureRef={poseMeasureRef}
       />
       {activeInfo ? (
         <PlanetHood activeBody={activeSlide} info={activeInfo} />

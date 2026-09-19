@@ -2,6 +2,8 @@ import { type PlanetTransitionStore, usePlanetTransition } from './store';
 
 export const useTransitionPhase = () =>
   usePlanetTransition((store: PlanetTransitionStore) => store.phase);
+export const useTransitionDirection = () =>
+  usePlanetTransition((store: PlanetTransitionStore) => store.direction);
 export const useTransitionBody = () =>
   usePlanetTransition((store: PlanetTransitionStore) => store.body);
 export const useTransitionFrom = () =>
