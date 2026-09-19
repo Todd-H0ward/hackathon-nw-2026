@@ -63,12 +63,20 @@ const wrapCentered = (value: number, length: number) => {
   return v;
 };
 
+export type PlanetHoverPayload = {
+  body: GlobeBodyId;
+  clientX: number;
+  clientY: number;
+};
+
 type CarouselSceneProps = {
   /** Continuous carousel offset; integer part aligns with active body. */
   offsetRef: RefObject<number>;
   targetOffsetRef: RefObject<number>;
   dragOffsetRef: RefObject<number>;
   fxConfigRef: RefObject<GlobeConfig>;
+  onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
+  hoveredBodyRef: RefObject<GlobeBodyId | null>;
 };
 
 const CarouselScene = ({
@@ -76,6 +84,8 @@ const CarouselScene = ({
   targetOffsetRef,
   dragOffsetRef,
   fxConfigRef,
+  onHoverPlanet,
+  hoveredBodyRef,
 }: CarouselSceneProps) => {
   const groupRefs = useRef<(Group | null)[]>([]);
   const ready = useRef(false);
@@ -170,6 +180,37 @@ const CarouselScene = ({
           }}
         >
           <Globe config={config} colorUrl={colorUrl} enableFx={false} />
+          {/* Invisible hit target — point cloud does not receive pointers. */}
+          <mesh
+            onPointerOver={(event) => {
+              event.stopPropagation();
+              document.body.style.cursor = 'pointer';
+              hoveredBodyRef.current = body;
+              onHoverPlanet?.({
+                body,
+                clientX: event.clientX,
+                clientY: event.clientY,
+              });
+            }}
+            onPointerMove={(event) => {
+              if (hoveredBodyRef.current !== body) return;
+              onHoverPlanet?.({
+                body,
+                clientX: event.clientX,
+                clientY: event.clientY,
+              });
+            }}
+            onPointerOut={(event) => {
+              event.stopPropagation();
+              document.body.style.cursor = '';
+              if (hoveredBodyRef.current !== body) return;
+              hoveredBodyRef.current = null;
+              onHoverPlanet?.(null);
+            }}
+          >
+            <sphereGeometry args={[config.RADIUS * 1.06, 24, 24]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
         </group>
       ))}
 
@@ -181,12 +222,16 @@ const CarouselScene = ({
 export type GlobeCarouselCanvasProps = {
   activeBody: GlobeBodyId;
   onBodyChange: (body: GlobeBodyId) => void;
+  onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
+  onPlanetClick?: (body: GlobeBodyId) => void;
   className?: string;
 };
 
 export const GlobeCarouselCanvas = ({
   activeBody,
   onBodyChange,
+  onHoverPlanet,
+  onPlanetClick,
   className,
 }: GlobeCarouselCanvasProps) => {
   const activeIndex = Math.max(0, GLOBE_BODY_IDS.indexOf(activeBody));
@@ -196,6 +241,9 @@ export const GlobeCarouselCanvas = ({
   const dragOffsetRef = useRef(0);
   const pointerX = useRef<number | null>(null);
   const dragging = useRef(false);
+  const dragMoved = useRef(false);
+  const hoveredBodyRef = useRef<GlobeBodyId | null>(null);
+  const clickBodyRef = useRef<GlobeBodyId | null>(null);
 
   const fxConfigRef = useRef(resolveGlobeConfig(activeBody));
   useEffect(() => {
@@ -216,29 +264,45 @@ export const GlobeCarouselCanvas = ({
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     pointerX.current = event.clientX;
     dragging.current = true;
+    dragMoved.current = false;
     dragOffsetRef.current = 0;
+    clickBodyRef.current = hoveredBodyRef.current;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragging.current || pointerX.current === null) return;
-    dragOffsetRef.current = -(event.clientX - pointerX.current) / 240;
+    const deltaPx = event.clientX - pointerX.current;
+    if (Math.abs(deltaPx) > 6) {
+      dragMoved.current = true;
+      clickBodyRef.current = null;
+      onHoverPlanet?.(null);
+    }
+    dragOffsetRef.current = -deltaPx / 240;
   };
 
   const finishDrag = (clientX: number) => {
     if (!dragging.current || pointerX.current === null) {
       dragging.current = false;
+      dragMoved.current = false;
       pointerX.current = null;
       dragOffsetRef.current = 0;
+      clickBodyRef.current = null;
       return;
     }
 
     const deltaPx = clientX - pointerX.current;
+    const clickedBody = clickBodyRef.current;
     dragging.current = false;
     pointerX.current = null;
     dragOffsetRef.current = 0;
+    clickBodyRef.current = null;
 
-    if (Math.abs(deltaPx) < SWIPE_PX) return;
+    if (Math.abs(deltaPx) < SWIPE_PX) {
+      if (!dragMoved.current && clickedBody) onPlanetClick?.(clickedBody);
+      dragMoved.current = false;
+      return;
+    }
 
     // Snap to the next slot — no residual drag / damp coast.
     const step = deltaPx < 0 ? 1 : -1;
@@ -248,6 +312,8 @@ export const GlobeCarouselCanvas = ({
       (((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
         BODY_COUNT);
     onBodyChange(GLOBE_BODY_IDS[nextIndex]);
+    dragMoved.current = false;
+    onHoverPlanet?.(null);
   };
 
   return (
@@ -275,6 +341,8 @@ export const GlobeCarouselCanvas = ({
           targetOffsetRef={targetOffsetRef}
           dragOffsetRef={dragOffsetRef}
           fxConfigRef={fxConfigRef}
+          onHoverPlanet={onHoverPlanet}
+          hoveredBodyRef={hoveredBodyRef}
         />
       </Canvas>
     </div>

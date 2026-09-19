@@ -1,11 +1,22 @@
+import { useRef } from 'react';
+import { useNavigate } from 'react-router';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { Button } from '@/shared/ui/button';
 import {
   GLOBE_BODY_IDS,
   type GlobeBodyId,
   GlobeCarouselCanvas,
+  type PlanetHoverPayload,
 } from '@/shared/ui/globe';
+import { useLabStore } from '@/store';
+
+import {
+  PlanetHoverCursor,
+  type PlanetHoverCursorHandle,
+} from './planet-hover-cursor';
 
 interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
@@ -24,6 +35,35 @@ export const PlanetSlider = ({
   activeSlide,
   setActiveSlide,
 }: PlanetSliderProps) => {
+  const navigate = useNavigate();
+  const setBody = useLabStore((s) => s.setBody);
+  const cursorRef = useRef<PlanetHoverCursorHandle>(null);
+  const lastBodyRef = useRef<GlobeBodyId | null>(null);
+
+  const handleHoverPlanet = (payload: PlanetHoverPayload | null) => {
+    const cursor = cursorRef.current;
+    if (!cursor) return;
+
+    if (!payload) {
+      lastBodyRef.current = null;
+      cursor.hide();
+      return;
+    }
+
+    if (lastBodyRef.current !== payload.body) {
+      lastBodyRef.current = payload.body;
+      cursor.show(payload.body, payload.clientX, payload.clientY);
+      return;
+    }
+
+    cursor.move(payload.clientX, payload.clientY);
+  };
+
+  const handlePlanetClick = (body: GlobeBodyId) => {
+    setBody(body);
+    navigate(STATIC_ROUTES.SANDBOX);
+  };
+
   return (
     <div className="relative h-full w-full min-h-dvh overflow-hidden">
       <div
@@ -35,7 +75,11 @@ export const PlanetSlider = ({
         className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing"
         activeBody={activeSlide}
         onBodyChange={setActiveSlide}
+        onHoverPlanet={handleHoverPlanet}
+        onPlanetClick={handlePlanetClick}
       />
+
+      <PlanetHoverCursor ref={cursorRef} />
 
       <Button
         type="button"
@@ -58,7 +102,6 @@ export const PlanetSlider = ({
       >
         <ChevronRight className="size-7" />
       </Button>
-
     </div>
   );
 };
