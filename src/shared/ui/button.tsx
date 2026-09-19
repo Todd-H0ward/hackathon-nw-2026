@@ -25,8 +25,7 @@ const buttonVariants = cva(
         'ghost-accent':
           'border-transparent bg-transparent text-muted-foreground hover:bg-secondary hover:text-primary',
         /** Play button — small orange square-ish */
-        play:
-          'border-0 bg-primary text-[#191919] font-bold hover:bg-primary/85',
+        play: 'border-0 bg-primary text-[#191919] font-bold hover:bg-primary/85',
         /** Destructive */
         destructive:
           'border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20',

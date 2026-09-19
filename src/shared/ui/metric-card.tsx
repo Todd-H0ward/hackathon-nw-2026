@@ -104,9 +104,7 @@ function MetricCard({
       {/* Bottom row */}
       <div className="flex justify-between items-center text-[9px] text-[#a2b593]">
         {description && <span>{description}</span>}
-        {sparkData && (
-          <Sparkline data={sparkData} color={sparkColor} />
-        )}
+        {sparkData && <Sparkline data={sparkData} color={sparkColor} />}
       </div>
     </div>
   );
@@ -116,5 +114,5 @@ function MetricCard({
 // EXPORTS
 // ═══════════════════════════════════════════
 
-export { MetricCard, Sparkline };
 export type { SparklinePoint };
+export { MetricCard, Sparkline };

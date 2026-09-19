@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { activeColonies, living } from '@/features/ecosystem/model';
 import { useToast } from '@/shared/ui';
+
+import { activeColonies, living } from '@/features/ecosystem/model';
 import {
   selectBody,
   selectSim,

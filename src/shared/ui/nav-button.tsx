@@ -1,5 +1,6 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -24,7 +25,8 @@ const navButtonVariants = cva(
     variants: {
       active: {
         true: 'text-primary bg-[#2b211d]',
-        false: 'text-[#999c9e] bg-transparent hover:bg-secondary hover:text-foreground',
+        false:
+          'text-[#999c9e] bg-transparent hover:bg-secondary hover:text-foreground',
       },
     },
     defaultVariants: {

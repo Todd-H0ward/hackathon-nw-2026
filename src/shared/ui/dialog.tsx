@@ -1,11 +1,11 @@
 import {
+  type ButtonHTMLAttributes,
   createContext,
   forwardRef,
+  type HTMLAttributes,
   useContext,
   useEffect,
   useRef,
-  type HTMLAttributes,
-  type ButtonHTMLAttributes,
 } from 'react';
 
 import { cn } from '@/shared/lib/utils';
@@ -38,7 +38,8 @@ const useDialogContext = () => useContext(DialogContext);
 const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
   ({ className, open, onClose, children, ...props }, forwardedRef) => {
     const internalRef = useRef<HTMLDialogElement>(null);
-    const ref = (forwardedRef as React.RefObject<HTMLDialogElement>) ?? internalRef;
+    const ref =
+      (forwardedRef as React.RefObject<HTMLDialogElement>) ?? internalRef;
 
     useEffect(() => {
       const el = ref.current;
@@ -69,7 +70,10 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
 );
 Dialog.displayName = 'Dialog';
 
-function DialogTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
+function DialogTitle({
+  className,
+  ...props
+}: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
       data-slot="dialog-title"
@@ -79,17 +83,26 @@ function DialogTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>
   );
 }
 
-function DialogDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
+function DialogDescription({
+  className,
+  ...props
+}: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
       data-slot="dialog-description"
-      className={cn('text-[#a8acae] leading-[1.9] my-[17px] text-[13px]', className)}
+      className={cn(
+        'text-[#a8acae] leading-[1.9] my-[17px] text-[13px]',
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function DialogClose({ className, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+function DialogClose({
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
   const { close } = useDialogContext();
   return (
     <button
@@ -111,4 +124,4 @@ function DialogClose({ className, ...props }: ButtonHTMLAttributes<HTMLButtonEle
 // EXPORTS
 // ═══════════════════════════════════════════
 
-export { Dialog, DialogTitle, DialogDescription, DialogClose };
+export { Dialog, DialogClose, DialogDescription, DialogTitle };

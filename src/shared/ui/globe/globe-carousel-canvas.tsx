@@ -369,8 +369,8 @@ export const GlobeCarouselCanvas = ({
     targetOffsetRef.current += step;
     offsetRef.current = targetOffsetRef.current;
     const nextIndex =
-      (((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
-        BODY_COUNT);
+      ((Math.round(targetOffsetRef.current) % BODY_COUNT) + BODY_COUNT) %
+      BODY_COUNT;
     onBodyChange(GLOBE_BODY_IDS[nextIndex]);
     dragMoved.current = false;
     onHoverPlanet?.(null);

@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -6,7 +6,8 @@ import { cn } from '@/shared/lib/utils';
 // TYPES
 // ═══════════════════════════════════════════
 
-interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface SwitchProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: ReactNode;
   description?: ReactNode;
 }
@@ -15,7 +16,13 @@ interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
 // COMPONENT
 // ═══════════════════════════════════════════
 
-function Switch({ className, label, description, id: externalId, ...props }: SwitchProps) {
+function Switch({
+  className,
+  label,
+  description,
+  id: externalId,
+  ...props
+}: SwitchProps) {
   const generatedId = useId();
   const id = externalId ?? generatedId;
 

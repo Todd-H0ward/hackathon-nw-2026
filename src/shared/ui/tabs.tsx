@@ -1,10 +1,10 @@
 import {
+  type ButtonHTMLAttributes,
   createContext,
+  type HTMLAttributes,
+  type ReactNode,
   useContext,
   useState,
-  type HTMLAttributes,
-  type ButtonHTMLAttributes,
-  type ReactNode,
 } from 'react';
 
 import { cn } from '@/shared/lib/utils';
@@ -66,7 +66,11 @@ function Tabs({
 
   return (
     <TabsContext.Provider value={{ value, onChange }}>
-      <div data-slot="tabs" className={cn('flex flex-col', className)} {...props}>
+      <div
+        data-slot="tabs"
+        className={cn('flex flex-col', className)}
+        {...props}
+      >
         {children}
       </div>
     </TabsContext.Provider>
@@ -77,10 +81,7 @@ function TabsList({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       data-slot="tabs-list"
-      className={cn(
-        'flex gap-7 border-b border-border mb-6',
-        className,
-      )}
+      className={cn('flex gap-7 border-b border-border mb-6', className)}
       {...props}
     />
   );
@@ -136,4 +137,4 @@ function TabsContent({ value, className, ...props }: TabsContentProps) {
 // EXPORTS
 // ═══════════════════════════════════════════
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

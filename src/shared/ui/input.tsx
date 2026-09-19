@@ -1,5 +1,6 @@
+import { type InputHTMLAttributes, useId } from 'react';
+
 import { cva, type VariantProps } from 'class-variance-authority';
-import { useId, type InputHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
