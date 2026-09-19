@@ -21,19 +21,60 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-import { activeColonies, members, position, type Simulation } from './model';
+import {
+  activeColonies,
+  type Colony,
+  type Individual,
+  type Simulation,
+} from './model';
 
-const arc = (a: [number, number, number], b: [number, number, number]) => {
-  const start = new Vector3(...a),
-    end = new Vector3(...b);
-  return Array.from({ length: 20 }, (_, i) =>
-    start
-      .clone()
-      .lerp(end, i / 19)
-      .normalize()
-      .multiplyScalar(2.36 + Math.sin((i / 19) * Math.PI) * 0.12),
-  );
+type Vec3 = [number, number, number];
+
+const ARC_STEPS = 20;
+const DEFAULT_RADIUS = 2.33;
+const BOUNDARY_RADIUS = 2.35;
+const LABEL_RADIUS = 2.45;
+
+/** Spherical → cartesian into a reusable tuple (no per-call array alloc). */
+const writePosition = (
+  out: Vec3,
+  lat: number,
+  lon: number,
+  radius = DEFAULT_RADIUS,
+) => {
+  const cosLat = Math.cos(lat);
+  out[0] = radius * cosLat * Math.sin(lon);
+  out[1] = radius * Math.sin(lat);
+  out[2] = radius * cosLat * Math.cos(lon);
+  return out;
 };
+
+const makeArcBuffer = (): Vec3[] =>
+  Array.from({ length: ARC_STEPS }, () => [0, 0, 0] as Vec3);
+
+/**
+ * Great-circle bump between two surface points. Writes into a caller-owned
+ * buffer so a 10 Hz stream never allocates 20 Vector3s per link.
+ */
+const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
+  for (let i = 0; i < ARC_STEPS; i++) {
+    const t = i / (ARC_STEPS - 1);
+    let x = a[0] + (b[0] - a[0]) * t;
+    let y = a[1] + (b[1] - a[1]) * t;
+    let z = a[2] + (b[2] - a[2]) * t;
+    const len = Math.hypot(x, y, z) || 1;
+    const r = 2.36 + Math.sin(t * Math.PI) * 0.12;
+    const point = out[i];
+    point[0] = (x / len) * r;
+    point[1] = (y / len) * r;
+    point[2] = (z / len) * r;
+  }
+  return out;
+};
+
+/** Copy an arc buffer into a fresh tuple array for StableLine / drei. */
+const snapshotArc = (buf: Vec3[]): Vec3[] =>
+  buf.map((p) => [p[0], p[1], p[2]] as Vec3);
 
 type LinePoints = ComponentProps<typeof Line>['points'];
 
@@ -76,12 +117,140 @@ const PACKET_MATERIAL = new MeshBasicMaterial({
   toneMapped: false,
 });
 
+type ColonyView = {
+  colony: Colony;
+  group: Individual[];
+  center: { lat: number; lon: number };
+  boundary: Vec3[];
+  links: { id: number; points: Vec3[] }[];
+  labelPosition: Vec3;
+};
+
+type PacketView = {
+  key: string;
+  points: Vec3[];
+  head: Vec3;
+};
+
 type SurfaceLifeProps = {
   simulation: Simulation;
   selected: number | null;
   showLinks: boolean;
   showLabels: boolean;
   onSelect: (id: number) => void;
+};
+
+/**
+ * Build the per-colony / per-packet line geometry in one O(n) pass. The WS
+ * stream replaces `simulation` up to 10 Hz, so this still runs that often —
+ * but never O(colonies × living) with a fresh `living()` filter each time.
+ */
+const buildSceneViews = (
+  simulation: Simulation,
+  showLinks: boolean,
+): { colonyViews: ColonyView[]; packetViews: PacketView[] } => {
+  const alive = simulation.individuals.filter((i) => i.dead === null);
+  const byColony = new Map<number, Individual[]>();
+  const byId = new Map<number, Individual>();
+
+  for (const individual of alive) {
+    byId.set(individual.id, individual);
+    const list = byColony.get(individual.colony);
+    if (list) list.push(individual);
+    else byColony.set(individual.colony, [individual]);
+  }
+
+  const scratchA: Vec3 = [0, 0, 0];
+  const scratchB: Vec3 = [0, 0, 0];
+  const scratchArc = makeArcBuffer();
+
+  const colonyViews: ColonyView[] = [];
+  for (const colony of activeColonies(simulation)) {
+    const group = byColony.get(colony.id);
+    if (!group || group.length === 0) continue;
+
+    let latSum = 0;
+    let lonSum = 0;
+    for (const member of group) {
+      latSum += member.lat;
+      lonSum += member.lon;
+    }
+    const center = {
+      lat: latSum / group.length,
+      lon: lonSum / group.length,
+    };
+
+    const boundary: Vec3[] = Array.from({ length: 49 }, (_, k) => {
+      const point: Vec3 = [0, 0, 0];
+      writePosition(
+        point,
+        center.lat + Math.sin((k / 48) * Math.PI * 2) * 0.2,
+        center.lon + Math.cos((k / 48) * Math.PI * 2) * 0.23,
+        BOUNDARY_RADIUS,
+      );
+      return point;
+    });
+
+    const links: ColonyView['links'] = [];
+    if (showLinks) {
+      for (let j = 1; j < group.length; j++) {
+        writePosition(scratchA, group[j - 1].lat, group[j - 1].lon);
+        writePosition(scratchB, group[j].lat, group[j].lon);
+        writeArc(scratchArc, scratchA, scratchB);
+        links.push({ id: group[j].id, points: snapshotArc(scratchArc) });
+      }
+    }
+
+    const labelPosition: Vec3 = [0, 0, 0];
+    writePosition(
+      labelPosition,
+      center.lat + 0.27,
+      center.lon,
+      LABEL_RADIUS,
+    );
+
+    colonyViews.push({
+      colony,
+      group,
+      center,
+      boundary,
+      links,
+      labelPosition,
+    });
+  }
+
+  const packetViews: PacketView[] = [];
+  if (showLinks) {
+    const packets = simulation.packets;
+    const start = Math.max(0, packets.length - 35);
+    for (let i = start; i < packets.length; i++) {
+      const packet = packets[i];
+      const from = byId.get(packet.from);
+      const to = byId.get(packet.to);
+      if (!from || !to) continue;
+
+      writePosition(scratchA, from.lat, from.lon);
+      writePosition(scratchB, to.lat, to.lon);
+      writeArc(scratchArc, scratchA, scratchB);
+      const points = snapshotArc(scratchArc);
+      const travel = packet.arrival - packet.sent;
+      const idx =
+        travel <= 0
+          ? 0
+          : Math.min(
+              ARC_STEPS - 1,
+              Math.floor(((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1)),
+            );
+
+      packetViews.push({
+        key: `${packet.from}-${packet.to}-${packet.sent}`,
+        points,
+        head: points[idx],
+      });
+    }
+  }
+
+  return { colonyViews, packetViews };
 };
 
 export const SurfaceLife = ({
@@ -99,47 +268,75 @@ export const SurfaceLife = ({
   const outward = useMemo(() => new Vector3(), []);
   const color = useMemo(() => new Color(), []);
   const visible = simulation.individuals;
+
+  const colonyColorById = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const colony of simulation.colonies) {
+      map.set(colony.id, colony.color);
+    }
+    return map;
+  }, [simulation.colonies]);
+
+  const { colonyViews, packetViews } = useMemo(
+    () => buildSceneViews(simulation, showLinks),
+    [simulation, showLinks],
+  );
+
   useEffect(() => {
     const target = mesh.current;
     if (!target) return;
     target.count = visible.length;
-    visible.forEach((i, index) => {
-      const colony = simulation.colonies.find((c) => c.id === i.colony);
+    for (let index = 0; index < visible.length; index++) {
+      const individual = visible[index];
       target.setColorAt(
         index,
         color.set(
-          i.dead !== null
+          individual.dead !== null
             ? '#ff5d66'
-            : i.action === 'divide'
+            : individual.action === 'divide'
               ? '#ffffff'
-              : i.energy < 18
+              : individual.energy < 18
                 ? '#ff805e'
-                : (colony?.color ?? '#70e0c4'),
+                : (colonyColorById.get(individual.colony) ?? '#70e0c4'),
         ),
       );
-    });
+    }
     if (target.instanceColor) target.instanceColor.needsUpdate = true;
-  }, [visible, simulation.colonies, color]);
+  }, [visible, colonyColorById, color]);
+
   useFrame(({ clock }) => {
     const target = mesh.current;
     if (!target) return;
-    visible.forEach((i, index) => {
-      dummy.position.set(...position(i));
+    const tick = simulation.tick;
+    for (let index = 0; index < visible.length; index++) {
+      const individual = visible[index];
+      // Write cartesian coords straight into the Object3D — no per-frame array.
+      const cosLat = Math.cos(individual.lat);
+      dummy.position.set(
+        DEFAULT_RADIUS * cosLat * Math.sin(individual.lon),
+        DEFAULT_RADIUS * Math.sin(individual.lat),
+        DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
+      );
       dummy.lookAt(outward.copy(dummy.position).multiplyScalar(2));
-      const age = simulation.tick - i.born;
+      const age = tick - individual.born;
       const birthScale = Math.min(1, (age + 1) / 8);
       const deathScale =
-        i.dead === null ? 1 : Math.max(0, 1 - (simulation.tick - i.dead) / 16);
-      const pulse = 1 + Math.sin(clock.elapsedTime * 2 + i.id) * 0.13;
+        individual.dead === null
+          ? 1
+          : Math.max(0, 1 - (tick - individual.dead) / 16);
+      const pulse = 1 + Math.sin(clock.elapsedTime * 2 + individual.id) * 0.13;
       const scale =
-        (i.colony === selected ? 1.2 : 1) * birthScale * deathScale * pulse;
+        (individual.colony === selected ? 1.2 : 1) *
+        birthScale *
+        deathScale *
+        pulse;
       dummy.scale.set(0.027 * scale, 0.027 * scale, 0.048 * scale);
       dummy.updateMatrix();
       target.setMatrixAt(index, dummy.matrix);
-    });
+    }
     target.instanceMatrix.needsUpdate = true;
   });
-  const colonies = activeColonies(simulation);
+
   return (
     <group>
       <mesh>
@@ -163,49 +360,30 @@ export const SurfaceLife = ({
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
-      {colonies.map((c) => {
-        const group = members(simulation, c.id);
-        const center = {
-          lat: group.reduce((s, i) => s + i.lat, 0) / group.length,
-          lon: group.reduce((s, i) => s + i.lon, 0) / group.length,
-        };
-        const boundary = Array.from({ length: 49 }, (_, k) =>
-          position(
-            {
-              lat: center.lat + Math.sin((k / 48) * Math.PI * 2) * 0.2,
-              lon: center.lon + Math.cos((k / 48) * Math.PI * 2) * 0.23,
-            },
-            2.35,
-          ),
-        );
-        return (
-          <group key={c.id}>
+      {colonyViews.map(
+        ({ colony, group, boundary, links, labelPosition }) => (
+          <group key={colony.id}>
             <StableLine
               points={boundary}
-              color={c.color}
+              color={colony.color}
               transparent
-              opacity={selected === c.id ? 0.6 : 0.17}
-              lineWidth={selected === c.id ? 1.3 : 0.6}
+              opacity={selected === colony.id ? 0.6 : 0.17}
+              lineWidth={selected === colony.id ? 1.3 : 0.6}
             />
             {showLinks &&
-              group
-                .slice(1)
-                .map((i, j) => (
-                  <StableLine
-                    key={i.id}
-                    points={arc(position(group[j]), position(i))}
-                    color={c.color}
-                    transparent
-                    opacity={selected === c.id ? 0.43 : 0.18}
-                    lineWidth={0.7}
-                  />
-                ))}
+              links.map((link) => (
+                <StableLine
+                  key={link.id}
+                  points={link.points}
+                  color={colony.color}
+                  transparent
+                  opacity={selected === colony.id ? 0.43 : 0.18}
+                  lineWidth={0.7}
+                />
+              ))}
             {showLabels && (
               <Html
-                position={position(
-                  { lat: center.lat + 0.27, lon: center.lon },
-                  2.45,
-                )}
+                position={labelPosition}
                 center
                 occlude={[occluder as RefObject<Object3D>]}
                 zIndexRange={[9, 0]}
@@ -214,14 +392,14 @@ export const SurfaceLife = ({
                   type="button"
                   className={cn(
                     '[font:8px_monospace] tracking-[1px] text-[var(--colony-color)] border border-[#65868355] bg-[#0b161ee8] rounded-[4px] whitespace-nowrap py-1.5 px-[7px] flex items-center gap-1.5 shadow-[0_2px_15px_#0005]',
-                    selected === c.id &&
+                    selected === colony.id &&
                       'border-[var(--colony-color)] bg-[#19312cf0]',
                   )}
-                  style={{ '--colony-color': c.color } as CSSProperties}
-                  onClick={() => onSelect(c.id)}
+                  style={{ '--colony-color': colony.color } as CSSProperties}
+                  onClick={() => onSelect(colony.id)}
                 >
                   <span className="size-1 bg-[var(--colony-color)] rounded-full" />{' '}
-                  C—{String(c.id).padStart(2, '0')}{' '}
+                  C—{String(colony.id).padStart(2, '0')}{' '}
                   <small className="text-[#9dafb8] border-l border-[#ffffff25] pl-[5px]">
                     {group.length}
                   </small>
@@ -229,37 +407,25 @@ export const SurfaceLife = ({
               </Html>
             )}
           </group>
-        );
-      })}
+        ),
+      )}
       {showLinks &&
-        simulation.packets.slice(-35).map((p) => {
-          const from = visible.find((i) => i.id === p.from),
-            to = visible.find((i) => i.id === p.to);
-          if (!from || !to) return null;
-          const points = arc(position(from), position(to));
-          const idx = Math.min(
-            19,
-            Math.floor(
-              ((simulation.tick - p.sent) / (p.arrival - p.sent)) * 19,
-            ),
-          );
-          return (
-            <group key={`${p.from}-${p.to}-${p.sent}`}>
-              <StableLine
-                points={points}
-                color="#ffffff"
-                transparent
-                opacity={0.45}
-                lineWidth={1}
-              />
-              <mesh
-                position={points[idx]}
-                geometry={PACKET_GEOMETRY}
-                material={PACKET_MATERIAL}
-              />
-            </group>
-          );
-        })}
+        packetViews.map((packet) => (
+          <group key={packet.key}>
+            <StableLine
+              points={packet.points}
+              color="#ffffff"
+              transparent
+              opacity={0.45}
+              lineWidth={1}
+            />
+            <mesh
+              position={packet.head}
+              geometry={PACKET_GEOMETRY}
+              material={PACKET_MATERIAL}
+            />
+          </group>
+        ))}
     </group>
   );
 };
