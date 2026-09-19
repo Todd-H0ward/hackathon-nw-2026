@@ -105,7 +105,7 @@ export const PlanetSlider = ({
         variant="ghost"
         size="icon"
         aria-label="Previous planet"
-        className="absolute top-[42%] left-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:left-6"
+        className="absolute top-[42%] left-2 z-10 -translate-y-1/2 cursor-pointer text-white/80 hover:bg-white/10 hover:text-white md:left-6"
         onClick={() => setActiveSlide(shiftBody(activeSlide, -1))}
       >
         <ChevronLeft className="size-7" />
@@ -116,7 +116,7 @@ export const PlanetSlider = ({
         variant="ghost"
         size="icon"
         aria-label="Next planet"
-        className="absolute top-[42%] right-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:right-6"
+        className="absolute top-[42%] right-2 z-10 -translate-y-1/2 cursor-pointer text-white/80 hover:bg-white/10 hover:text-white md:right-6"
         onClick={() => setActiveSlide(shiftBody(activeSlide, 1))}
       >
         <ChevronRight className="size-7" />
