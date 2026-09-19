@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useFrame, useThree } from '@react-three/fiber';
 import {
@@ -24,6 +24,12 @@ export type UsePositionSimParams = {
   size: number;
   spin?: number;
   jitter?: number;
+  /**
+   * When false, skip the per-frame FBO evolve. Use a ref so a carousel can
+   * toggle this from its pose `useFrame` without re-mounting the globe.
+   * Defaults to always on (sandbox / single-globe canvases).
+   */
+  enabledRef?: RefObject<boolean>;
 };
 
 export type UsePositionSimResult = {
@@ -46,6 +52,7 @@ export const usePositionSim = ({
   size,
   spin = 0,
   jitter = 0,
+  enabledRef,
 }: UsePositionSimParams): UsePositionSimResult => {
   const { gl } = useThree();
   const [ready, setReady] = useState(false);
@@ -144,6 +151,9 @@ export const usePositionSim = ({
 
   useFrame((_, delta) => {
     if (!ready) return;
+    // Carousel writes this from a higher-priority frame (−2); skip invisible
+    // side/wrap planets so their FBO ping-pong never hits the GPU.
+    if (enabledRef && !enabledRef.current) return;
 
     const current = currentRef.current;
     const previous = previousRef.current;
