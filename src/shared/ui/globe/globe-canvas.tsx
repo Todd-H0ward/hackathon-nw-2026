@@ -1,48 +1,118 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { OrbitControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
+
+import { cn } from '@/shared/lib/utils';
 
 import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
 import { GLOBE_DEFAULTS } from './config';
 import { Globe } from './globe';
 
-const VIEW = {
-  fov: 36,
-  position: [0, 0, 6] as [number, number, number],
+const CAMERA = {
+  fov: 35,
+  near: 0.1,
+  far: 100,
+  position: [0, 0, 7] as [number, number, number],
 };
 
 const GL = {
   alpha: true,
-  antialias: false,
+  antialias: true,
   powerPreference: 'high-performance' as const,
   precision: 'highp' as const,
+  preserveDrawingBuffer: false,
+};
+
+/** Keeps the projection matrix matching the real drawable aspect (avoids ellipse squash). */
+const SquareCameraRig = () => {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    const side = Math.min(size.width, size.height);
+    if (side <= 0) return;
+
+    if ('aspect' in camera) {
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, size.height, size.width]);
+
+  return null;
 };
 
 export type GlobeCanvasProps = {
   body?: GlobeBodyId;
   /** World-space globe radius. Defaults to `GLOBE_DEFAULTS.RADIUS`. */
   radius?: number;
+  /** Enable orbit drag. Off by default for carousel slides. */
+  interactive?: boolean;
+  className?: string;
   children?: ReactNode;
 };
 
 export const GlobeCanvas = ({
   body = 'earth',
   radius = GLOBE_DEFAULTS.RADIUS,
+  interactive = false,
+  className,
   children,
 }: GlobeCanvasProps) => {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [pixelSize, setPixelSize] = useState(0);
+
   const config = useMemo(
     () => resolveGlobeConfig(body, { RADIUS: radius }),
     [body, radius],
   );
   const maps = useMemo(() => GLOBE_MAPS[body], [body]);
 
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+
+    const measure = () => {
+      const { width, height } = host.getBoundingClientRect();
+      setPixelSize(Math.max(1, Math.floor(Math.min(width, height))));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <Canvas camera={VIEW} dpr={[1, 2]} gl={GL} className="h-full w-full">
-      <ambientLight intensity={0.5} />
-      <Globe config={config} colorUrl={maps.color} />
-      <OrbitControls />
-      {children}
-    </Canvas>
+    <div
+      ref={hostRef}
+      className={cn(
+        'relative flex aspect-square size-full max-h-full max-w-full items-center justify-center',
+        className,
+      )}
+    >
+      {pixelSize > 0 ? (
+        <div
+          className="relative overflow-hidden"
+          style={{ width: pixelSize, height: pixelSize }}
+        >
+          <Canvas
+            camera={CAMERA}
+            dpr={interactive ? [1, 2] : [1, 1.5]}
+            gl={GL}
+            className="!block !size-full"
+            style={{ width: pixelSize, height: pixelSize, touchAction: 'none' }}
+            flat={false}
+          >
+            <SquareCameraRig />
+            <ambientLight intensity={0.55} />
+            <Globe config={config} colorUrl={maps.color} />
+            {interactive ? (
+              <OrbitControls enableZoom={false} enablePan={false} />
+            ) : null}
+            {children}
+          </Canvas>
+        </div>
+      ) : null}
+    </div>
   );
 };

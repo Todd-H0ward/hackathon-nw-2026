@@ -20,6 +20,7 @@ import './materials/spark';
 export type GlobeProps = {
   config?: GlobeConfig;
   colorUrl?: string;
+  enableFx?: boolean;
 };
 
 const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
@@ -27,6 +28,7 @@ const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
 export const Globe = ({
   config = GLOBE_DEFAULTS,
   colorUrl = DEFAULT_COLOR,
+  enableFx = true,
 }: GlobeProps) => {
   const hazeRef = useRef<Mesh>(null);
   const hazeMat = useRef<ShaderMaterial>(null);
@@ -52,7 +54,7 @@ export const Globe = ({
   });
 
   return (
-    <>
+    <group>
       <mesh ref={hazeRef} scale={config.RADIUS}>
         <sphereGeometry args={[config.HAZE_RADIUS, 64, 64]} />
         <hazeMaterial
@@ -85,7 +87,7 @@ export const Globe = ({
         </points>
       ) : null}
 
-      <GlobeFx configRef={live} />
-    </>
+      {enableFx ? <GlobeFx configRef={live} /> : null}
+    </group>
   );
 };
