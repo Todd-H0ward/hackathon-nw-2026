@@ -73,5 +73,5 @@ jobs:
             docker pull ${{ env.FRONTEND_IMAGE }}:latest
             docker stop nwstep-frontend || true
             docker rm nwstep-frontend || true
-            docker run -d --name nwstep-frontend -p 80:80 --restart always ${{ env.FRONTEND_IMAGE }}:latest
+            docker run -d --name nwstep-frontend -p 80:80 --add-host=host.docker.internal:host-gateway --restart always ${{ env.FRONTEND_IMAGE }}:latest
             docker image prune -f
