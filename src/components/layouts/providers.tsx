@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 import { queryClient } from '@/shared/api';
+import { VoiceProvider } from '@/contexts';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -10,6 +11,8 @@ interface ProvidersProps {
 
 export const Providers = ({ children }: ProvidersProps) => {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <VoiceProvider>{children}</VoiceProvider>
+    </QueryClientProvider>
   );
 };
