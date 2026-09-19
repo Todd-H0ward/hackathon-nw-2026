@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 import { keysToCamelCase, keysToSnakeCase } from '@/shared/api/interceptors';
-import type { TUser } from '@/shared/types';
 
 export const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -33,8 +32,3 @@ API.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-export const getCurrentUser = async (): Promise<TUser> => {
-  const { data } = await API.get<TUser>('/me');
-  return data;
-};
