@@ -2,9 +2,17 @@ import type { SelectHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function Select({ className, label, id, ...props }: SelectProps) {
   return (
@@ -29,5 +37,9 @@ function Select({ className, label, id, ...props }: SelectProps) {
     </div>
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Select };

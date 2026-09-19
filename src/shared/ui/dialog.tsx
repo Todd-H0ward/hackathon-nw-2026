@@ -10,17 +10,30 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-/* ── Context ── */
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface DialogContextValue {
   close: () => void;
 }
-const DialogContext = createContext<DialogContextValue>({ close: () => {} });
 
-/* ── Dialog (root) ── */
 interface DialogProps extends HTMLAttributes<HTMLDialogElement> {
   open?: boolean;
   onClose?: () => void;
 }
+
+// ═══════════════════════════════════════════
+// CONTEXT
+// ═══════════════════════════════════════════
+
+const DialogContext = createContext<DialogContextValue>({ close: () => {} });
+
+const useDialogContext = () => useContext(DialogContext);
+
+// ═══════════════════════════════════════════
+// COMPOUND COMPONENTS
+// ═══════════════════════════════════════════
 
 const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
   ({ className, open, onClose, children, ...props }, forwardedRef) => {
@@ -56,7 +69,6 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
 );
 Dialog.displayName = 'Dialog';
 
-/* ── DialogTitle ── */
 function DialogTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
@@ -67,7 +79,6 @@ function DialogTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>
   );
 }
 
-/* ── DialogDescription ── */
 function DialogDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
@@ -78,9 +89,8 @@ function DialogDescription({ className, ...props }: HTMLAttributes<HTMLParagraph
   );
 }
 
-/* ── DialogClose ── */
 function DialogClose({ className, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { close } = useContext(DialogContext);
+  const { close } = useDialogContext();
   return (
     <button
       type="button"
@@ -96,5 +106,9 @@ function DialogClose({ className, ...props }: ButtonHTMLAttributes<HTMLButtonEle
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Dialog, DialogTitle, DialogDescription, DialogClose };

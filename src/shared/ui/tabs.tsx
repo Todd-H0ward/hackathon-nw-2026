@@ -1,24 +1,52 @@
-import { createContext, useContext, useState, type HTMLAttributes, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  type HTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-/* ── Context ── */
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface TabsContextValue {
   value: string;
   onChange: (v: string) => void;
 }
+
+interface TabsProps extends HTMLAttributes<HTMLDivElement> {
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (v: string) => void;
+}
+
+interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  value: string;
+  badge?: ReactNode;
+}
+
+interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
+  value: string;
+}
+
+// ═══════════════════════════════════════════
+// CONTEXT
+// ═══════════════════════════════════════════
 
 const TabsContext = createContext<TabsContextValue>({
   value: '',
   onChange: () => {},
 });
 
-/* ── Tabs (root) ── */
-interface TabsProps extends HTMLAttributes<HTMLDivElement> {
-  defaultValue?: string;
-  value?: string;
-  onValueChange?: (v: string) => void;
-}
+const useTabsContext = () => useContext(TabsContext);
+
+// ═══════════════════════════════════════════
+// COMPOUND COMPONENTS
+// ═══════════════════════════════════════════
 
 function Tabs({
   className,
@@ -45,7 +73,6 @@ function Tabs({
   );
 }
 
-/* ── TabsList ── */
 function TabsList({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -59,12 +86,6 @@ function TabsList({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-/* ── TabsTrigger ── */
-interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  value: string;
-  badge?: ReactNode;
-}
-
 function TabsTrigger({
   className,
   value,
@@ -72,15 +93,15 @@ function TabsTrigger({
   children,
   ...props
 }: TabsTriggerProps) {
-  const ctx = useContext(TabsContext);
-  const isActive = ctx.value === value;
+  const { value: activeValue, onChange } = useTabsContext();
+  const isActive = activeValue === value;
 
   return (
     <button
       type="button"
       data-slot="tabs-trigger"
       data-state={isActive ? 'active' : 'inactive'}
-      onClick={() => ctx.onChange(value)}
+      onClick={() => onChange(value)}
       className={cn(
         'flex items-center gap-[7px] border-0 border-b-2 border-transparent rounded-none pb-[14px] text-[12px] transition-colors cursor-pointer outline-none focus-visible:outline-2 focus-visible:outline-primary',
         isActive
@@ -98,14 +119,9 @@ function TabsTrigger({
   );
 }
 
-/* ── TabsContent ── */
-interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
-  value: string;
-}
-
 function TabsContent({ value, className, ...props }: TabsContentProps) {
-  const ctx = useContext(TabsContext);
-  if (ctx.value !== value) return null;
+  const { value: activeValue } = useTabsContext();
+  if (activeValue !== value) return null;
 
   return (
     <div
@@ -115,5 +131,9 @@ function TabsContent({ value, className, ...props }: TabsContentProps) {
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

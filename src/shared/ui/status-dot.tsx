@@ -3,6 +3,18 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+interface StatusDotProps
+  extends HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof statusDotVariants> {}
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
+
 const statusDotVariants = cva(
   'inline-block rounded-full shrink-0',
   {
@@ -28,9 +40,9 @@ const statusDotVariants = cva(
   },
 );
 
-interface StatusDotProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof statusDotVariants> {}
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function StatusDot({ className, variant, size, ...props }: StatusDotProps) {
   return (
@@ -42,5 +54,9 @@ function StatusDot({ className, variant, size, ...props }: StatusDotProps) {
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { StatusDot, statusDotVariants };

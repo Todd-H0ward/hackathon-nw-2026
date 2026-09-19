@@ -2,6 +2,10 @@ import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   /** Rendered value next to the label (e.g. "72 %") */
@@ -9,6 +13,10 @@ interface SliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
   minLabel?: string;
   maxLabel?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function Slider({
   className,
@@ -59,5 +67,9 @@ function Slider({
     </div>
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Slider };

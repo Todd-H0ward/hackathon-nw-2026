@@ -3,6 +3,18 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+export interface BadgeProps
+  extends HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {}
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
+
 const badgeVariants = cva(
   'inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[1.5px] uppercase rounded px-[7px] py-[5px] leading-none select-none',
   {
@@ -28,9 +40,9 @@ const badgeVariants = cva(
   },
 );
 
-export interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
@@ -41,5 +53,9 @@ function Badge({ className, variant, ...props }: BadgeProps) {
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Badge, badgeVariants };

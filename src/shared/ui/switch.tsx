@@ -2,10 +2,18 @@ import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: ReactNode;
   description?: ReactNode;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function Switch({ className, label, description, id: externalId, ...props }: SwitchProps) {
   const generatedId = useId();
@@ -38,5 +46,9 @@ function Switch({ className, label, description, id: externalId, ...props }: Swi
     </label>
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Switch };

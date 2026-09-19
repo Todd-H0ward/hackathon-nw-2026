@@ -3,6 +3,20 @@ import { useId, type InputHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+interface InputProps
+  extends InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputVariants> {
+  label?: string;
+}
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
+
 const inputVariants = cva(
   [
     'w-full bg-[#222425] border border-[#383a3b] rounded-[6px] text-foreground',
@@ -24,11 +38,9 @@ const inputVariants = cva(
   },
 );
 
-interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof inputVariants> {
-  label?: string;
-}
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 function Input({
   className,
@@ -66,5 +78,8 @@ function Input({
   );
 }
 
-export { Input, inputVariants };
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
+export { Input, inputVariants };

@@ -2,7 +2,10 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-/* ── Card ── */
+// ═══════════════════════════════════════════
+// COMPOUND COMPONENTS
+// ═══════════════════════════════════════════
+
 function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -16,7 +19,6 @@ function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-/* ── CardHeader ── */
 function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -30,7 +32,6 @@ function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-/* ── CardTitle ── */
 function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
@@ -41,7 +42,6 @@ function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) 
   );
 }
 
-/* ── CardContent ── */
 function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -52,7 +52,6 @@ function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-/* ── CardFooter ── */
 function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -65,5 +64,9 @@ function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Card, CardHeader, CardTitle, CardContent, CardFooter };

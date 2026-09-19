@@ -10,7 +10,10 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-/* ── Context & hook ── */
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ToastItem {
   id: number;
   message: ReactNode;
@@ -20,17 +23,24 @@ interface ToastContextValue {
   toast: (message: ReactNode) => void;
 }
 
+interface ToastProviderProps {
+  children: ReactNode;
+  duration?: number;
+}
+
+// ═══════════════════════════════════════════
+// CONTEXT
+// ═══════════════════════════════════════════
+
 const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
 export function useToast() {
   return useContext(ToastContext);
 }
 
-/* ── ToastProvider ── */
-interface ToastProviderProps {
-  children: ReactNode;
-  duration?: number;
-}
+// ═══════════════════════════════════════════
+// COMPOUND COMPONENTS
+// ═══════════════════════════════════════════
 
 function ToastProvider({ children, duration = 2800 }: ToastProviderProps) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -63,7 +73,6 @@ function ToastProvider({ children, duration = 2800 }: ToastProviderProps) {
   );
 }
 
-/* ── Toast (individual) ── */
 function Toast({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -79,5 +88,9 @@ function Toast({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
     />
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { Toast, ToastProvider };

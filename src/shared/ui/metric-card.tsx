@@ -2,6 +2,10 @@ import type { HTMLAttributes, ReactNode, SVGProps } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SparklinePoint {
   value: number;
 }
@@ -11,6 +15,20 @@ interface SparklineProps extends SVGProps<SVGSVGElement> {
   color?: string;
   strokeWidth?: number;
 }
+
+interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
+  label: string;
+  icon?: ReactNode;
+  value: ReactNode;
+  unit?: string;
+  description?: string;
+  sparkData?: SparklinePoint[];
+  sparkColor?: string;
+}
+
+// ═══════════════════════════════════════════
+// COMPOUND COMPONENTS
+// ═══════════════════════════════════════════
 
 function Sparkline({
   data,
@@ -45,17 +63,6 @@ function Sparkline({
       />
     </svg>
   );
-}
-
-/* ── MetricCard ── */
-interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
-  label: string;
-  icon?: ReactNode;
-  value: ReactNode;
-  unit?: string;
-  description?: string;
-  sparkData?: SparklinePoint[];
-  sparkColor?: string;
 }
 
 function MetricCard({
@@ -104,6 +111,10 @@ function MetricCard({
     </div>
   );
 }
+
+// ═══════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════
 
 export { MetricCard, Sparkline };
 export type { SparklinePoint };

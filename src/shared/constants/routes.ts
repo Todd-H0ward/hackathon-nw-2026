@@ -1,8 +1,10 @@
 export const STATIC_ROUTES = {
   HOME: '/',
   ABOUT: '/about',
+  VOICE: '/voice',
   UI_KIT: '/ui-kit',
 } as const;
+
 
 
 export const DYNAMIC_ROUTES = {
