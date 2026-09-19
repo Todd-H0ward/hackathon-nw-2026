@@ -1,4 +1,3 @@
-export { AnalyticsView } from './analytics-view';
 export { ColoniesPanel } from './colonies-panel';
 export { EnvironmentPanel } from './environment-panel';
 export { InterventionBar } from './intervention-bar';
@@ -6,7 +5,6 @@ export { LabDialog } from './lab-dialog';
 export { LabFooter } from './lab-footer';
 export { LabHeader } from './lab-header';
 export { LabTitle } from './lab-title';
-export { LabToast } from './lab-toast';
 export { MetricGrid } from './metric-grid';
 export { PlanetViewport } from './planet-viewport';
 export { SceneBoundary } from './scene-boundary';

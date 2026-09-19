@@ -10,6 +10,7 @@ import {
 
 import type { GlobeBodyId } from '@/shared/ui/globe';
 import { cn } from '@/shared/lib/utils';
+import { Slider, Switch } from '@/shared/ui';
 
 import {
   type Settings,
@@ -121,56 +122,42 @@ export const EnvironmentPanel = ({
         <h2 className="text-[11px] font-medium flex-1 m-0">Условия эксперимента</h2>
         <Settings2 size={15} className="text-[#667884]" />
       </div>
-      <label className="block mb-[23px] max-[700px]:m-0">
-        <span className="flex justify-between text-[#9bacb6] text-[10px]">
-          Приток ресурса
-          <output className="[font:10px_monospace] text-[#c9dad4]">
-            {sim.settings.resource}%
-          </output>
-        </span>
-        <input
-          type="range"
-          min="0"
-          max="100"
+      <div className="mb-[23px] max-[700px]:m-0">
+        <Slider
+          label="Приток ресурса"
+          outputValue={`${sim.settings.resource}%`}
+          min={0}
+          max={100}
           value={sim.settings.resource}
           onChange={(e) => onSettings({ resource: +e.target.value })}
-          className="block w-full h-[3px] my-[15px] mx-0 accent-[#b3d9c4] cursor-pointer"
+          minLabel="Слабый"
+          maxLabel="Интенсивный"
         />
-        <small className="flex justify-between text-[#536776] text-[8px]">
-          Слабый<span>Интенсивный</span>
-        </small>
-      </label>
-      <label className="block mb-[23px] max-[700px]:m-0">
-        <span className="flex justify-between text-[#9bacb6] text-[10px]">
-          Шум среды
-          <output className="[font:10px_monospace] text-[#c9dad4]">
-            {sim.settings.noise}%
-          </output>
-        </span>
-        <input
-          type="range"
-          min="0"
-          max="100"
+      </div>
+      <div className="mb-[23px] max-[700px]:m-0">
+        <Slider
+          label="Шум среды"
+          outputValue={`${sim.settings.noise}%`}
+          min={0}
+          max={100}
           value={sim.settings.noise}
           onChange={(e) => onSettings({ noise: +e.target.value })}
-          className="block w-full h-[3px] my-[15px] mx-0 accent-[#b3d9c4] cursor-pointer"
+          minLabel="Стабильность"
+          maxLabel="Возмущения"
         />
-        <small className="flex justify-between text-[#536776] text-[8px]">
-          Стабильность<span>Возмущения</span>
-        </small>
-      </label>
-      <label className="flex items-center justify-between text-[9px] text-[#94a7b3] mt-[27px] max-[700px]:col-span-full max-[700px]:mt-2 max-[700px]:mb-0">
-        <span className="flex gap-[7px] items-center">
-          <Dna size={15} />
-          Мутации при делении
-        </span>
-        <input
-          type="checkbox"
+      </div>
+      <div className="mt-[27px] max-[700px]:col-span-full max-[700px]:mt-2 max-[700px]:mb-0">
+        <Switch
+          label={
+            <span className="flex gap-[7px] items-center text-[9px]">
+              <Dna size={15} />
+              Мутации при делении
+            </span>
+          }
           checked={sim.settings.mutation}
           onChange={(e) => onSettings({ mutation: e.target.checked })}
-          className="accent-[#b3d9c4] w-[25px] h-[15px]"
         />
-      </label>
+      </div>
       <div className="flex gap-2.5 border-t border-[#222c37] mt-[27px] pt-5 text-[#657e85] max-[700px]:hidden">
         <BookOpen size={16} />
         <p className="text-[9px] leading-[1.9]">

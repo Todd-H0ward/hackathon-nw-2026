@@ -1,12 +1,6 @@
 export {
-  selectAlive,
   selectBody,
-  selectColonies,
-  selectColonyById,
-  selectGroup,
-  selectHistory,
   selectLabActions,
-  selectMetrics,
   selectSim,
   selectWorld,
   selectWorlds,

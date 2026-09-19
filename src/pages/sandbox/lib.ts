@@ -2,8 +2,7 @@ import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import { MODEL_VERSION, type Simulation } from '@/features/ecosystem/model';
 
-export type LabView = 'lab' | 'analytics';
-export type LabModal = 'guide' | 'atlas' | 'reset' | 'replay' | null;
+export type { LabModal } from '@/contexts/lab';
 
 export const BODY_IDS: GlobeBodyId[] = ['earth', 'mars', 'venus'];
 

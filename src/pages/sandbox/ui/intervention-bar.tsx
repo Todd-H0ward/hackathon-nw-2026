@@ -1,13 +1,12 @@
 import { ShieldAlert, Sparkles, Waves, Zap } from 'lucide-react';
 
+import { Button } from '@/shared/ui';
+
 type InterventionBarProps = {
   onPulse: () => void;
   onStorm: () => void;
   onScarcity: () => void;
 };
-
-const actionBtn =
-  'flex gap-[5px] items-center bg-[#18212a] border border-[#2b3b48] text-[#a2b4bf] py-[9px] px-2.5 rounded-[5px] text-[9px] hover:bg-[#2b403e] hover:text-[#c8e4d7] max-[1180px]:flex-1 max-[1180px]:justify-center max-[700px]:text-[8px] max-[700px]:py-2.5 max-[700px]:px-[5px]';
 
 export const InterventionBar = ({
   onPulse,
@@ -25,17 +24,17 @@ export const InterventionBar = ({
         </small>
       </span>
     </div>
-    <button type="button" className={actionBtn} onClick={onPulse}>
+    <Button type="button" variant="outline" size="xs" onClick={onPulse}>
       <Sparkles size={14} />
       Импульс
-    </button>
-    <button type="button" className={actionBtn} onClick={onStorm}>
+    </Button>
+    <Button type="button" variant="outline" size="xs" onClick={onStorm}>
       <Waves size={14} />
       Возмущение
-    </button>
-    <button type="button" className={actionBtn} onClick={onScarcity}>
+    </Button>
+    <Button type="button" variant="outline" size="xs" onClick={onScarcity}>
       <ShieldAlert size={14} />
       Истощение
-    </button>
+    </Button>
   </div>
 );

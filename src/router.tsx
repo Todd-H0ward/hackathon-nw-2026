@@ -2,7 +2,11 @@ import { createBrowserRouter } from 'react-router';
 
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
-import { SandboxPage } from '@/pages/sandbox';
+import {
+  AnalyticsPage,
+  SandboxLayout,
+  SandboxPage,
+} from '@/pages/sandbox';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 
@@ -19,7 +23,17 @@ export const router = createBrowserRouter([
       },
       {
         path: STATIC_ROUTES.SANDBOX,
-        element: <SandboxPage />,
+        element: <SandboxLayout />,
+        children: [
+          {
+            index: true,
+            element: <SandboxPage />,
+          },
+          {
+            path: 'analytics',
+            element: <AnalyticsPage />,
+          },
+        ],
       },
       {
         path: '*',
