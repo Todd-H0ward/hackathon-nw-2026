@@ -23,7 +23,7 @@ import { cn } from '@/shared/lib/utils';
 
 import { activeColonies, members, position, type Simulation } from './model';
 
-function arc(a: [number, number, number], b: [number, number, number]) {
+const arc = (a: [number, number, number], b: [number, number, number]) => {
   const start = new Vector3(...a),
     end = new Vector3(...b);
   return Array.from({ length: 20 }, (_, i) =>
@@ -33,7 +33,7 @@ function arc(a: [number, number, number], b: [number, number, number]) {
       .normalize()
       .multiplyScalar(2.36 + Math.sin((i / 19) * Math.PI) * 0.12),
   );
-}
+};
 
 type LinePoints = ComponentProps<typeof Line>['points'];
 
@@ -76,19 +76,21 @@ const PACKET_MATERIAL = new MeshBasicMaterial({
   toneMapped: false,
 });
 
-export function SurfaceLife({
-  simulation,
-  selected,
-  showLinks,
-  showLabels,
-  onSelect,
-}: {
+type SurfaceLifeProps = {
   simulation: Simulation;
   selected: number | null;
   showLinks: boolean;
   showLabels: boolean;
   onSelect: (id: number) => void;
-}) {
+};
+
+export const SurfaceLife = ({
+  simulation,
+  selected,
+  showLinks,
+  showLabels,
+  onSelect,
+}: SurfaceLifeProps) => {
   const mesh = useRef<InstancedMesh>(null);
   // Cheap stand-in for the planet: label occlusion raycasts against this only,
   // not the whole scene (the globe's point cloud has 160k vertices).
@@ -260,4 +262,4 @@ export function SurfaceLife({
         })}
     </group>
   );
-}
+};

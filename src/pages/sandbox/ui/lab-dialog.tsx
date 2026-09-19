@@ -1,4 +1,4 @@
-import type { LabModal } from '@/contexts/lab';
+import type { LabModal } from '@/contexts';
 
 import {
   Button,

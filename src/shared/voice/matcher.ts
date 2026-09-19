@@ -1,28 +1,24 @@
 import { voiceCommands } from './commands';
 import type { VoiceCommand, VoiceCommandArgs } from './types';
 
-// ═══════════════════════════════════════════
-// COMMAND MATCHER
-// ═══════════════════════════════════════════
-
 /**
  * Нормализует текст: строчные буквы, убирает лишние пробелы и пунктуацию.
  */
-function normalize(text: string): string {
+const normalize = (text: string): string => {
   return text
     .toLowerCase()
     .replace(/[.,!?;:]/g, '')
     .trim();
-}
+};
 
 /**
  * Ищет голосовую команду по транскрипту.
  * Возвращает найденную команду и аргументы, или null.
  */
-export function findCommand(
+export const findCommand = (
   transcript: string,
   commands: VoiceCommand[] = voiceCommands,
-): { command: VoiceCommand; args: VoiceCommandArgs } | null {
+): { command: VoiceCommand; args: VoiceCommandArgs } | null => {
   const normalized = normalize(transcript);
 
   for (const command of commands) {
@@ -42,17 +38,17 @@ export function findCommand(
   }
 
   return null;
-}
+};
 
 /**
  * Разворачивает response: если это функция — вызывает её, если строка — возвращает как есть.
  */
-export function resolveResponse(
+export const resolveResponse = (
   command: VoiceCommand,
   args: VoiceCommandArgs,
-): string {
+): string => {
   if (typeof command.response === 'function') {
     return command.response(args);
   }
   return command.response;
-}
+};

@@ -4,22 +4,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
+type NavButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof navButtonVariants> & {
+    icon?: ReactNode;
+    count?: number | string;
+  };
 
-interface NavButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof navButtonVariants> {
-  icon?: ReactNode;
-  count?: number | string;
-}
-
-// ═══════════════════════════════════════════
-// VARIANTS
-// ═══════════════════════════════════════════
-
-const navButtonVariants = cva(
+export const navButtonVariants = cva(
   'w-full flex items-center gap-0 text-left border-0 rounded-[7px] px-[13px] py-[13px] text-[13px] transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
   {
     variants: {
@@ -35,18 +26,14 @@ const navButtonVariants = cva(
   },
 );
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function NavButton({
+export const NavButton = ({
   className,
   active,
   icon,
   count,
   children,
   ...props
-}: NavButtonProps) {
+}: NavButtonProps) => {
   return (
     <button
       data-slot="nav-button"
@@ -67,10 +54,4 @@ function NavButton({
       )}
     </button>
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { NavButton, navButtonVariants };
+};

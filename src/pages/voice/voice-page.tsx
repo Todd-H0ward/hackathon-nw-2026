@@ -3,10 +3,6 @@ import { VoiceMicButton } from '@/components/VoiceMicButton';
 
 import { voiceCommands } from '@/shared/voice';
 
-// ═══════════════════════════════════════════
-// PAGE
-// ═══════════════════════════════════════════
-
 export const VoicePage = () => {
   return (
     <div className="flex h-full min-h-svh flex-col gap-8 p-8">

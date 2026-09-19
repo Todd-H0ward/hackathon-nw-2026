@@ -3,7 +3,7 @@ import type { GlobeBodyId } from '@/shared/ui/globe';
 import type { Simulation } from '@/features/ecosystem/model';
 import { MODEL_VERSION } from '@/features/ecosystem/world-info';
 
-export type { LabModal } from '@/contexts/lab';
+export type { LabModal } from '@/contexts';
 
 /** Planet texture as a round thumbnail background. */
 export const WORLD_THUMB: Record<GlobeBodyId, string> = {

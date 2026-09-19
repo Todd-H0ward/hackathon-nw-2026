@@ -94,7 +94,7 @@ export const PlanetViewport = ({
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[360px] flex-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_50%,color-mix(in_oklch,var(--world-color)_9%,transparent),transparent_62%)] max-[700px]:min-h-[380px]"
+      className="relative min-h-[360px] flex-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_50%,color-mix(in_oklch,var(--world-color)_9%,transparent),transparent_62%)] max-mobile:min-h-[380px]"
       aria-label="Интерактивная планета с особями и колониями"
     >
       <div className="pointer-events-none absolute top-4 right-4 left-4 z-[11] flex items-start justify-between gap-3">
@@ -197,7 +197,7 @@ export const PlanetViewport = ({
         <span>ПОВОРОТ — ПЕРЕТАСКИВАНИЕ</span>
         <span>МАСШТАБ — КОЛЕСО МЫШИ</span>
       </div>
-      <div className="pointer-events-none absolute bottom-4 left-4 flex gap-3.5 text-[8px] text-muted-foreground max-[1180px]:gap-[9px] max-[700px]:text-[7px]">
+      <div className="pointer-events-none absolute bottom-4 left-4 flex gap-3.5 text-[8px] text-muted-foreground max-laptop:gap-[9px] max-mobile:text-[7px]">
         <span className="flex items-center gap-[5px]">
           <i className="size-[5px] rotate-45 block bg-[#81d6b9]" />
           Особь
@@ -218,7 +218,7 @@ export const PlanetViewport = ({
       {sim.effect && (
         <div
           className={cn(
-            'absolute bottom-[50px] left-1/2 flex -translate-x-1/2 items-center gap-[9px] whitespace-nowrap rounded-md border border-xeno-green/40 bg-card/90 px-[13px] py-[9px] text-[9px] text-xeno-green backdrop-blur max-[700px]:bottom-[100px] max-[700px]:p-2 max-[700px]:text-[8px]',
+            'absolute bottom-[50px] left-1/2 flex -translate-x-1/2 items-center gap-[9px] whitespace-nowrap rounded-md border border-xeno-green/40 bg-card/90 px-[13px] py-[9px] text-[9px] text-xeno-green backdrop-blur max-mobile:bottom-[100px] max-mobile:p-2 max-mobile:text-[8px]',
             (sim.effect.kind === 'scarcity' || sim.effect.kind === 'storm') &&
               'border-destructive/40 text-destructive',
           )}
@@ -229,7 +229,7 @@ export const PlanetViewport = ({
             : sim.effect.kind === 'storm'
               ? 'Возмущение среды'
               : 'Истощение ресурса'}
-          <span className="font-mono text-[8px] opacity-60 max-[700px]:text-[7px]">
+          <span className="font-mono text-[8px] opacity-60 max-mobile:text-[7px]">
             {sim.effect.until - sim.tick} тактов
           </span>
         </div>

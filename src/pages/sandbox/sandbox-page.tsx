@@ -1,4 +1,4 @@
-import { useLab } from '@/contexts/lab';
+import { useLab } from '@/contexts';
 
 import {
   ColoniesPanel,
@@ -16,7 +16,7 @@ export const SandboxPage = () => {
   if (!lab.world) return null;
 
   return (
-    <div className="grid h-full grid-cols-[220px_minmax(0,1fr)_270px] group-data-[expanded=true]/lab:grid-cols-1 min-[1600px]:grid-cols-[250px_minmax(0,1fr)_300px] max-[1180px]:grid-cols-[190px_minmax(0,1fr)_235px] max-[980px]:h-auto max-[980px]:grid-cols-[190px_minmax(0,1fr)] max-[700px]:grid-cols-1">
+    <div className="grid h-full grid-cols-[220px_minmax(0,1fr)_270px] group-data-[expanded=true]/lab:grid-cols-1 ultrawide:grid-cols-[250px_minmax(0,1fr)_300px] max-laptop:grid-cols-[190px_minmax(0,1fr)_235px] max-tablet:h-auto max-tablet:grid-cols-[190px_minmax(0,1fr)] max-mobile:grid-cols-1">
       <EnvironmentPanel
         body={lab.body}
         sim={lab.sim}
@@ -26,7 +26,7 @@ export const SandboxPage = () => {
         onSettings={lab.settings}
       />
 
-      <main className="flex min-h-0 min-w-0 flex-col bg-background max-[980px]:min-h-[calc(100dvh-1px)]">
+      <main className="flex min-h-0 min-w-0 flex-col bg-background max-tablet:min-h-[calc(100dvh-1px)]">
         <PlanetViewport
           body={lab.body}
           world={lab.world}

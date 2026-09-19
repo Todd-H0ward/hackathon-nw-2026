@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui';
 import {
   GLOBE_BODY_IDS,
   type GlobeBodyId,
@@ -23,12 +23,12 @@ import {
 } from './planet-hover-cursor';
 import type { PlanetInfoCatalog } from './planet-info';
 
-interface PlanetSliderProps {
+type PlanetSliderProps = {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
   catalog: PlanetInfoCatalog;
-}
+};
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
   const index = GLOBE_BODY_IDS.indexOf(current);
@@ -107,7 +107,7 @@ export const PlanetSlider = ({
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Previous planet"
+        aria-label="Предыдущая планета"
         className="absolute top-[42%] left-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:left-6"
         onClick={() => setActiveSlide(shiftBody(activeSlide, -1))}
       >
@@ -118,7 +118,7 @@ export const PlanetSlider = ({
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Next planet"
+        aria-label="Следующая планета"
         className="absolute top-[42%] right-2 z-10 -translate-y-1/2 text-white/80 hover:bg-white/10 hover:text-white md:right-6"
         onClick={() => setActiveSlide(shiftBody(activeSlide, 1))}
       >

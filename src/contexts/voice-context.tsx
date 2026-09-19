@@ -16,15 +16,13 @@ import type {
 import { useSpeechRecognition } from '@/shared/voice/useSpeechRecognition';
 import { useSpeechSynthesis } from '@/shared/voice/useSpeechSynthesis';
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
+// State
 
-interface VoiceState {
+type VoiceState = {
   status: VoiceStatus;
   history: VoiceHistoryEntry[];
   error: string | null;
-}
+};
 
 type VoiceAction =
   | { type: 'SET_STATUS'; payload: VoiceStatus }
@@ -38,7 +36,7 @@ const initialState: VoiceState = {
   error: null,
 };
 
-function voiceReducer(state: VoiceState, action: VoiceAction): VoiceState {
+const voiceReducer = (state: VoiceState, action: VoiceAction): VoiceState => {
   switch (action.type) {
     case 'SET_STATUS':
       return { ...state, status: action.payload };
@@ -51,11 +49,9 @@ function voiceReducer(state: VoiceState, action: VoiceAction): VoiceState {
     default:
       return state;
   }
-}
+};
 
-// ═══════════════════════════════════════════
-// CONTEXT
-// ═══════════════════════════════════════════
+// Context
 
 const VoiceContext = createContext<VoiceContextValue | null>(null);
 
@@ -65,11 +61,7 @@ export const useVoice = (): VoiceContextValue => {
   return ctx;
 };
 
-// ═══════════════════════════════════════════
-// PROVIDER
-// ═══════════════════════════════════════════
-
-export function VoiceProvider({ children }: { children: ReactNode }) {
+export const VoiceProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(voiceReducer, initialState);
   const idCounter = useRef(0);
 
@@ -178,4 +170,4 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       {children}
     </VoiceContext.Provider>
   );
-}
+};

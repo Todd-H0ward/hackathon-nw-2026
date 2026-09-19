@@ -5,13 +5,9 @@ import { Bot, Trash2, User } from 'lucide-react';
 import { useVoice } from '@/contexts';
 
 import { cn } from '@/shared/lib/utils';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui';
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-export function VoiceDialog({ className }: { className?: string }) {
+export const VoiceDialog = ({ className }: { className?: string }) => {
   const { history, clearHistory } = useVoice();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -102,4 +98,4 @@ export function VoiceDialog({ className }: { className?: string }) {
       </div>
     </div>
   );
-}
+};

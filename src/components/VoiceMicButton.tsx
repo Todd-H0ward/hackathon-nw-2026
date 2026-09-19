@@ -4,11 +4,7 @@ import { useVoice } from '@/contexts';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-export function VoiceMicButton({ className }: { className?: string }) {
+export const VoiceMicButton = ({ className }: { className?: string }) => {
   const { status, isSupported, error, startListening, stopListening } =
     useVoice();
 
@@ -82,4 +78,4 @@ export function VoiceMicButton({ className }: { className?: string }) {
       )}
     </div>
   );
-}
+};

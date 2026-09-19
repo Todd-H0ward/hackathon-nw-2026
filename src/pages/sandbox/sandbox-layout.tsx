@@ -3,7 +3,7 @@ import { Outlet } from 'react-router';
 
 import { motion } from 'motion/react';
 
-import { LabProvider, useLab } from '@/contexts/lab';
+import { LabProvider, useLab } from '@/contexts';
 
 import { ToastProvider } from '@/shared/ui';
 
@@ -12,7 +12,7 @@ import { usePlanetTransition } from '@/features/planet-transition';
 import { LabDialog, LabRail, LabStatus } from './ui';
 
 const shellClassName =
-  'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-[700px]:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
+  'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-mobile:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
 
 const SandboxShell = () => {
   const lab = useLab();

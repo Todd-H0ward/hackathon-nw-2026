@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { ArrowRight, Waves } from 'lucide-react';
 
-import { useLab } from '@/contexts/lab';
+import { useLab } from '@/contexts';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
@@ -35,7 +35,7 @@ export const AtlasPage = () => {
   };
 
   return (
-    <section className="mx-auto max-w-[1180px] px-5 py-6 max-[700px]:px-3 max-[700px]:py-4">
+    <section className="mx-auto max-w-[1180px] px-5 py-6 max-mobile:px-3 max-mobile:py-4">
       <p className="font-mono text-[9px] tracking-[1.45px] text-muted-foreground">
         ТРИ СРЕДЫ · ТРИ НЕЗАВИСИМЫХ ЭКСПЕРИМЕНТА
       </p>
@@ -47,7 +47,7 @@ export const AtlasPage = () => {
         Прогресс сохраняется при переключении.
       </p>
 
-      <div className="mt-5 grid grid-cols-3 gap-3 max-[1180px]:grid-cols-2 max-[700px]:grid-cols-1">
+      <div className="mt-5 grid grid-cols-3 gap-3 max-laptop:grid-cols-2 max-mobile:grid-cols-1">
         {lab.availableWorlds.map((world) => {
           const id = world.id;
           const sim = lab.sims[id];

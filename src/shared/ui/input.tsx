@@ -4,23 +4,14 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
+type InputProps = InputHTMLAttributes<HTMLInputElement> &
+  VariantProps<typeof inputVariants> & {
+    label?: string;
+  };
 
-interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof inputVariants> {
-  label?: string;
-}
-
-// ═══════════════════════════════════════════
-// VARIANTS
-// ═══════════════════════════════════════════
-
-const inputVariants = cva(
+export const inputVariants = cva(
   [
-    'w-full bg-[#222425] border border-[#383a3b] rounded-[6px] text-foreground',
+    'w-full bg-field border border-field-border rounded-[6px] text-foreground',
     'placeholder:text-muted-foreground',
     'focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-[4px]',
     'disabled:pointer-events-none disabled:opacity-50',
@@ -39,17 +30,13 @@ const inputVariants = cva(
   },
 );
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function Input({
+export const Input = ({
   className,
   inputSize,
   label,
   id: externalId,
   ...props
-}: InputProps) {
+}: InputProps) => {
   const generatedId = useId();
   const id = externalId ?? generatedId;
 
@@ -77,10 +64,4 @@ function Input({
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Input, inputVariants };
+};

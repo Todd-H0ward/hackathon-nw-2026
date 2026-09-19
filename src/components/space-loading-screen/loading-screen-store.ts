@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export interface LoadingScreenState {
+export type LoadingScreenState = {
   /** Активен ли экран загрузки */
   isLoading: boolean;
   /** Текст текущего статуса */
@@ -11,7 +11,7 @@ export interface LoadingScreenState {
   startLoading: (statusText?: string) => void;
   finishLoading: () => void;
   dismiss: () => void;
-}
+};
 
 export const useLoadingScreenStore = create<LoadingScreenState>((set) => ({
   isLoading: true,

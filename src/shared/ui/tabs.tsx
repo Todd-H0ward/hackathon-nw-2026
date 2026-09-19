@@ -9,33 +9,25 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface TabsContextValue {
+type TabsContextValue = {
   value: string;
   onChange: (v: string) => void;
-}
+};
 
-interface TabsProps extends HTMLAttributes<HTMLDivElement> {
+type TabsProps = HTMLAttributes<HTMLDivElement> & {
   defaultValue?: string;
   value?: string;
   onValueChange?: (v: string) => void;
-}
+};
 
-interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type TabsTriggerProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   value: string;
   badge?: ReactNode;
-}
+};
 
-interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
+type TabsContentProps = HTMLAttributes<HTMLDivElement> & {
   value: string;
-}
-
-// ═══════════════════════════════════════════
-// CONTEXT
-// ═══════════════════════════════════════════
+};
 
 const TabsContext = createContext<TabsContextValue>({
   value: '',
@@ -44,18 +36,14 @@ const TabsContext = createContext<TabsContextValue>({
 
 const useTabsContext = () => useContext(TabsContext);
 
-// ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
-// ═══════════════════════════════════════════
-
-function Tabs({
+export const Tabs = ({
   className,
   defaultValue = '',
   value: controlledValue,
   onValueChange,
   children,
   ...props
-}: TabsProps) {
+}: TabsProps) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const value = controlledValue ?? internalValue;
 
@@ -75,9 +63,12 @@ function Tabs({
       </div>
     </TabsContext.Provider>
   );
-}
+};
 
-function TabsList({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export const TabsList = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="tabs-list"
@@ -85,15 +76,15 @@ function TabsList({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
+};
 
-function TabsTrigger({
+export const TabsTrigger = ({
   className,
   value,
   badge,
   children,
   ...props
-}: TabsTriggerProps) {
+}: TabsTriggerProps) => {
   const { value: activeValue, onChange } = useTabsContext();
   const isActive = activeValue === value;
 
@@ -118,9 +109,13 @@ function TabsTrigger({
       )}
     </button>
   );
-}
+};
 
-function TabsContent({ value, className, ...props }: TabsContentProps) {
+export const TabsContent = ({
+  value,
+  className,
+  ...props
+}: TabsContentProps) => {
   const { value: activeValue } = useTabsContext();
   if (activeValue !== value) return null;
 
@@ -131,10 +126,4 @@ function TabsContent({ value, className, ...props }: TabsContentProps) {
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+};

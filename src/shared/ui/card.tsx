@@ -2,11 +2,10 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
-// ═══════════════════════════════════════════
-
-function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export const Card = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card"
@@ -17,9 +16,12 @@ function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
+};
 
-function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export const CardHeader = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-header"
@@ -30,12 +32,12 @@ function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
+};
 
-function CardTitle({
+export const CardTitle = ({
   className,
   ...props
-}: HTMLAttributes<HTMLHeadingElement>) {
+}: HTMLAttributes<HTMLHeadingElement>) => {
   return (
     <h3
       data-slot="card-title"
@@ -43,9 +45,12 @@ function CardTitle({
       {...props}
     />
   );
-}
+};
 
-function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export const CardContent = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-content"
@@ -53,9 +58,12 @@ function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
+};
 
-function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export const CardFooter = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-footer"
@@ -66,10 +74,4 @@ function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Card, CardContent, CardFooter, CardHeader, CardTitle };
+};

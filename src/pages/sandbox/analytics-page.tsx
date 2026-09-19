@@ -1,6 +1,6 @@
 import { RotateCcw } from 'lucide-react';
 
-import { useLab } from '@/contexts/lab';
+import { useLab } from '@/contexts';
 
 import {
   Button,
@@ -37,7 +37,7 @@ export const AnalyticsPage = () => {
 
   return (
     <div className="mx-auto max-w-[1180px]">
-      <section className="px-5 py-6 max-[700px]:px-3 max-[700px]:py-4">
+      <section className="px-5 py-6 max-mobile:px-3 max-mobile:py-4">
         <div className="font-mono text-[9px] tracking-[1.45px] text-muted-foreground">
           ДАННЫЕ ТЕКУЩЕГО ПРОГОНА
         </div>
@@ -49,13 +49,13 @@ export const AnalyticsPage = () => {
           {sim.history.length} тактов
         </p>
 
-        <div className="mb-3 grid grid-cols-3 gap-3 max-[700px]:grid-cols-1">
+        <div className="mb-3 grid grid-cols-3 gap-3 max-mobile:grid-cols-1">
           <MetricCard label="Рождений" value={sim.births} />
           <MetricCard label="Делений колоний" value={sim.splits} />
           <MetricCard label="Угасших особей" value={sim.deaths} />
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3 max-[980px]:grid-cols-1">
+        <div className="mb-5 grid grid-cols-2 gap-3 max-tablet:grid-cols-1">
           {charts.map((item) => (
             <Card key={item.name} className="border-border bg-card">
               <CardHeader className="pb-0">

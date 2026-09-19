@@ -9,14 +9,14 @@ import {
   Waves,
 } from 'lucide-react';
 
+import { WORLD_THUMB } from '@/pages/sandbox/lib';
+
 import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import type { Settings, Simulation } from '@/features/ecosystem/model';
 import type { WorldInfo } from '@/features/ecosystem/world-info';
-
-import { WORLD_THUMB } from '../lib';
 
 type EnvironmentPanelProps = {
   body: GlobeBodyId;
@@ -37,19 +37,19 @@ export const EnvironmentPanel = ({
   onSettings,
 }: EnvironmentPanelProps) => {
   return (
-    <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-[980px]:h-full max-[700px]:grid max-[700px]:h-auto max-[700px]:grid-cols-2 max-[700px]:gap-x-4 max-[700px]:gap-y-3 max-[700px]:border-r-0 max-[700px]:border-b">
+    <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-tablet:h-full max-mobile:grid max-mobile:h-auto max-mobile:grid-cols-2 max-mobile:gap-x-4 max-mobile:gap-y-3 max-mobile:border-r-0 max-mobile:border-b">
       <SectionTitle
         index="01"
         title="Среда обитания"
         icon={<Globe2 size={14} />}
       />
-      <div className="grid gap-1 max-[700px]:col-span-full max-[700px]:flex">
+      <div className="grid gap-1 max-mobile:col-span-full max-mobile:flex">
         {worlds.map((item) => (
           <button
             type="button"
             key={item.id}
             className={cn(
-              'flex items-center gap-2.5 rounded-md border border-transparent bg-transparent p-2 text-left text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground max-[700px]:min-w-0 max-[700px]:flex-1 max-[700px]:gap-[7px] max-[700px]:px-[5px] max-[700px]:py-[7px] [&_svg]:max-[700px]:hidden',
+              'flex items-center gap-2.5 rounded-md border border-transparent bg-transparent p-2 text-left text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground max-mobile:min-w-0 max-mobile:flex-1 max-mobile:gap-[7px] max-mobile:px-[5px] max-mobile:py-[7px] [&_svg]:max-mobile:hidden',
               body === item.id &&
                 'border-primary/40 bg-secondary text-foreground',
             )}
@@ -57,13 +57,13 @@ export const EnvironmentPanel = ({
           >
             <span
               className={cn(
-                'block size-7 shrink-0 rounded-full bg-cover shadow-[inset_-8px_-3px_9px_rgb(0_0_0/0.8)] max-[700px]:size-[25px]',
+                'block size-7 shrink-0 rounded-full bg-cover shadow-[inset_-8px_-3px_9px_rgb(0_0_0/0.8)] max-mobile:size-[25px]',
                 WORLD_THUMB[item.id],
               )}
             />
-            <span className="flex-1 text-xs max-[700px]:text-[10px]">
+            <span className="flex-1 text-xs max-mobile:text-[10px]">
               {item.name}
-              <small className="mt-0.5 block font-mono text-[8px] tracking-[1.3px] text-muted-foreground max-[700px]:text-[6px]">
+              <small className="mt-0.5 block font-mono text-[8px] tracking-[1.3px] text-muted-foreground max-mobile:text-[6px]">
                 {item.english}
               </small>
             </span>
@@ -72,7 +72,7 @@ export const EnvironmentPanel = ({
         ))}
       </div>
 
-      <dl className="my-3 grid gap-2 border-b border-border pb-3 max-[700px]:col-start-1 max-[700px]:m-0 max-[700px]:border-0 max-[700px]:p-0">
+      <dl className="my-3 grid gap-2 border-b border-border pb-3 max-mobile:col-start-1 max-mobile:m-0 max-mobile:border-0 max-mobile:p-0">
         <Stat label="Средняя температура" unit="°C">
           {world.temperature > 0 ? '+' : ''}
           {world.temperature}
@@ -93,7 +93,7 @@ export const EnvironmentPanel = ({
         </a>
       </dl>
 
-      <div className="mb-4 rounded-md border border-xeno-green/25 bg-xeno-green/5 p-2.5 max-[700px]:col-start-2 max-[700px]:m-0 [&_svg]:float-right [&_svg]:text-xeno-green">
+      <div className="mb-4 rounded-md border border-xeno-green/25 bg-xeno-green/5 p-2.5 max-mobile:col-start-2 max-mobile:m-0 [&_svg]:float-right [&_svg]:text-xeno-green">
         <Waves size={15} />
         <span className="font-mono text-[7px] tracking-[1px] text-muted-foreground">
           ФИЗИЧЕСКИЙ МЕХАНИЗМ
@@ -110,9 +110,9 @@ export const EnvironmentPanel = ({
         index="02"
         title="Условия эксперимента"
         icon={<Settings2 size={14} />}
-        className="max-[700px]:col-span-full"
+        className="max-mobile:col-span-full"
       />
-      <div className="grid gap-4 max-[700px]:col-span-full max-[700px]:grid-cols-2">
+      <div className="grid gap-4 max-mobile:col-span-full max-mobile:grid-cols-2">
         <Slider
           label="Приток ресурса"
           outputValue={`${sim.settings.resource}%`}
@@ -134,7 +134,7 @@ export const EnvironmentPanel = ({
           maxLabel="Возмущения"
         />
       </div>
-      <div className="mt-4 max-[700px]:col-span-full max-[700px]:mt-0">
+      <div className="mt-4 max-mobile:col-span-full max-mobile:mt-0">
         <Switch
           label={
             <span className="flex items-center gap-[7px] text-[9px]">
@@ -160,7 +160,7 @@ type SectionTitleProps = {
 const SectionTitle = ({ index, title, icon, className }: SectionTitleProps) => (
   <div
     className={cn(
-      'mb-2 flex items-center gap-2 text-muted-foreground max-[700px]:col-span-full max-[700px]:m-0',
+      'mb-2 flex items-center gap-2 text-muted-foreground max-mobile:col-span-full max-mobile:m-0',
       className,
     )}
   >
@@ -181,9 +181,9 @@ const Stat = ({
   unit: string;
   children: ReactNode;
 }) => (
-  <div className="flex justify-between gap-1.5 text-[9px] text-muted-foreground max-[700px]:text-[8px]">
+  <div className="flex justify-between gap-1.5 text-[9px] text-muted-foreground max-mobile:text-[8px]">
     <dt>{label}</dt>
-    <dd className="font-mono text-[10px] text-foreground max-[700px]:text-[9px]">
+    <dd className="font-mono text-[10px] text-foreground max-mobile:text-[9px]">
       {children}{' '}
       <small className="text-[8px] text-muted-foreground">{unit}</small>
     </dd>

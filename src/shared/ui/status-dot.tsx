@@ -4,19 +4,10 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
+type StatusDotProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof statusDotVariants>;
 
-interface StatusDotProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof statusDotVariants> {}
-
-// ═══════════════════════════════════════════
-// VARIANTS
-// ═══════════════════════════════════════════
-
-const statusDotVariants = cva('inline-block rounded-full shrink-0', {
+export const statusDotVariants = cva('inline-block rounded-full shrink-0', {
   variants: {
     variant: {
       /** Green — online / active colony */
@@ -38,11 +29,12 @@ const statusDotVariants = cva('inline-block rounded-full shrink-0', {
   },
 });
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function StatusDot({ className, variant, size, ...props }: StatusDotProps) {
+export const StatusDot = ({
+  className,
+  variant,
+  size,
+  ...props
+}: StatusDotProps) => {
   return (
     <span
       data-slot="status-dot"
@@ -51,10 +43,4 @@ function StatusDot({ className, variant, size, ...props }: StatusDotProps) {
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { StatusDot, statusDotVariants };
+};

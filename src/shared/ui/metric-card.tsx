@@ -2,21 +2,17 @@ import type { HTMLAttributes, ReactNode, SVGProps } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════
-
-interface SparklinePoint {
+export type SparklinePoint = {
   value: number;
-}
+};
 
-interface SparklineProps extends SVGProps<SVGSVGElement> {
+type SparklineProps = SVGProps<SVGSVGElement> & {
   data: SparklinePoint[];
   color?: string;
   strokeWidth?: number;
-}
+};
 
-interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
+type MetricCardProps = HTMLAttributes<HTMLDivElement> & {
   label: string;
   icon?: ReactNode;
   value: ReactNode;
@@ -24,19 +20,15 @@ interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
   description?: string;
   sparkData?: SparklinePoint[];
   sparkColor?: string;
-}
+};
 
-// ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
-// ═══════════════════════════════════════════
-
-function Sparkline({
+export const Sparkline = ({
   data,
   color = '#c08162',
   strokeWidth = 1.5,
   className,
   ...props
-}: SparklineProps) {
+}: SparklineProps) => {
   if (data.length < 2) return null;
 
   const max = Math.max(...data.map((d) => d.value), 0.001);
@@ -63,9 +55,9 @@ function Sparkline({
       />
     </svg>
   );
-}
+};
 
-function MetricCard({
+export const MetricCard = ({
   className,
   label,
   icon,
@@ -75,7 +67,7 @@ function MetricCard({
   sparkData,
   sparkColor,
   ...props
-}: MetricCardProps) {
+}: MetricCardProps) => {
   return (
     <div
       data-slot="metric-card"
@@ -108,11 +100,4 @@ function MetricCard({
       </div>
     </div>
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export type { SparklinePoint };
-export { MetricCard, Sparkline };
+};

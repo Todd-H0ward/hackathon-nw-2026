@@ -3,11 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
-// ═══════════════════════════════════════════
-// VARIANTS
-// ═══════════════════════════════════════════
-
-const buttonVariants = cva(
+export const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-[7px] border text-[13px] font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-[4px] active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -51,16 +47,12 @@ const buttonVariants = cva(
   },
 );
 
-// ═══════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════
-
-function Button({
+export const Button = ({
   className,
   variant = 'default',
   size = 'default',
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) => {
   return (
     <ButtonPrimitive
       data-slot="button"
@@ -68,10 +60,4 @@ function Button({
       {...props}
     />
   );
-}
-
-// ═══════════════════════════════════════════
-// EXPORTS
-// ═══════════════════════════════════════════
-
-export { Button, buttonVariants };
+};

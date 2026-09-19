@@ -104,30 +104,30 @@ export type Simulation = {
   splits: number;
 };
 
-export function living(s: Simulation) {
-  return s.individuals.filter((i) => i.dead === null);
-}
-export function members(s: Simulation, colony: number) {
-  return living(s).filter((i) => i.colony === colony);
-}
-export function activeColonies(s: Simulation) {
-  return s.colonies.filter((c) =>
+export const living = (s: Simulation) =>
+  s.individuals.filter((i) => i.dead === null);
+
+export const members = (s: Simulation, colony: number) =>
+  living(s).filter((i) => i.colony === colony);
+
+export const activeColonies = (s: Simulation) =>
+  s.colonies.filter((c) =>
     s.individuals.some((i) => i.colony === c.id && i.dead === null),
   );
-}
-export function position(
+
+export const position = (
   i: Pick<Individual, 'lat' | 'lon'>,
   radius = 2.33,
-): [number, number, number] {
+): [number, number, number] => {
   return [
     radius * Math.cos(i.lat) * Math.sin(i.lon),
     radius * Math.sin(i.lat),
     radius * Math.cos(i.lat) * Math.cos(i.lon),
   ];
-}
+};
 
 /** Best-effort short id (`ind-07` -> 7) for the numeric ids the UI/3D layer expects. */
-function numericId(remoteId: string): number {
+const numericId = (remoteId: string): number => {
   const digits = remoteId.match(/(\d+)$/)?.[1];
   if (digits) return parseInt(digits, 10);
   let hash = 0;
@@ -135,9 +135,9 @@ function numericId(remoteId: string): number {
     hash = (hash * 31 + remoteId.charCodeAt(i)) | 0;
   }
   return Math.abs(hash);
-}
+};
 
-function mapAction(individual: RemoteIndividual): Action {
+const mapAction = (individual: RemoteIndividual): Action => {
   if (!individual.alive) return 'starve';
   if (individual.starvationTicks > 0) return 'starve';
   const selected: DecisionAction | undefined =
@@ -145,9 +145,9 @@ function mapAction(individual: RemoteIndividual): Action {
   if (selected === 'DIVIDE') return 'divide';
   if (selected === 'TRANSFER') return 'signal';
   return 'accumulate';
-}
+};
 
-function reasonFor(individual: RemoteIndividual): string {
+const reasonFor = (individual: RemoteIndividual): string => {
   if (!individual.alive) {
     return 'Особь угасла: ресурс исчерпан или структура разрушена.';
   }
@@ -155,7 +155,7 @@ function reasonFor(individual: RemoteIndividual): string {
     individual.lastDecision?.reasoning ??
     'Первичный зародыш. Ожидает первого решения.'
   );
-}
+};
 
 /**
  * The live backend reports efficiency as a 0..1 fraction while the swagger
@@ -195,18 +195,18 @@ export const createAdapterCarry = (): AdapterCarry => ({
   effect: null,
 });
 
-function pushEvent(
+const pushEvent = (
   carry: AdapterCarry,
   tick: number,
   kind: Event['kind'],
   text: string,
-) {
+) => {
   carry.events.unshift({ id: carry.nextEventId++, tick, kind, text });
   if (carry.events.length > 100) carry.events.length = 100;
-}
+};
 
 /** Diffs `snapshot` against what `carry` last saw and logs real transitions. */
-function syncEvents(snapshot: StateSnapshot, carry: AdapterCarry) {
+const syncEvents = (snapshot: StateSnapshot, carry: AdapterCarry) => {
   const { tick } = snapshot;
   const individuals = snapshot.individuals ?? [];
   const colonies = snapshot.colonies ?? [];
@@ -261,15 +261,15 @@ function syncEvents(snapshot: StateSnapshot, carry: AdapterCarry) {
     }
   }
   carry.aliveIds = nowAlive;
-}
+};
 
 /** Turns a raw backend snapshot into the `Simulation` shape the UI expects. */
-export function snapshotToSimulation(
+export const snapshotToSimulation = (
   body: GlobeBodyId,
   seed: number,
   snapshot: StateSnapshot,
   carry: AdapterCarry,
-): Simulation {
+): Simulation => {
   syncEvents(snapshot, carry);
 
   if (carry.effect && snapshot.tick > carry.effect.until) {
@@ -358,16 +358,16 @@ export function snapshotToSimulation(
     deaths: remoteMetrics.deathsTotal ?? 0,
     splits: remoteMetrics.colonySplitsTotal ?? 0,
   };
-}
+};
 
 /** Records an intervention the client just sent (server doesn't echo a running log). */
-export function logIntervention(
+export const logIntervention = (
   carry: AdapterCarry,
   tick: number,
   type: string,
-) {
+) => {
   carry.interventions.push({ tick, type });
-}
+};
 
 /** Placeholder sim shown while the first API snapshot is in flight. */
 export const emptySimulation = (

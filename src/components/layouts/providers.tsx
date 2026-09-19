@@ -6,9 +6,9 @@ import { VoiceProvider } from '@/contexts';
 
 import { queryClient } from '@/shared/api';
 
-interface ProvidersProps {
+type ProvidersProps = {
   children: ReactNode;
-}
+};
 
 export const Providers = ({ children }: ProvidersProps) => {
   return (

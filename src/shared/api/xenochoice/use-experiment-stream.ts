@@ -58,11 +58,11 @@ const parseSnapshot = (raw: unknown): StateSnapshot | null => {
  * `onSnapshot` receives the experiment id that produced the frame, so callers
  * never have to guess which world a late snapshot belongs to.
  */
-export function useExperimentStream(
+export const useExperimentStream = (
   experimentId: string | null,
   enabled: boolean,
   onSnapshot: (snapshot: StateSnapshot, experimentId: string) => void,
-): StreamStatus {
+): StreamStatus => {
   const onSnapshotRef = useRef(onSnapshot);
   onSnapshotRef.current = onSnapshot;
 
@@ -137,4 +137,4 @@ export function useExperimentStream(
   }, [experimentId, enabled]);
 
   return status;
-}
+};

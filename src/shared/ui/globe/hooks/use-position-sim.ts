@@ -15,10 +15,10 @@ import {
   WebGLRenderTarget,
 } from 'three';
 
-import { buildFibonacciField } from '../lib/fibonacci';
-import blitFrag from '../sim/shaders/blit.frag';
-import evolveFrag from '../sim/shaders/evolve.frag';
-import fullscreenVert from '../sim/shaders/fullscreen.vert';
+import { buildFibonacciField } from '@/shared/ui/globe/lib/fibonacci';
+import blitFrag from '@/shared/ui/globe/sim/shaders/blit.frag';
+import evolveFrag from '@/shared/ui/globe/sim/shaders/evolve.frag';
+import fullscreenVert from '@/shared/ui/globe/sim/shaders/fullscreen.vert';
 
 export type UsePositionSimParams = {
   size: number;

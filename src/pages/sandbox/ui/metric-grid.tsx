@@ -45,7 +45,7 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-0 bg-card max-[700px]:grid-cols-2">
+    <div className="grid grid-cols-4 gap-0 bg-card max-mobile:grid-cols-2">
       {items.map((item) => (
         <MetricCard
           key={item.title}
@@ -54,7 +54,7 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
           unit={item.unit}
           sparkData={item.data}
           sparkColor={item.color}
-          className="rounded-none border-0 border-r border-border bg-transparent px-3.5 py-2.5 last:border-r-0 max-[700px]:border-b [&>div:nth-child(2)]:my-2 [&>div:nth-child(2)]:text-[22px]"
+          className="rounded-none border-0 border-r border-border bg-transparent px-3.5 py-2.5 last:border-r-0 max-mobile:border-b [&>div:nth-child(2)]:my-2 [&>div:nth-child(2)]:text-[22px]"
         />
       ))}
     </div>

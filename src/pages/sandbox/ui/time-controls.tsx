@@ -24,8 +24,8 @@ export const TimeControls = ({
   onOpenReset,
   onSpeedChange,
 }: TimeControlsProps) => (
-  <div className="flex items-center justify-between gap-2 border-y border-border bg-card px-3 py-2 max-[700px]:p-2">
-    <div className="flex items-center gap-[5px] max-[700px]:gap-0.5">
+  <div className="flex items-center justify-between gap-2 border-y border-border bg-card px-3 py-2 max-mobile:p-2">
+    <div className="flex items-center gap-[5px] max-mobile:gap-0.5">
       <Button
         type="button"
         variant="play"
@@ -54,7 +54,7 @@ export const TimeControls = ({
       >
         <RotateCcw size={15} />
       </Button>
-      <span className="font-mono text-[8px] tracking-[0.6px] text-muted-foreground ml-2 max-[700px]:text-[7px] max-[700px]:ml-0.5">
+      <span className="font-mono text-[8px] tracking-[0.6px] text-muted-foreground ml-2 max-mobile:text-[7px] max-mobile:ml-0.5">
         ТАКТ{' '}
         <b className="ml-1 font-normal text-foreground">
           {String(tick).padStart(5, '0')}
@@ -75,7 +75,7 @@ export const TimeControls = ({
         </Button>
       ))}
     </div>
-    <span className="font-mono text-[8px] text-muted-foreground max-[1180px]:hidden">
+    <span className="font-mono text-[8px] text-muted-foreground max-laptop:hidden">
       SEED {seed}
     </span>
   </div>

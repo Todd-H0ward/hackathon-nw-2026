@@ -26,7 +26,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     itemClass,
     isActive &&
-      "bg-secondary text-foreground before:absolute before:-left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:rounded-full before:bg-primary before:content-[''] max-[700px]:before:hidden",
+      "bg-secondary text-foreground before:absolute before:-left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:rounded-full before:bg-primary before:content-[''] max-mobile:before:hidden",
   );
 
 const RailLink = ({
@@ -55,13 +55,13 @@ const RailLink = ({
 export const LabRail = ({ seed, onExport, onOpenGuide }: LabRailProps) => (
   <nav
     aria-label="Навигация лаборатории"
-    className="flex w-12 shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card py-2.5 max-[700px]:h-12 max-[700px]:w-full max-[700px]:flex-row max-[700px]:border-r-0 max-[700px]:border-b max-[700px]:px-2.5 max-[700px]:py-0"
+    className="flex w-12 shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card py-2.5 max-mobile:h-12 max-mobile:w-full max-mobile:flex-row max-mobile:border-r-0 max-mobile:border-b max-mobile:px-2.5 max-mobile:py-0"
   >
     <Link
       to={STATIC_ROUTES.HOME}
       className={cn(
         itemClass,
-        'mb-2 text-xeno-green max-[700px]:mb-0 max-[700px]:mr-2',
+        'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
       )}
       title="XenoChoice — к выбору планеты"
       aria-label="XenoChoice — к выбору планеты"
@@ -100,7 +100,7 @@ export const LabRail = ({ seed, onExport, onOpenGuide }: LabRailProps) => (
       <CircleHelp size={17} />
     </button>
     <span
-      className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-[700px]:mt-0 max-[700px]:ml-2"
+      className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
       title="Локальная модель"
       role="img"
       aria-label="Локальная модель активна"
