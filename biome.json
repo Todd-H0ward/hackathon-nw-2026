@@ -17,7 +17,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedImports": {
+          "level": "error",
+          "fix": "safe"
+        }
+      }
     }
   },
   "javascript": {
@@ -67,23 +73,17 @@
               ":BLANK_LINE:",
               ":PACKAGE:",
               ":BLANK_LINE:",
-              "@/components/**",
+              ["@/components", "@/components/**"],
               ":BLANK_LINE:",
-              "@/contexts/**",
+              ["@/contexts", "@/contexts/**"],
               ":BLANK_LINE:",
-              "@/pages/**",
+              ["@/pages", "@/pages/**"],
               ":BLANK_LINE:",
-              "@/shared/**",
+              ["@/shared", "@/shared/**"],
               ":BLANK_LINE:",
               ":ALIAS:",
               ":BLANK_LINE:",
-              [
-                ":PATH:",
-                "!**/*.css",
-                "!**/*.scss",
-                "!**/*.sass",
-                "!**/*.less"
-              ],
+              [":PATH:", "!**/*.css", "!**/*.scss", "!**/*.sass", "!**/*.less"],
               ":BLANK_LINE:",
               ":STYLE:"
             ]

@@ -1,33 +1,64 @@
-# React + TypeScript + Vite
+# NW Step Hackathon — frontend template
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Vite + React 19 + TypeScript + React Router + TanStack Query + Axios + Tailwind 4 + shadcn (Base UI) + Biome.
 
-Currently, two official plugins are available:
+## Quick start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+pnpm install
+cp .env-example .env
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
-# hackathon-nw-2026
+## Scripts
+
+| Command        | Description                          |
+|----------------|--------------------------------------|
+| `pnpm dev`     | Start Vite dev server                |
+| `pnpm build`   | Typecheck and production build       |
+| `pnpm preview` | Preview production build             |
+| `pnpm lint`    | Run Biome linter                     |
+| `pnpm format`  | Format and autofix with Biome        |
+| `pnpm check`   | Biome check + TypeScript project refs|
+
+## Project structure
+
+```
+src/
+  components/   # app-level layouts / providers
+  contexts/     # React contexts (e.g. user session)
+  pages/        # route pages
+  shared/
+    api/        # Axios instance + endpoints
+    constants/  # routes, etc.
+    hooks/      # shared hooks (React Query, …)
+    lib/        # utilities (cn, …)
+    types/      # shared types
+    ui/         # shadcn UI primitives
+```
+
+Path alias: `@/*` → `src/*`.
+
+## Environment
+
+| Variable         | Description              |
+|------------------|--------------------------|
+| `VITE_API_URL`   | API base URL for Axios   |
+
+`GET /me` is available via `useCurrentUser` / `getCurrentUser`. Wire it into `UserProvider` when you need session bootstrap.
+
+## UI
+
+Add shadcn components with:
+
+```bash
+pnpm dlx shadcn@latest add <component>
+```
+
+Components land in `src/shared/ui`.
+
+## Stack notes
+
+- Imports are organized by Biome (`assist.source.organizeImports`).
+- Axios converts snake_case ↔ camelCase on request/response.
+- React Query defaults: `staleTime` 60s, limited retries, no refetch on focus.

@@ -1,22 +1,37 @@
-const camelCase = (value: string) => {
-  return value.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-};
+const CAMEL_CASE_RE = /[_-]([a-z])/gi;
+const SNAKE_CASE_RE = /([a-z0-9])([A-Z])/g;
 
-const transformKeys = <T>(value: T): T => {
+const toCamelCase = (value: string) =>
+  value.replace(CAMEL_CASE_RE, (_, letter: string) => letter.toUpperCase());
+
+const toSnakeCase = (value: string) =>
+  value.replace(SNAKE_CASE_RE, '$1_$2').replace(/-/g, '_').toLowerCase();
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  Object.prototype.toString.call(value) === '[object Object]';
+
+const transformKeys = <T>(
+  value: T,
+  transformKey: (key: string) => string,
+): T => {
   if (Array.isArray(value)) {
-    return value.map(transformKeys) as T;
+    return value.map((item) => transformKeys(item, transformKey)) as T;
   }
 
-  if (value !== null && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, value]) => [
-        camelCase(key),
-        transformKeys(value),
-      ]),
-    ) as T;
+  if (!isPlainObject(value)) {
+    return value;
   }
 
-  return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nested]) => [
+      transformKey(key),
+      transformKeys(nested, transformKey),
+    ]),
+  ) as T;
 };
 
-export { transformKeys };
+const keysToCamelCase = <T>(value: T): T => transformKeys(value, toCamelCase);
+
+const keysToSnakeCase = <T>(value: T): T => transformKeys(value, toSnakeCase);
+
+export { keysToCamelCase, keysToSnakeCase };

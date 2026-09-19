@@ -5,7 +5,7 @@ import { Providers } from '@/components/layouts';
 export const App = () => {
   return (
     <Providers>
-      <div className="h-full">
+      <div className="h-full min-h-full">
         <Outlet />
       </div>
     </Providers>

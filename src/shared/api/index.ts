@@ -1,1 +1,2 @@
-export { API } from './api.ts';
+export { API } from './api';
+export { queryClient } from './query-client';
