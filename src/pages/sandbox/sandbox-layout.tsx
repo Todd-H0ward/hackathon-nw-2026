@@ -1,11 +1,13 @@
-import { type CSSProperties, useState } from 'react';
-import { Outlet } from 'react-router';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
+import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
+import { readSandboxPose } from '@/features/planet-transition';
 import {
   getTransitionState,
   useLabBody,
@@ -17,6 +19,9 @@ import {
   useLabSetSeed,
   useLabSim,
   useLabStreamStatus,
+  useTransitionDirection,
+  useTransitionLaunch,
+  useTransitionPhase,
 } from '@/store';
 
 import { LabDialog, LabRail, LabStatus } from './ui';
@@ -27,8 +32,14 @@ const shellClassName =
   'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-mobile:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
 
 const SandboxShell = () => {
-  // Single mount point for the experiment lifecycle: one create, one socket.
   useLabBootstrap();
+
+  const navigate = useNavigate();
+  const launchTransition = useTransitionLaunch();
+  const reduceMotion = useReducedMotion();
+  const phase = useTransitionPhase();
+  const direction = useTransitionDirection();
+  const navigatedHome = useRef(false);
 
   const actions = useLabActions();
   const worlds = useWorldCatalog();
@@ -45,28 +56,61 @@ const SandboxShell = () => {
 
   const world = worlds.catalog[body];
 
-  // Arriving with a planet in flight: fade the lab in around it.
-  const [arriving] = useState(() => getTransitionState().phase !== 'idle');
+  const [arriving] = useState(
+    () =>
+      getTransitionState().phase !== 'idle' &&
+      getTransitionState().direction === 'forward',
+  );
+  const leavingHome =
+    direction === 'back' &&
+    (phase === 'handoff' || phase === 'flight' || phase === 'land');
+
+  const goHome = () => {
+    if (reduceMotion) {
+      navigate(STATIC_ROUTES.HOME);
+      return;
+    }
+    const pose = readSandboxPose();
+    if (!pose) {
+      navigate(STATIC_ROUTES.HOME);
+      return;
+    }
+    navigatedHome.current = false;
+    launchTransition(body, pose, 'back');
+  };
+
+  useEffect(() => {
+    if (phase !== 'handoff' || direction !== 'back') return;
+    if (navigatedHome.current) return;
+    navigatedHome.current = true;
+    navigate(STATIC_ROUTES.HOME);
+  }, [phase, direction, navigate]);
 
   return (
     <motion.div
       className={shellClassName}
       initial={arriving ? { opacity: 0 } : false}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
+      animate={{ opacity: leavingHome ? 0 : 1 }}
+      transition={{
+        duration: leavingHome ? 0.35 : 0.8,
+        ease: 'easeOut',
+        delay: arriving && !leavingHome ? 0.15 : 0,
+      }}
       data-expanded={expanded || undefined}
-      style={{ '--world-color': world?.color ?? '#70e0c4' } as CSSProperties}
+      style={
+        {
+          pointerEvents: phase !== 'idle' ? 'none' : undefined,
+          '--world-color': world?.color ?? '#70e0c4',
+        } as CSSProperties
+      }
     >
       <LabRail
         seed={sim.seed}
         onExport={actions.exportExperiment}
         onOpenGuide={() => setModal('guide')}
+        onGoHome={goHome}
       />
 
-      {/*
-        Anchors the floating LabStatus without reserving height. Scrolling lives
-        on the inner layer so the notice stays pinned instead of scrolling away.
-      */}
       <div className="relative min-h-0 min-w-0 flex-1">
         <LabStatus
           booting={booting}
@@ -74,7 +118,6 @@ const SandboxShell = () => {
           worldsLoading={worlds.isLoading}
           worldsError={worlds.isError}
         />
-        {/* Pages assume a loaded planet catalog; the notice explains the wait. */}
         <div className="h-full overflow-y-auto">
           {world ? <Outlet /> : null}
         </div>

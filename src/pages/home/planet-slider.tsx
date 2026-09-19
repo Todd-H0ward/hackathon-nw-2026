@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { type RefObject, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -27,6 +27,9 @@ type PlanetSliderProps = {
   setActiveSlide: (value: GlobeBodyId) => void;
   hiddenBody?: GlobeBodyId | null;
   catalog: PlanetInfoCatalog;
+  poseMeasureRef?: RefObject<
+    ((body: GlobeBodyId) => PlanetScreenPose | null) | null
+  >;
 };
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
@@ -42,6 +45,7 @@ export const PlanetSlider = ({
   setActiveSlide,
   hiddenBody = null,
   catalog,
+  poseMeasureRef,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
   const setBody = useLabSetBody();
@@ -78,7 +82,7 @@ export const PlanetSlider = ({
 
     // HomePage navigates once the overlay has picked the planet up.
     if (pose && !reduceMotion) {
-      launchTransition(body, pose);
+      launchTransition(body, pose, 'forward');
       return;
     }
     navigate(STATIC_ROUTES.SANDBOX);
@@ -106,6 +110,7 @@ export const PlanetSlider = ({
         onHoverPlanet={handleHoverPlanet}
         onPlanetClick={handlePlanetClick}
         hiddenBody={hiddenBody}
+        poseMeasureRef={poseMeasureRef}
       />
 
       <PlanetHoverCursor ref={cursorRef} catalog={catalog} />

@@ -85,10 +85,8 @@ const FlightScene = ({ body }: { body: GlobeBodyId }) => {
     let pose = store.from;
     if (store.phase === 'flight' || store.phase === 'land') {
       const target = store.resolveTarget?.();
-      if (!target) {
-        store.reset();
-        return;
-      }
+      // Destination may need a frame after navigate (esp. reverse → home carousel).
+      if (!target) return;
       pose = mixPose(store.from, target, progress.current);
     }
 
