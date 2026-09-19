@@ -148,6 +148,8 @@ export type MetricsSnapshot = {
   efficiency: number;
   decisionEntropy: number;
   deliveryLatency: number;
+  deliveryMeasured: boolean;
+  responseMeasured: boolean;
   responseLatency: number;
   birthsTotal: number;
   colonySplitsTotal: number;
@@ -171,9 +173,18 @@ export type EnergyBalance = {
   deathDissipation: number;
 };
 
-export type ExperimentStatus = 'ready' | 'running' | 'paused' | 'completed';
+export type ExperimentStatus =
+  | 'ready'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'error';
 
 export type StateSnapshot = {
+  mode: ExperimentMode;
+  flow: number;
+  noise: number;
+  interventions: Intervention[];
   tick: number;
   revision: number;
   checksum: string;
@@ -182,7 +193,13 @@ export type StateSnapshot = {
   individuals: Individual[];
   colonies: Colony[];
   channels: Channel[];
-  inTransit: unknown[];
+  inTransit: {
+    senderId: string;
+    receiverId: string;
+    emittedTick: number;
+    deliveryTick: number;
+    netEnergy: number;
+  }[];
   signals: Signal[];
   metrics: MetricsSnapshot;
   balance: EnergyBalance;
@@ -204,7 +221,9 @@ export type InterventionType =
   | 'impulse'
   | 'perturbation'
   | 'depletion'
-  | 'toggle_mutations';
+  | 'toggle_mutations'
+  | 'set_mode'
+  | 'set_channel';
 
 export type ExperimentMode = 'reactive' | 'adaptive' | 'evolutionary';
 
@@ -247,6 +266,11 @@ export type CommandResult = {
 };
 
 export type InterventionRequest = {
+  name?: string;
+  color?: string;
+  duration?: number;
+  params?: Record<string, number>;
+  genome?: Genome;
   type: InterventionType;
   targetId: string;
   value: number;
@@ -265,7 +289,7 @@ export type ExportBundle = {
   world: World;
   mode: ExperimentMode;
   status: ExperimentStatus;
-  seed: number;
+  seed: string;
   parameters: Record<string, number>;
   interventions: Intervention[];
   finalSnapshot: StateSnapshot;

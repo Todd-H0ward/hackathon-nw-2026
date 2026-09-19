@@ -20,6 +20,16 @@ const initialSims = (): Record<GlobeBodyId, Simulation> =>
  * API orchestration lives in `pages/sandbox/use-lab-bootstrap`.
  */
 export type LabStore = {
+  recording: {
+    id: string;
+    maxTick: number;
+    tick: number;
+    playing: boolean;
+  } | null;
+  setRecording: (recording: LabStore['recording']) => void;
+  colonyDraft: { lat: number; lng: number } | null;
+  setColonyDraft: (draft: LabStore['colonyDraft']) => void;
+  focusNonce: number;
   body: GlobeBodyId;
   sims: Record<GlobeBodyId, Simulation>;
   experimentIds: Partial<Record<GlobeBodyId, string>>;
@@ -55,6 +65,11 @@ export type LabStore = {
 };
 
 export const useLabStore = create<LabStore>((set) => ({
+  recording: null,
+  setRecording: (recording) => set({ recording }),
+  colonyDraft: null,
+  setColonyDraft: (colonyDraft) => set({ colonyDraft }),
+  focusNonce: 0,
   body: 'earth',
   sims: initialSims(),
   experimentIds: {},
@@ -82,7 +97,8 @@ export const useLabStore = create<LabStore>((set) => ({
   setStreamStatus: (streamStatus) => set({ streamStatus }),
 
   setSpeed: (speed) => set({ speed }),
-  setSelected: (selected) => set({ selected }),
+  setSelected: (selected) =>
+    set((state) => ({ selected, focusNonce: state.focusNonce + 1 })),
   selectFallback: (colonyId) =>
     set((state) => ({ selected: state.selected ?? colonyId })),
   toggleShowLinks: () => set((state) => ({ showLinks: !state.showLinks })),

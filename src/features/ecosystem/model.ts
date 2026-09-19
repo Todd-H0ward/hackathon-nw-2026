@@ -17,7 +17,6 @@ import type {
   DecisionAction,
   Colony as RemoteColony,
   Individual as RemoteIndividual,
-  Signal,
   StateSnapshot,
 } from '@/shared/api/xenochoice';
 import type { GlobeBodyId } from '@/shared/ui/globe';
@@ -26,9 +25,10 @@ const DEG2RAD = Math.PI / 180;
 /** How many ticks a dead individual stays rendered (fading out), like before. */
 const DEATH_FADE_TICKS = 16;
 
-export type Action = 'accumulate' | 'signal' | 'divide' | 'starve';
+export type Action = 'accumulate' | 'signal' | 'divide' | 'grow' | 'starve';
 export const ACTIONS: Record<Action, string> = {
   accumulate: 'Накапливает ресурс',
+  grow: 'Наращивает структуру',
   signal: 'Передаёт импульс',
   divide: 'Воспроизводится',
   starve: 'Экономит ресурс',
@@ -86,6 +86,7 @@ export type Metric = {
 };
 
 export type Simulation = {
+  snapshot?: StateSnapshot;
   body: GlobeBodyId;
   seed: number;
   tick: number;
@@ -142,6 +143,7 @@ const mapAction = (individual: RemoteIndividual): Action => {
   if (individual.starvationTicks > 0) return 'starve';
   const selected: DecisionAction | undefined =
     individual.lastDecision?.selectedAction;
+  if (selected === 'GROW') return 'grow';
   if (selected === 'DIVIDE') return 'divide';
   if (selected === 'TRANSFER') return 'signal';
   return 'accumulate';
@@ -162,7 +164,7 @@ const reasonFor = (individual: RemoteIndividual): string => {
  * example shows whole percents — accept either rather than render "7980 %".
  */
 const efficiencyPercent = (raw: number) => {
-  const percent = raw <= 1 ? raw * 100 : raw;
+  const percent = raw;
   return Math.min(100, Math.max(0, percent));
 };
 
@@ -270,7 +272,18 @@ export const snapshotToSimulation = (
   snapshot: StateSnapshot,
   carry: AdapterCarry,
 ): Simulation => {
+  if (snapshot.tick < (carry.history.at(-1)?.tick ?? 0)) {
+    Object.assign(carry, createAdapterCarry());
+  }
   syncEvents(snapshot, carry);
+  carry.settings = {
+    resource: snapshot.flow * 50,
+    noise: snapshot.noise * 100,
+    mutation: snapshot.mode === 'evolutionary',
+  };
+  carry.interventions = (snapshot.interventions ?? [])
+    .filter((i) => i.tick <= snapshot.tick)
+    .map((i) => ({ tick: i.tick, type: i.type }));
 
   if (carry.effect && snapshot.tick > carry.effect.until) {
     carry.effect = null;
@@ -317,12 +330,12 @@ export const snapshotToSimulation = (
     }),
   );
 
-  const packets: Packet[] = (snapshot.signals ?? []).map((s: Signal) => ({
+  const packets: Packet[] = (snapshot.inTransit ?? []).map((s) => ({
     from: numericId(s.senderId),
     to: numericId(s.receiverId),
     sent: s.emittedTick,
     arrival: s.deliveryTick,
-    energy: s.value,
+    energy: s.netEnergy,
   }));
 
   const remoteMetrics = snapshot.metrics;
@@ -333,7 +346,9 @@ export const snapshotToSimulation = (
     power: remoteMetrics.inputPower ?? 0,
     efficiency: efficiencyPercent(remoteMetrics.efficiency ?? 0),
     entropy: remoteMetrics.decisionEntropy ?? 0,
-    delay: remoteMetrics.deliveryLatency ?? null,
+    delay: remoteMetrics.responseMeasured
+      ? remoteMetrics.responseLatency
+      : null,
   };
   if (carry.history.at(-1)?.tick !== metric.tick) {
     carry.history.push(metric);
@@ -341,6 +356,7 @@ export const snapshotToSimulation = (
   }
 
   return {
+    snapshot,
     body,
     seed,
     tick: snapshot.tick,

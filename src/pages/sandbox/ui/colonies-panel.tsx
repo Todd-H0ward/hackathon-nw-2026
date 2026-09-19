@@ -163,6 +163,60 @@ export const ColoniesPanel = ({
         </p>
       </div>
     </div>
+    <div className="mt-3 grid gap-2 text-xs max-tablet:col-span-full">
+      <h3>Характеристики выбранной колонии</h3>
+      {sim.snapshot?.colonies
+        .filter((c) => c.id === colony?.remoteId)
+        .map((c) => (
+          <dl key={c.id} className="grid grid-cols-2 gap-1">
+            <dt>Запас энергии</dt>
+            <dd>{c.metrics.totalEnergy.toFixed(2)} EU</dd>
+            <dt>Структура</dt>
+            <dd>{c.metrics.totalBiomass.toFixed(2)} BU</dd>
+            <dt>Живых особей</dt>
+            <dd>{c.metrics.population}</dd>
+          </dl>
+        ))}
+      <details>
+        <summary className="cursor-pointer">
+          Особь: решения и наследование
+        </summary>
+        <div className="max-h-60 overflow-auto">
+          {sim.snapshot?.individuals
+            .filter((i) => i.colonyId === colony?.remoteId && i.alive)
+            .slice(0, 30)
+            .map((i) => (
+              <div key={i.id} className="my-2 rounded border p-2">
+                <b>
+                  {i.id} · поколение {i.generation}
+                </b>
+                <p>Родитель: {i.parentId ?? 'первичная структура'}</p>
+                <p>
+                  Энергия {i.energy.toFixed(2)} · структура{' '}
+                  {i.biomass.toFixed(2)} · память {i.memory.toFixed(3)}
+                </p>
+                <p>Выбор: {i.lastDecision?.selectedAction ?? '—'}</p>
+                <p>{i.lastDecision?.reasoning}</p>
+                <dl className="grid grid-cols-2">
+                  {Object.entries(i.lastDecision?.scores ?? {}).map(
+                    ([action, value]) => (
+                      <div key={action}>
+                        {action}: {value.toFixed(4)}
+                      </div>
+                    ),
+                  )}
+                </dl>
+                <p>
+                  Гены:{' '}
+                  {Object.entries(i.genome)
+                    .map(([key, value]) => `${key}=${value.toFixed(3)}`)
+                    .join(' · ')}
+                </p>
+              </div>
+            ))}
+        </div>
+      </details>
+    </div>
     <div className="mt-4 mb-2.5 flex items-center justify-between max-tablet:col-span-full max-tablet:mt-2.5">
       <h3 className="text-[10px] font-[450] m-0">Полевой журнал</h3>
       <span className="font-mono text-[7px] tracking-[1px] text-xeno-green">

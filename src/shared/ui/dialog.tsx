@@ -36,7 +36,9 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
       else if (!open && el.open) el.close();
     }, [open, ref]);
 
-    const handleCancel = (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
+    const handleCancel = (
+      e: React.SyntheticEvent<HTMLDialogElement, Event>,
+    ) => {
       e.preventDefault();
       onClose?.();
     };

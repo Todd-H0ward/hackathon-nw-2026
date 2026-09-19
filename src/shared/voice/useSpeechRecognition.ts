@@ -58,7 +58,14 @@ export const useSpeechRecognition = ({
     recognition.interimResults = false; // ждать финального результата
     recognition.maxAlternatives = 1;
 
+    let delivered = false;
+    recognition.onstart = () => {
+      delivered = false;
+    };
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      if (delivered) return;
+      delivered = true;
+      recognition.stop();
       const transcript = event.results[0]?.[0]?.transcript ?? '';
       onResultRef.current?.(transcript);
       setIsListening(false);
@@ -82,6 +89,9 @@ export const useSpeechRecognition = ({
     recognitionRef.current = recognition;
 
     return () => {
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
       recognition.abort();
     };
   }, [lang, isSupported]);

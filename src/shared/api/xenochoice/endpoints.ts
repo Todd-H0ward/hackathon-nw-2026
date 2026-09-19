@@ -57,3 +57,18 @@ export const exportExperiment = async (
 
 export const replayExperiment = (id: string, request: ReplayRequest) =>
   unwrap<StateSnapshot>(xenoApi.post(`/experiments/${id}/replay`, request));
+
+export const importExperiment = (bundle: unknown) =>
+  unwrap<Experiment>(xenoApi.post('/experiments/import', bundle));
+export const getExperiment = (id: string) =>
+  unwrap<Experiment>(xenoApi.get(`/experiments/${id}`));
+export const previewExperiment = (id: string, tick: number) =>
+  unwrap<StateSnapshot>(
+    xenoApi.get(`/experiments/${id}/preview`, { params: { tick } }),
+  );
+export const deleteExperiment = (id: string) =>
+  xenoApi.delete(`/experiments/${id}`);
+export const getMetrics = (id: string) =>
+  unwrap<import('./types').MetricsSnapshot[]>(
+    xenoApi.get(`/experiments/${id}/metrics`),
+  );

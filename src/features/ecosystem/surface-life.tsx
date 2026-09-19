@@ -210,12 +210,7 @@ const buildSceneViews = (
     }
 
     const labelPosition: Vec3 = [0, 0, 0];
-    writePosition(
-      labelPosition,
-      center.lat + 0.27,
-      center.lon,
-      LABEL_RADIUS,
-    );
+    writePosition(labelPosition, center.lat + 0.27, center.lon, LABEL_RADIUS);
 
     colonyViews.push({
       colony,
@@ -536,9 +531,7 @@ export const SurfaceLife = ({
         />
       ))}
       {showLinks &&
-        packetViews.map((view) => (
-          <PacketOverlay key={view.key} view={view} />
-        ))}
+        packetViews.map((view) => <PacketOverlay key={view.key} view={view} />)}
     </group>
   );
 };
