@@ -71,7 +71,7 @@ const styleArrow = (arrow: HTMLElement) => {
 const styleLabTourPopover = (popover: PopoverDOM) => {
   popover.title.className = cn(
     popover.title.className,
-    '!m-0 !mr-7 !block !text-base !font-medium !tracking-[-0.3px] !leading-snug !text-foreground',
+    '!m-0 !mr-20 !block !text-base !font-medium !tracking-[-0.3px] !leading-snug !text-foreground',
   );
   popover.description.className = cn(
     popover.description.className,
@@ -108,9 +108,9 @@ const styleLabTourPopover = (popover: PopoverDOM) => {
 
   popover.closeButton.className = cn(
     popover.closeButton.className,
-    '!absolute !top-2.5 !right-2.5 !z-[1] !inline-flex !h-auto !min-w-0',
-    '!cursor-pointer !items-center !justify-center !rounded !px-1.5 !py-0.5',
-    '!font-mono !text-[8px] !font-medium !tracking-[0.8px] !uppercase',
+    '!absolute !top-2.5 !right-2.5 !z-[1] !inline-flex !h-auto !w-auto !min-w-0 !max-w-none',
+    '!cursor-pointer !items-center !justify-center !whitespace-nowrap !rounded !px-2 !py-0.5',
+    '!font-mono !text-[8px] !font-medium !tracking-[0.4px] !uppercase',
     '!text-muted-foreground hover:!bg-secondary hover:!text-foreground',
     'focus:!bg-secondary focus:!text-foreground',
   );
