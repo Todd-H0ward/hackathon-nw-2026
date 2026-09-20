@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 
 import {
   Activity,
@@ -22,11 +22,12 @@ import {
 
 import { ResearchVoice } from '../research-voice';
 
-interface LabRailProps {
-  seed: number;
-  onExport: () => void;
-  onStartTour: () => void;
-  onGoHome: () => void;
+export interface LabRailProps {
+  seed?: number;
+  onExport?: () => void;
+  onStartTour?: () => void;
+  onOpenGuide?: () => void;
+  onGoHome?: () => void;
 }
 
 const itemClass =
@@ -43,17 +44,21 @@ interface RailLinkProps {
   to: string;
   end?: boolean;
   label: string;
+  onClick?: () => void;
   children: ReactNode;
 }
 
-const RailLink = ({ to, end, label, children }: RailLinkProps) => (
+const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
   <NavLink
     to={to}
     end={end}
     className={navClass}
     title={label}
     aria-label={label}
-    onClick={() => announceAction(label)}
+    onClick={() => {
+      announceAction(label);
+      onClick?.();
+    }}
   >
     {children}
   </NavLink>
@@ -64,9 +69,20 @@ export const LabRail = ({
   seed,
   onExport,
   onStartTour,
+  onOpenGuide,
   onGoHome,
 }: LabRailProps) => {
+  const navigate = useNavigate();
   const audio = useAudioPreferences();
+
+  const handleGoHome = () => {
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      navigate(STATIC_ROUTES.HOME);
+    }
+  };
+
   return (
     <nav
       aria-label="Навигация лаборатории"
@@ -75,10 +91,10 @@ export const LabRail = ({
       <button
         type="button"
         data-tour={TOUR_ANCHORS.ROLE}
-        onClick={onGoHome}
+        onClick={handleGoHome}
         className={cn(
           itemClass,
-          'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
+          'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2 cursor-pointer',
         )}
         title="XenoChoice — к выбору планеты"
         aria-label="XenoChoice — к выбору планеты"
@@ -103,41 +119,51 @@ export const LabRail = ({
 
       <div className="flex-1" />
 
-      <button
-        type="button"
-        data-tour={TOUR_ANCHORS.EXPORT}
-        className={itemClass}
-        title={`Экспорт эксперимента · seed ${seed}`}
-        aria-label="Экспорт эксперимента"
-        onClick={onExport}
-      >
-        <ArrowDownToLine size={17} />
-      </button>
-      <button
-        type="button"
-        className={itemClass}
-        title="Обучение: обзор лаборатории"
-        aria-label="Обучение: обзор лаборатории"
-        onClick={() => {
-          announceAction('Обучение');
-          onStartTour();
-        }}
-      >
-        <GraduationCap size={17} />
-      </button>
-      <button
-        type="button"
-        className={itemClass}
-        title="FAQ — скоро"
-        aria-label="FAQ — скоро"
-        disabled
+      {onExport ? (
+        <button
+          type="button"
+          data-tour={TOUR_ANCHORS.EXPORT}
+          className={cn(itemClass, 'cursor-pointer')}
+          title={
+            seed !== undefined
+              ? `Экспорт эксперимента · seed ${seed}`
+              : 'Экспорт эксперимента'
+          }
+          aria-label="Экспорт эксперимента"
+          onClick={onExport}
+        >
+          <ArrowDownToLine size={17} />
+        </button>
+      ) : null}
+
+      {onStartTour ? (
+        <button
+          type="button"
+          className={cn(itemClass, 'cursor-pointer')}
+          title="Обучение: обзор лаборатории"
+          aria-label="Обучение: обзор лаборатории"
+          onClick={() => {
+            announceAction('Обучение');
+            onStartTour();
+          }}
+        >
+          <GraduationCap size={17} />
+        </button>
+      ) : null}
+
+      <RailLink
+        to={STATIC_ROUTES.FAQ}
+        label="Справочник и FAQ"
+        onClick={onOpenGuide}
       >
         <CircleHelp size={17} />
-      </button>
+      </RailLink>
+
       <ResearchVoice />
+
       <button
         type="button"
-        className={itemClass}
+        className={cn(itemClass, 'cursor-pointer')}
         aria-label={
           audio.enabled
             ? 'Выключить озвучку действий'
@@ -156,6 +182,7 @@ export const LabRail = ({
       >
         {audio.enabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
       </button>
+
       <span
         className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
         title="Локальная модель"

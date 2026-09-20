@@ -1,3 +1,7 @@
+import { Link } from 'react-router';
+import { BookOpen } from 'lucide-react';
+
+import { STATIC_ROUTES } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
@@ -53,13 +57,20 @@ export const PlanetHood = ({
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={onEnter}
-          className="pointer-events-auto self-start"
-        >
-          Открыть лабораторию
-        </Button>
+        <div className="pointer-events-auto flex items-center gap-2.5 self-start">
+          <Button type="button" onClick={onEnter}>
+            Открыть лабораторию
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            render={<Link to={STATIC_ROUTES.FAQ} />}
+            className="gap-1.5 text-xs text-white/80 hover:text-white"
+          >
+            <BookOpen size={14} />
+            <span>Справочник</span>
+          </Button>
+        </div>
         <dl
           key={`${info.id}-stats`}
           className="grid grid-cols-3 gap-x-4 gap-y-3"

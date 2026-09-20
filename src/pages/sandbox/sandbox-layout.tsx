@@ -136,6 +136,7 @@ const SandboxShell = () => {
         seed={sim.seed}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
+        onOpenGuide={() => navigate(STATIC_ROUTES.FAQ)}
         onGoHome={goHome}
       />
 
