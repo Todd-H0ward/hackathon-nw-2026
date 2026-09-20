@@ -51,6 +51,8 @@ const SIDE_SCALE = 0.62;
 /** Start shrinking toward 0 past the side slot so the ring wrap is invisible. */
 const EDGE_FADE_START = Math.max(1, RING_HALF - 0.45);
 const SWIPE_PX = 56;
+/** Ignore micro-jitter so a tap still counts as a click (esp. touch). */
+const CLICK_CANCEL_MOVE_PX = 12;
 const OFFSET_DAMP = 4.2;
 const POSE_DAMP = 6.0;
 /** If target X jumps farther than this, the ring wrapped — snap, don't lerp through center. */
@@ -87,6 +89,8 @@ interface CarouselSceneProps {
   fxConfigRef: RefObject<GlobeConfig>;
   onHoverPlanet?: (payload: PlanetHoverPayload | null) => void;
   hoveredBodyRef: RefObject<GlobeBodyId | null>;
+  /** Set on mesh pointerdown — touch has no prior hover. */
+  clickBodyRef: RefObject<GlobeBodyId | null>;
   hiddenBodyRef: RefObject<GlobeBodyId | null>;
   measureRef: RefObject<MeasureBody | null>;
 }
@@ -98,6 +102,7 @@ const CarouselScene = ({
   fxConfigRef,
   onHoverPlanet,
   hoveredBodyRef,
+  clickBodyRef,
   hiddenBodyRef,
   measureRef,
 }: CarouselSceneProps) => {
@@ -243,6 +248,16 @@ const CarouselScene = ({
           />
           {/* Invisible hit target — point cloud does not receive pointers. */}
           <mesh
+            onPointerDown={(event) => {
+              // Touch never gets pointerover before down — stamp the hit here.
+              hoveredBodyRef.current = body;
+              clickBodyRef.current = body;
+              onHoverPlanet?.({
+                body,
+                clientX: event.clientX,
+                clientY: event.clientY,
+              });
+            }}
             onPointerOver={(event) => {
               event.stopPropagation();
               document.body.style.cursor = 'pointer';
@@ -358,14 +373,17 @@ export const GlobeCarouselCanvas = ({
     dragging.current = true;
     dragMoved.current = false;
     dragOffsetRef.current = 0;
-    clickBodyRef.current = hoveredBodyRef.current;
+    // Prefer mesh hit from R3F (set in onPointerDown); hover is desktop-only.
+    if (!clickBodyRef.current) {
+      clickBodyRef.current = hoveredBodyRef.current;
+    }
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragging.current || pointerX.current === null) return;
     const deltaPx = event.clientX - pointerX.current;
-    if (Math.abs(deltaPx) > 6) {
+    if (Math.abs(deltaPx) > CLICK_CANCEL_MOVE_PX) {
       dragMoved.current = true;
       clickBodyRef.current = null;
       onHoverPlanet?.(null);
@@ -386,18 +404,37 @@ export const GlobeCarouselCanvas = ({
     const deltaPx = clientX - pointerX.current;
     const clickedBody = clickBodyRef.current;
     const currentDragOffset = dragOffsetRef.current;
+    const wasTap = !dragMoved.current && Math.abs(deltaPx) < SWIPE_PX;
     dragging.current = false;
     pointerX.current = null;
-    clickBodyRef.current = null;
 
     // Smoothly absorb the drag offset into offsetRef so position is 100% continuous
     offsetRef.current += currentDragOffset;
     dragOffsetRef.current = 0;
 
-    if (Math.abs(deltaPx) < SWIPE_PX) {
-      if (!dragMoved.current && clickedBody) {
-        onPlanetClick?.(clickedBody, measureRef.current?.(clickedBody) ?? null);
+    if (wasTap) {
+      const fireClick = (body: GlobeBodyId) => {
+        onPlanetClick?.(body, measureRef.current?.(body) ?? null);
+        clickBodyRef.current = null;
+      };
+
+      if (clickedBody) {
+        fireClick(clickedBody);
+      } else {
+        // Touch: R3F mesh pointerdown can land after this DOM handler.
+        requestAnimationFrame(() => {
+          const lateHit = clickBodyRef.current ?? hoveredBodyRef.current;
+          if (lateHit) fireClick(lateHit);
+          else clickBodyRef.current = null;
+        });
       }
+      dragMoved.current = false;
+      return;
+    }
+
+    clickBodyRef.current = null;
+
+    if (Math.abs(deltaPx) < SWIPE_PX) {
       dragMoved.current = false;
       return;
     }
@@ -447,6 +484,7 @@ export const GlobeCarouselCanvas = ({
           fxConfigRef={fxConfigRef}
           onHoverPlanet={onHoverPlanet}
           hoveredBodyRef={hoveredBodyRef}
+          clickBodyRef={clickBodyRef}
           hiddenBodyRef={hiddenBodyRef}
           measureRef={measureRef}
         />
