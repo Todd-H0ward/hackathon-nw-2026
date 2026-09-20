@@ -1,8 +1,8 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 import { Stars } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { Color } from 'three';
+import { Color, type Points } from 'three';
 
 /**
  * Soft background starfield for home carousel and sandbox viewport.
@@ -15,6 +15,7 @@ import { Color } from 'three';
  */
 export const Starfield = ({ dense = false }: { dense?: boolean }) => {
   const { scene, gl } = useThree();
+  const starsRef = useRef<Points>(null);
 
   useLayoutEffect(() => {
     const prevBackground = scene.background;
@@ -27,8 +28,16 @@ export const Starfield = ({ dense = false }: { dense?: boolean }) => {
     };
   }, [gl, scene]);
 
+  useLayoutEffect(() => {
+    const points = starsRef.current;
+    if (!points) return;
+    // Behind globe / haze transparent passes.
+    points.renderOrder = -1000;
+  }, []);
+
   return (
     <Stars
+      ref={starsRef}
       radius={dense ? 55 : 50}
       depth={dense ? 30 : 28}
       count={dense ? 3500 : 2800}
