@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 
 import { cn } from '@/shared/lib/utils';
@@ -8,11 +8,13 @@ import { cn } from '@/shared/lib/utils';
 import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
 import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS } from './config';
 import { Globe } from './globe';
+import { Starfield } from './starfield';
 
+/** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
   fov: 35,
   near: 0.1,
-  far: 100,
+  far: 1000,
   position: [0, 0, 7] as [number, number, number],
 };
 
@@ -20,7 +22,7 @@ const CAMERA = {
 export const GLOBE_FILL_CAMERA = {
   fov: 42,
   near: 0.1,
-  far: 100,
+  far: 1000,
   position: [0, 0, 8.6] as [number, number, number],
 };
 
@@ -103,17 +105,7 @@ export const GlobeCanvas = ({
   const scene = (
     <>
       <ambientLight intensity={fill ? 0.5 : 0.55} />
-      {stars ? (
-        <Stars
-          radius={70}
-          depth={30}
-          count={1300}
-          factor={2}
-          saturation={0}
-          fade
-          speed={0.15}
-        />
-      ) : null}
+      {stars ? <Starfield dense={fill} /> : null}
       <Globe config={config} colorUrl={maps.color} />
       {interactive ? (
         fill ? (
