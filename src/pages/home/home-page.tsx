@@ -42,10 +42,14 @@ export const HomePage = () => {
   );
 
   const handingOffForward = phase === 'handoff' && direction === 'forward';
+  // Keep home under the ferry until land so we don't flash a small carousel planet.
+  const showHome = direction !== 'back' || phase === 'land' || phase === 'idle';
   const hideTransitionBody =
     !!transitionBody &&
     phase !== 'idle' &&
-    (direction === 'forward' ? phase === 'handoff' : phase !== 'launch');
+    (direction === 'forward'
+      ? phase === 'handoff'
+      : phase === 'handoff' || phase === 'flight');
   const activeInfo = catalog[activeSlide];
 
   useEffect(() => {
@@ -62,9 +66,10 @@ export const HomePage = () => {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // Reverse: arm carousel landing once it can report a pose.
+  // Reverse: arm carousel landing once. Do not depend on `phase` — clearing the
+  // target on handoff→flight restarts the ferry (shrink → grow → shrink).
   useEffect(() => {
-    if (direction !== 'back' || phase === 'idle') return;
+    if (direction !== 'back') return;
     const body = getTransitionState().body;
     if (!body) return;
 
@@ -91,7 +96,7 @@ export const HomePage = () => {
       const state = getTransitionState();
       if (state.direction === 'back') state.setTarget(null);
     };
-  }, [direction, phase]);
+  }, [direction]);
 
   return (
     <motion.div
@@ -100,7 +105,7 @@ export const HomePage = () => {
       initial={
         direction === 'back' && phase !== 'idle' ? { opacity: 0 } : false
       }
-      animate={{ opacity: handingOffForward ? 0 : 1 }}
+      animate={{ opacity: handingOffForward || !showHome ? 0 : 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
       onAnimationComplete={() => {
         if (navigated.current) return;

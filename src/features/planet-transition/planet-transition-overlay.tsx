@@ -5,10 +5,14 @@ import { animate, motion } from 'motion/react';
 import { type Group, MathUtils, type PerspectiveCamera } from 'three';
 
 import {
+  GLOBE_DEFAULTS,
   GLOBE_MAPS,
   GLOBE_TRANSITION_DPR,
   Globe,
   type GlobeBodyId,
+  type GlobeConfig,
+  HOME_CAROUSEL_LOOK,
+  lerpGlobeConfig,
   type PlanetScreenPose,
   resolveGlobeConfig,
 } from '@/shared/ui/globe';
@@ -16,6 +20,7 @@ import {
 import {
   getTransitionState,
   useTransitionBody,
+  useTransitionDirection,
   useTransitionHasTarget,
   useTransitionPhase,
   useTransitionReset,
@@ -46,6 +51,11 @@ const mixPose = (
   distance: MathUtils.lerp(a.distance, b.distance, t),
 });
 
+const smoothstep = (t: number) => {
+  const x = MathUtils.clamp(t, 0, 1);
+  return x * x * (3 - 2 * x);
+};
+
 interface FlightSceneProps {
   body: GlobeBodyId;
 }
@@ -54,11 +64,34 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   const groupRef = useRef<Group>(null);
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const size = useThree((state) => state.size);
-  const config = useMemo(() => resolveGlobeConfig(body), [body]);
+  const direction = useTransitionDirection();
   const hasTarget = useTransitionHasTarget();
 
+  // Forward: carousel motion → sandbox rest. Back: sandbox rest → carousel motion.
+  // RESOLUTION stays on the destination density so land matches the sandbox viewport.
+  const { fromConfig, toConfig, baseConfig } = useMemo(() => {
+    const carousel = resolveGlobeConfig(body, {
+      RESOLUTION: GLOBE_DEFAULTS.RESOLUTION,
+      ...HOME_CAROUSEL_LOOK[body],
+    });
+    const sandbox = resolveGlobeConfig(body, {
+      RESOLUTION: GLOBE_DEFAULTS.RESOLUTION,
+    });
+    if (direction === 'forward') {
+      return { fromConfig: carousel, toConfig: sandbox, baseConfig: carousel };
+    }
+    return { fromConfig: sandbox, toConfig: carousel, baseConfig: sandbox };
+  }, [body, direction]);
+
+  const liveConfigRef = useRef<GlobeConfig>(baseConfig);
   const frames = useRef(0);
   const progress = useRef(0);
+
+  useEffect(() => {
+    liveConfigRef.current = baseConfig;
+    frames.current = 0;
+    progress.current = 0;
+  }, [baseConfig]);
 
   // motion drives the timeline; the frame loop maps it onto the live target.
   useEffect(() => {
@@ -87,6 +120,15 @@ const FlightScene = ({ body }: FlightSceneProps) => {
       store.setPhase('handoff');
     }
 
+    let blend = 0;
+    if (store.phase === 'flight') blend = progress.current;
+    else if (store.phase === 'land') blend = 1;
+    liveConfigRef.current = lerpGlobeConfig(
+      fromConfig,
+      toConfig,
+      smoothstep(blend),
+    );
+
     let pose = store.from;
     if (store.phase === 'flight' || store.phase === 'land') {
       const target = store.resolveTarget?.();
@@ -95,6 +137,7 @@ const FlightScene = ({ body }: FlightSceneProps) => {
       pose = mixPose(store.from, target, progress.current);
     }
 
+    const cfg = liveConfigRef.current;
     // Render as if from a camera centered on the planet (like the source and
     // target canvases) and crop the viewport out of that larger frame, so the
     // globe stays on-axis and lands without perspective skew. The eye distance
@@ -102,7 +145,7 @@ const FlightScene = ({ body }: FlightSceneProps) => {
     const { width, height } = size;
     const fullWidth = 2 * Math.max(pose.x, width - pose.x, 1);
     const fullHeight = 2 * Math.max(pose.y, height - pose.y, 1);
-    const alpha = Math.asin(Math.min(0.999, config.RADIUS / pose.distance));
+    const alpha = Math.asin(Math.min(0.999, cfg.RADIUS / pose.distance));
     const tanHalf =
       (Math.tan(alpha) * fullHeight) / (2 * Math.max(1, pose.radius));
     camera.fov = MathUtils.radToDeg(2 * Math.atan(tanHalf));
@@ -121,7 +164,11 @@ const FlightScene = ({ body }: FlightSceneProps) => {
 
   return (
     <group ref={groupRef}>
-      <Globe config={config} colorUrl={GLOBE_MAPS[body].color} />
+      <Globe
+        config={baseConfig}
+        liveConfigRef={liveConfigRef}
+        colorUrl={GLOBE_MAPS[body].color}
+      />
     </group>
   );
 };

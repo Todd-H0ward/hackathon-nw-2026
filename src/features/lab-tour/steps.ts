@@ -31,7 +31,7 @@ export const LAB_TOUR_STEPS: DriveStep[] = [
   {
     element: tourAnchorSelector(TOUR_ANCHORS.HABITAT),
     popover: {
-      title: '01 · Среда обитания',
+      title: 'Среда обитания',
       description:
         'Выберите планету. Реальные тела имеют разные температуру, гравитацию и давление; коэффициенты жизни — допущения модели.',
       side: 'right',
@@ -41,7 +41,7 @@ export const LAB_TOUR_STEPS: DriveStep[] = [
   {
     element: tourAnchorSelector(TOUR_ANCHORS.SETTINGS),
     popover: {
-      title: '02 · Условия эксперимента',
+      title: 'Условия эксперимента',
       description:
         'Задайте приток ресурса, шум среды и мутации при делении. Эти параметры определяют, насколько легко сообществам выживать и ветвиться.',
       side: 'right',
@@ -91,7 +91,7 @@ export const LAB_TOUR_STEPS: DriveStep[] = [
   {
     element: tourAnchorSelector(TOUR_ANCHORS.COLONIES),
     popover: {
-      title: '03 · Живые сообщества',
+      title: 'Живые сообщества',
       description:
         'Список колоний на планете. Выберите сообщество, чтобы изучить его состав и историю.',
       side: 'left',

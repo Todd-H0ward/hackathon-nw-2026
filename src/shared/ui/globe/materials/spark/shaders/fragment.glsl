@@ -36,7 +36,7 @@ void main() {
   float hemi = 0.55 + 0.45 * max(vWorldNormal.y, 0.0);
   vec3 litColor = baseColor * (1.0 + uEnvIntensity * (hemi - 0.5));
 
-  vec3 hdrColor = litColor * 2.2;
+  vec3 hdrColor = litColor * 1.35;
   float grain = interleavedGradientNoise(gl_FragCoord.xy);
   hdrColor += (grain - 0.5) * (2.0 / 255.0);
 

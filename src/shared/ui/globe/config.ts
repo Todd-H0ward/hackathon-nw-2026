@@ -31,7 +31,7 @@ export type GlobeConfig = {
 export const GLOBE_BLOOM_DPR: [number, number] = [1, 1.5];
 
 /** Overlay canvas that shares the screen with the page globe during ferry. */
-export const GLOBE_TRANSITION_DPR = 1;
+export const GLOBE_TRANSITION_DPR: [number, number] = [1, 1.5];
 
 export const GLOBE_DEFAULTS: GlobeConfig = {
   RESOLUTION: 400,
@@ -43,7 +43,7 @@ export const GLOBE_DEFAULTS: GlobeConfig = {
   DEPTH_MAX: 1,
   DEPTH_RADIUS: 1.15,
   TINT: '#f2f2f2',
-  ENV_FILL: 0.35,
+  ENV_FILL: 0.3,
   SPIN: 0,
   JITTER: 0,
   HAZE_OPACITY: 0.021,
@@ -53,8 +53,8 @@ export const GLOBE_DEFAULTS: GlobeConfig = {
   HAZE_DOT_DIV: 8.1,
   HAZE_COLOR_SCALE: 1.5,
   HAZE_RADIUS: 1.2,
-  BLOOM_INTENSITY: 0.264,
-  BLOOM_THRESHOLD: 0,
+  BLOOM_INTENSITY: 0.22,
+  BLOOM_THRESHOLD: 0.22,
   BLOOM_SMOOTHING: 0.55,
   BLOOM_RADIUS: 0.68,
 };

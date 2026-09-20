@@ -20,7 +20,11 @@ import {
   type WorldInfo,
 } from '@/features/ecosystem';
 import { registerSandboxPose } from '@/features/planet-transition';
-import { getTransitionState, useTransitionPhase } from '@/store';
+import {
+  getTransitionState,
+  useTransitionDirection,
+  useTransitionPhase,
+} from '@/store';
 
 import { ResearchScene } from '../research-scene';
 import { SceneBoundary } from './scene-boundary';
@@ -87,11 +91,16 @@ export const PlanetViewport = ({
 }: PlanetViewportProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const transitionPhase = useTransitionPhase();
+  const transitionDirection = useTransitionDirection();
   // The planet is still in flight — show ours once it lands.
   const sceneHidden =
     transitionPhase === 'launch' ||
     transitionPhase === 'handoff' ||
     transitionPhase === 'flight';
+  // Keep colonies/overlays off until the ferry has fully handed off.
+  const showSurface =
+    transitionPhase === 'idle' ||
+    (transitionDirection === 'back' && !sceneHidden);
 
   useEffect(() => {
     const resolve = () => measureViewportPose(sectionRef.current);
@@ -163,14 +172,22 @@ export const PlanetViewport = ({
             stars
             interactive
           >
-            <ResearchScene sim={sim} selected={selected} reset={cameraReset} />
-            <SurfaceLife
-              simulation={sim}
-              selected={selected}
-              showLinks={showLinks}
-              showLabels={showLabels}
-              onSelect={onSelect}
-            />
+            {showSurface ? (
+              <>
+                <ResearchScene
+                  sim={sim}
+                  selected={selected}
+                  reset={cameraReset}
+                />
+                <SurfaceLife
+                  simulation={sim}
+                  selected={selected}
+                  showLinks={showLinks}
+                  showLabels={showLabels}
+                  onSelect={onSelect}
+                />
+              </>
+            ) : null}
           </GlobeCanvas>
         </SceneBoundary>
       </motion.div>

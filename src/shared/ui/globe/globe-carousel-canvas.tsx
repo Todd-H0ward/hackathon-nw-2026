@@ -15,6 +15,7 @@ import {
   type GlobeBodyId,
   resolveGlobeConfig,
 } from './bodies';
+import { HOME_CAROUSEL_LOOK, HOME_CAROUSEL_RESOLUTION } from './carousel-look';
 import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
@@ -65,30 +66,6 @@ const wrapCentered = (value: number, length: number) => {
 };
 
 type MeasureBody = (body: GlobeBodyId) => PlanetScreenPose | null;
-
-const HOME_CAROUSEL_LOOK: Record<GlobeBodyId, Partial<GlobeConfig>> = {
-  earth: {
-    HAZE_OPACITY: 0.14,
-    HAZE_MUL: 10.5,
-    BLOOM_INTENSITY: 1.75,
-    SPIN: 0.0001,
-    JITTER: 0.014,
-  },
-  mars: {
-    HAZE_OPACITY: 0.08,
-    HAZE_MUL: 7.5,
-    BLOOM_INTENSITY: 1.35,
-    SPIN: 0.00008,
-    JITTER: 0.014,
-  },
-  venus: {
-    HAZE_OPACITY: 0.28,
-    HAZE_MUL: 14.0,
-    BLOOM_INTENSITY: 2.2,
-    SPIN: 0.00004,
-    JITTER: 0.014,
-  },
-};
 
 export type PlanetHoverPayload = {
   body: GlobeBodyId;
@@ -232,7 +209,7 @@ const CarouselScene = ({
         body,
         config: resolveGlobeConfig(body, {
           RADIUS: GLOBE_DEFAULTS.RADIUS,
-          RESOLUTION: 280,
+          RESOLUTION: HOME_CAROUSEL_RESOLUTION,
           ...HOME_CAROUSEL_LOOK[body],
         }),
         colorUrl: GLOBE_MAPS[body].color,

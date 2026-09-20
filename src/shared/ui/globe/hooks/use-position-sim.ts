@@ -30,6 +30,11 @@ export type UsePositionSimParams = {
    * Defaults to always on (sandbox / single-globe canvases).
    */
   enabledRef?: RefObject<boolean>;
+  /**
+   * Optional per-frame spin/jitter source (ferry look morph). When set, overrides
+   * the static `spin` / `jitter` props inside the evolve loop.
+   */
+  motionRef?: RefObject<{ spin: number; jitter: number }>;
 };
 
 export type UsePositionSimResult = {
@@ -53,6 +58,7 @@ export const usePositionSim = ({
   spin = 0,
   jitter = 0,
   enabledRef,
+  motionRef,
 }: UsePositionSimParams): UsePositionSimResult => {
   const { gl } = useThree();
   const [ready, setReady] = useState(false);
@@ -148,6 +154,7 @@ export const usePositionSim = ({
 
   const paramsRef = useRef({ spin, jitter });
   paramsRef.current = { spin, jitter };
+  const settleRestRef = useRef(false);
 
   useFrame((_, delta) => {
     if (!ready) return;
@@ -161,9 +168,20 @@ export const usePositionSim = ({
 
     const read = flipRef.current ? previous : current;
     const write = flipRef.current ? current : previous;
-    const { spin: nextSpin, jitter: nextJitter } = paramsRef.current;
-    if (nextSpin === 0 && nextJitter === 0) return;
+    const { spin: nextSpin, jitter: nextJitter } =
+      motionRef?.current ?? paramsRef.current;
 
+    // When motion stops, blit rest once so the cloud matches a fresh sandbox globe.
+    if (nextSpin === 0 && nextJitter === 0) {
+      if (!settleRestRef.current) return;
+      settleRestRef.current = false;
+      blitMaterial.uniforms.uTexture.value = restTexture;
+      draw(blitMaterial, write);
+      flipRef.current = !flipRef.current;
+      return;
+    }
+
+    settleRestRef.current = true;
     timeRef.current += delta * 0.3;
 
     evolveMaterial.uniforms.uPrev.value = read.texture;
