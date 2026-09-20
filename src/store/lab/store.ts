@@ -5,6 +5,8 @@ import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import { emptySimulation, type Simulation } from '@/features/ecosystem';
 
+import { syncLabSimRef } from './sim-ref';
+
 export type LabModal = 'reset' | 'replay' | 'extinct' | null;
 
 export const DEFAULT_SEED = 2048;
@@ -79,7 +81,7 @@ export const useLabStore = create<LabStore>((set) => ({
   speed: 1,
   selected: null,
   showLinks: true,
-  showLabels: true,
+  showLabels: false,
   modal: null,
   cameraReset: 0,
   expanded: false,
@@ -97,12 +99,15 @@ export const useLabStore = create<LabStore>((set) => ({
       ) {
         return state;
       }
+      syncLabSimRef(body, sim);
       return { sims: { ...state.sims, [body]: sim } };
     }),
   patchSim: (body, patch) =>
-    set((state) => ({
-      sims: { ...state.sims, [body]: { ...state.sims[body], ...patch } },
-    })),
+    set((state) => {
+      const next = { ...state.sims[body], ...patch };
+      syncLabSimRef(body, next);
+      return { sims: { ...state.sims, [body]: next } };
+    }),
   setExperimentIds: (experimentIds) => set({ experimentIds }),
   setBooting: (booting) => set({ booting }),
   setStreamStatus: (streamStatus) => set({ streamStatus }),
@@ -120,3 +125,8 @@ export const useLabStore = create<LabStore>((set) => ({
   toggleExpanded: () => set((state) => ({ expanded: !state.expanded })),
   setSeed: (seed) => set({ seed }),
 }));
+
+// Keep refs aligned with the initial empty sims.
+for (const id of GLOBE_BODY_IDS) {
+  syncLabSimRef(id, useLabStore.getState().sims[id]);
+}

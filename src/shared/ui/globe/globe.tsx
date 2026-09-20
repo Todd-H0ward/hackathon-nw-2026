@@ -1,12 +1,14 @@
-import { type RefObject, useRef } from 'react';
+import { type RefObject, useEffect, useRef } from 'react';
 
 import { useTexture } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import {
   AdditiveBlending,
   BackSide,
   type Mesh,
   type ShaderMaterial,
+  type Texture,
+  TextureLoader,
 } from 'three';
 
 import { GLOBE_DEFAULTS, type GlobeConfig } from './config';
@@ -48,6 +50,16 @@ export const Globe = ({
   motion.current.jitter = live.current.JITTER;
 
   const colorTex = useTexture(colorUrl);
+  // Drop previous color map from GPU + drei/suspend cache when the body
+  // hot-swaps (sandbox). Skip unmount dispose — ferry + carousel share URLs.
+  const prevColor = useRef<{ url: string; tex: Texture } | null>(null);
+  useEffect(() => {
+    const prev = prevColor.current;
+    prevColor.current = { url: colorUrl, tex: colorTex };
+    if (!prev || prev.url === colorUrl) return;
+    prev.tex.dispose();
+    useLoader.clear(TextureLoader, prev.url);
+  }, [colorTex, colorUrl]);
 
   const geometry = usePointGrid(config.RESOLUTION);
   const sim = usePositionSim({
@@ -59,6 +71,9 @@ export const Globe = ({
   });
 
   useFrame(() => {
+    // Side / hidden carousel planets: skip uniform churn while GPGPU is frozen.
+    if (simEnabledRef && !simEnabledRef.current) return;
+
     if (liveConfigRef?.current) live.current = liveConfigRef.current;
     motion.current.spin = live.current.SPIN;
     motion.current.jitter = live.current.JITTER;

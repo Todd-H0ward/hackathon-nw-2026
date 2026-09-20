@@ -10,10 +10,14 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import { LabRail, ToastProvider } from '@/shared/ui';
+import { type LabConnectionStatus, LabRail, ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem';
-import { useLabTour } from '@/features/lab-tour';
+import {
+  isLabTourSeen,
+  markLabTourSeen,
+  useLabTour,
+} from '@/features/lab-tour';
 import { readSandboxPose } from '@/features/planet-transition';
 import {
   getLabState,
@@ -25,8 +29,10 @@ import {
   useLabSeed,
   useLabSetModal,
   useLabSetSeed,
-  useLabSim,
+  useLabSimDialogStats,
+  useLabSimSeed,
   useLabStreamStatus,
+  useLabToggleExpanded,
   useTransitionDirection,
   useTransitionLaunch,
   useTransitionPhase,
@@ -35,7 +41,7 @@ import {
 import { ColonyBuilder } from './colony-builder';
 import { ResearchPanel } from './research-panel';
 import { ResearchVoice } from './research-voice';
-import { LabDialog, LabStatus } from './ui';
+import { LabDialog, LabFirstRunDialog, LabStatus } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabBootstrap } from './use-lab-bootstrap';
 
@@ -57,17 +63,44 @@ const SandboxShell = () => {
   const worlds = useWorldCatalog();
 
   const body = useLabBody();
-  const sim = useLabSim();
+  const simSeed = useLabSimSeed();
+  const dialogStats = useLabSimDialogStats();
   const seed = useLabSeed();
   const setSeed = useLabSetSeed();
   const modal = useLabModal();
   const setModal = useLabSetModal();
   const expanded = useLabExpanded();
+  const toggleExpanded = useLabToggleExpanded();
   const booting = useLabBooting();
   const streamStatus = useLabStreamStatus();
 
   const world = worlds.catalog[body];
   const editorActive = location.pathname === STATIC_ROUTES.SANDBOX;
+
+  const connectionStatus: LabConnectionStatus = (() => {
+    if (worlds.isError || streamStatus === 'failed') return 'offline';
+    if (
+      worlds.isLoading ||
+      booting ||
+      streamStatus === 'connecting' ||
+      streamStatus === 'reconnecting'
+    ) {
+      return 'degraded';
+    }
+    if (streamStatus === 'open') return 'online';
+    return 'degraded';
+  })();
+
+  useEffect(() => {
+    if (!expanded || modal !== null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      toggleExpanded();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [expanded, modal, toggleExpanded]);
 
   const pauseIfRunning = useCallback(() => {
     const { body: current, sims } = getLabState();
@@ -83,6 +116,7 @@ const SandboxShell = () => {
     phase,
     modalOpen: modal !== null,
     onPause: pauseIfRunning,
+    autoStart: false,
   });
 
   const [arriving] = useState(
@@ -90,6 +124,36 @@ const SandboxShell = () => {
       getTransitionState().phase !== 'idle' &&
       getTransitionState().direction === 'forward',
   );
+  const [firstRunOpen, setFirstRunOpen] = useState(false);
+  const [firstRunDone, setFirstRunDone] = useState(() => isLabTourSeen());
+
+  // First-visit gate: after ferry settles and the editor mounts, ask before
+  // dumping the user into dense chrome. Skip marks the tour as seen.
+  useEffect(() => {
+    if (firstRunDone || firstRunOpen || isLabTourSeen()) return;
+    if (!editorActive || !world || worlds.isLoading || booting) return;
+    if (phase !== 'idle' || modal !== null) return;
+
+    const delayMs = arriving ? 1000 : 450;
+    const timer = window.setTimeout(() => {
+      if (isLabTourSeen()) return;
+      pauseIfRunning();
+      setFirstRunOpen(true);
+    }, delayMs);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    arriving,
+    booting,
+    editorActive,
+    firstRunDone,
+    firstRunOpen,
+    modal,
+    pauseIfRunning,
+    phase,
+    world,
+    worlds.isLoading,
+  ]);
   const leavingHome =
     direction === 'back' &&
     (phase === 'handoff' || phase === 'flight' || phase === 'land');
@@ -134,11 +198,14 @@ const SandboxShell = () => {
       }
     >
       <LabRail
-        seed={sim.seed}
+        seed={simSeed}
         voiceSlot={<ResearchVoice />}
+        connectionStatus={connectionStatus}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
-        onOpenGuide={() => navigate(STATIC_ROUTES.FAQ)}
+        onOpenGuide={() =>
+          navigate(`${STATIC_ROUTES.FAQ}?article=overview`)
+        }
         onGoHome={goHome}
       />
 
@@ -158,7 +225,7 @@ const SandboxShell = () => {
 
       <LabDialog
         modal={modal}
-        sim={sim}
+        stats={dialogStats}
         seed={seed}
         onSeedChange={setSeed}
         onClose={() => setModal(null)}
@@ -175,6 +242,21 @@ const SandboxShell = () => {
         onOpenDemo={() => {
           setModal(null);
           navigate(STATIC_ROUTES.DEMO);
+        }}
+      />
+
+      <LabFirstRunDialog
+        open={firstRunOpen}
+        onSkip={() => {
+          markLabTourSeen();
+          setFirstRunDone(true);
+          setFirstRunOpen(false);
+        }}
+        onStartTour={() => {
+          setFirstRunDone(true);
+          setFirstRunOpen(false);
+          // Let the dialog close before driver.js mounts its overlay.
+          window.requestAnimationFrame(() => startTour());
         }}
       />
     </motion.div>

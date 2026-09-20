@@ -6,6 +6,7 @@ export {
   useLabCameraReset,
   useLabExpanded,
   useLabExperimentId,
+  useLabMetricsStrip,
   useLabModal,
   useLabRunning,
   useLabSeed,
@@ -17,12 +18,19 @@ export {
   useLabShowLabels,
   useLabShowLinks,
   useLabSim,
+  useLabSimDialogStats,
+  useLabSimEffect,
+  useLabSimSeed,
+  useLabSimSettings,
+  useLabSimStable,
   useLabSims,
+  useLabSimTick,
   useLabSpeed,
   useLabStreamStatus,
   useLabToggleExpanded,
   useLabToggleShowLabels,
   useLabToggleShowLinks,
 } from './selectors';
+export { labSimRefs, readLabSimRef, syncLabSimRef } from './sim-ref';
 export type { LabModal } from './store';
 export { DEFAULT_SEED } from './store';

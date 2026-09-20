@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { BufferGeometry, Float32BufferAttribute, Sphere, Vector3 } from 'three';
 
@@ -23,5 +23,8 @@ export const createPointGrid = (size: number) => {
   return geometry;
 };
 
-export const usePointGrid = (size: number) =>
-  useMemo(() => createPointGrid(size), [size]);
+export const usePointGrid = (size: number) => {
+  const geometry = useMemo(() => createPointGrid(size), [size]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  return geometry;
+};

@@ -25,6 +25,11 @@ export interface UseLabTourOptions {
   modalOpen: boolean;
   /** Pause the running simulation before highlighting. */
   onPause?: () => void;
+  /**
+   * Silent driver.js auto-start. Prefer `LabFirstRunDialog` in the shell;
+   * leave false so first visit goes through the welcome gate.
+   */
+  autoStart?: boolean;
 }
 
 const POPOVER_CLASS = cn(
@@ -131,6 +136,8 @@ export const useLabTour = ({
   phase,
   modalOpen,
   onPause,
+  /** Prefer LabFirstRunDialog; keep true only for legacy silent auto-start. */
+  autoStart = false,
 }: UseLabTourOptions) => {
   const driverRef = useRef<Driver | null>(null);
   const onPauseRef = useRef(onPause);
@@ -193,6 +200,7 @@ export const useLabTour = ({
   }, [destroyTour, editorActive]);
 
   useEffect(() => {
+    if (!autoStart) return;
     if (autoStartedRef.current) return;
     if (!ready || !editorActive || booting || phase !== 'idle' || modalOpen)
       return;
@@ -225,7 +233,15 @@ export const useLabTour = ({
       window.clearTimeout(initialTimer);
       window.clearTimeout(retryTimer);
     };
-  }, [ready, editorActive, booting, phase, modalOpen, startTour]);
+  }, [
+    autoStart,
+    ready,
+    editorActive,
+    booting,
+    phase,
+    modalOpen,
+    startTour,
+  ]);
 
   useEffect(() => () => destroyTour(), [destroyTour]);
 

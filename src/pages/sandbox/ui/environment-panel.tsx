@@ -14,11 +14,11 @@ import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-import type { Settings, Simulation, WorldInfo } from '@/features/ecosystem';
+import type { Settings, WorldInfo } from '@/features/ecosystem';
 
 interface EnvironmentPanelProps {
   body: GlobeBodyId;
-  sim: Simulation;
+  settings: Settings;
   world: WorldInfo;
   /** Only the planets `/worlds` actually returned. */
   worlds: WorldInfo[];
@@ -28,7 +28,7 @@ interface EnvironmentPanelProps {
 
 export const EnvironmentPanel = ({
   body,
-  sim,
+  settings,
   world,
   worlds,
   onSelectWorld,
@@ -122,10 +122,10 @@ export const EnvironmentPanel = ({
         <div className="grid gap-4 max-mobile:grid-cols-2">
           <Slider
             label="Приток ресурса"
-            outputValue={`${Math.round(sim.settings.resource)}%`}
+            outputValue={`${Math.round(settings.resource)}%`}
             min={0}
             max={100}
-            value={Math.round(sim.settings.resource)}
+            value={Math.round(settings.resource)}
             onChange={(e) =>
               onSettings({ resource: Math.round(+e.target.value) })
             }
@@ -134,10 +134,10 @@ export const EnvironmentPanel = ({
           />
           <Slider
             label="Шум среды"
-            outputValue={`${Math.round(sim.settings.noise)}%`}
+            outputValue={`${Math.round(settings.noise)}%`}
             min={0}
             max={100}
-            value={Math.round(sim.settings.noise)}
+            value={Math.round(settings.noise)}
             onChange={(e) => onSettings({ noise: Math.round(+e.target.value) })}
             minLabel="Стабильность"
             maxLabel="Возмущения"
@@ -151,7 +151,7 @@ export const EnvironmentPanel = ({
                 Мутации при делении
               </span>
             }
-            checked={sim.settings.mutation}
+            checked={settings.mutation}
             onChange={(e) => onSettings({ mutation: e.target.checked })}
           />
         </div>

@@ -21,11 +21,17 @@ import {
 } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
-import { useLabBody, useLabSetModal, useLabSim } from '@/store';
+import {
+  useLabBody,
+  useLabSetModal,
+  useLabSimDialogStats,
+  useLabSimTick,
+} from '@/store';
 import { useLabStore } from '@/store/lab/store';
 
 export const AnalyticsPage = () => {
-  const sim = useLabSim();
+  const tick = useLabSimTick();
+  const stats = useLabSimDialogStats();
   const body = useLabBody();
   const setModal = useLabSetModal();
   const world = useWorldCatalog().catalog[body];
@@ -61,7 +67,7 @@ export const AnalyticsPage = () => {
       clearInterval(timer);
     };
   }, [id]);
-  const visible = history.filter((h) => h.tick <= sim.tick);
+  const visible = history.filter((h) => h.tick <= tick);
   const compare = async () => {
     if (!id) return;
     setBusy(true);
@@ -120,14 +126,13 @@ export const AnalyticsPage = () => {
           От импульса к сообществу.
         </h1>
         <p className="mb-5 text-[11px] text-muted-foreground">
-          Изменения на {worldCaseName(body)} · последние {visible.length}{' '}
-          тактов
+          Изменения на {worldCaseName(body)} · последние {visible.length} тактов
         </p>
 
         <div className="mb-3 grid grid-cols-3 gap-3 max-mobile:grid-cols-1">
-          <MetricCard label="Рождений" value={sim.births} />
-          <MetricCard label="Делений колоний" value={sim.splits} />
-          <MetricCard label="Угасших особей" value={sim.deaths} />
+          <MetricCard label="Рождений" value={stats.births} />
+          <MetricCard label="Делений колоний" value={stats.splits} />
+          <MetricCard label="Угасших особей" value={stats.deaths} />
         </div>
 
         <div className="mb-3 max-w-xs">
@@ -160,8 +165,8 @@ export const AnalyticsPage = () => {
                   className="w-full h-[65px]"
                 />
                 <span className="mt-2.5 block font-mono text-[8px] text-muted-foreground">
-                  Такт {visible[0]?.tick ?? sim.tick}{' '}
-                  <span className="float-right">{sim.tick}</span>
+                  Такт {visible[0]?.tick ?? tick}{' '}
+                  <span className="float-right">{tick}</span>
                 </span>
               </CardContent>
             </Card>

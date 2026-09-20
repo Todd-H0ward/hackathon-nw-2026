@@ -12,7 +12,7 @@ export {
 } from './card';
 export { Dialog, DialogClose, DialogDescription, DialogTitle } from './dialog';
 export { Input, inputVariants } from './input';
-export type { LabRailProps } from './lab-rail';
+export type { LabConnectionStatus, LabRailProps } from './lab-rail';
 export { LabRail } from './lab-rail';
 export type { SparklinePoint } from './metric-card';
 export { MetricCard } from './metric-card';

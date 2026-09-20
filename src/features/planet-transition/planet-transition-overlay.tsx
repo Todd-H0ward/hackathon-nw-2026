@@ -11,11 +11,11 @@ import {
   type GlobeBodyId,
   type GlobeConfig,
   HOME_CAROUSEL_LOOK,
-  HOME_CAROUSEL_RESOLUTION,
   lerpGlobeConfig,
   type PlanetScreenPose,
   resolveGlobeConfig,
 } from '@/shared/ui/globe';
+import { resolveCarouselResolution } from '@/shared/lib/perf/device-tier';
 
 import {
   getTransitionState,
@@ -70,12 +70,13 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   // Forward: carousel motion → sandbox rest. Back: sandbox rest → carousel motion.
   // Stay on carousel density — dual bloom+GPGPU at full RES hitchs the handoff.
   const { fromConfig, toConfig, baseConfig } = useMemo(() => {
+    const res = resolveCarouselResolution();
     const carousel = resolveGlobeConfig(body, {
-      RESOLUTION: HOME_CAROUSEL_RESOLUTION,
+      RESOLUTION: res,
       ...HOME_CAROUSEL_LOOK[body],
     });
     const sandbox = resolveGlobeConfig(body, {
-      RESOLUTION: HOME_CAROUSEL_RESOLUTION,
+      RESOLUTION: res,
     });
     if (direction === 'forward') {
       return { fromConfig: carousel, toConfig: sandbox, baseConfig: carousel };

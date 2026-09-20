@@ -22,20 +22,20 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
-import {
-  activeColonies,
-  type Colony,
-  type Individual,
-  type Simulation,
-} from './model';
+import type { Colony, Individual, Simulation } from './model';
 import { LOW_ENERGY_THRESHOLD, SURFACE_MARKER } from './surface-markers';
 
 type Vec3 = [number, number, number];
 
 const ARC_STEPS = 20;
+const BOUNDARY_STEPS = 49;
 const DEFAULT_RADIUS = 2.33;
 const BOUNDARY_RADIUS = 2.35;
 const LABEL_RADIUS = 2.46;
+/** Rebuild colony boundary/link polylines every N sim ticks (packets update every tick). */
+const COLONY_GEOMETRY_STRIDE = 2;
+
+const Z_AXIS = new Vector3(0, 0, 1);
 
 /** Spherical → cartesian into a reusable tuple (no per-call array alloc). */
 const writePosition = (
@@ -53,6 +53,51 @@ const writePosition = (
 
 const makeArcBuffer = (): Vec3[] =>
   Array.from({ length: ARC_STEPS }, () => [0, 0, 0] as Vec3);
+
+const makeBoundaryBuffer = (): Vec3[] =>
+  Array.from({ length: BOUNDARY_STEPS }, () => [0, 0, 0] as Vec3);
+
+const copyVec3Array = (dst: Vec3[], src: Vec3[]) => {
+  for (let i = 0; i < src.length; i++) {
+    const d = dst[i];
+    const s = src[i];
+    d[0] = s[0];
+    d[1] = s[1];
+    d[2] = s[2];
+  }
+};
+
+const sameVec3Array = (a: Vec3[], b: Vec3[]) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (
+      Math.abs(a[i][0] - b[i][0]) > 1e-5 ||
+      Math.abs(a[i][1] - b[i][1]) > 1e-5 ||
+      Math.abs(a[i][2] - b[i][2]) > 1e-5
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/**
+ * Publish scratch coords into a stable array identity. Returns the previous
+ * published buffer when coordinates are unchanged so drei Line can skip work.
+ */
+const publishVec3Array = (
+  cache: Map<string, Vec3[]>,
+  key: string,
+  scratch: Vec3[],
+  factory: () => Vec3[],
+): Vec3[] => {
+  const prev = cache.get(key);
+  if (prev && sameVec3Array(prev, scratch)) return prev;
+  const out = prev ?? factory();
+  copyVec3Array(out, scratch);
+  if (!prev) cache.set(key, out);
+  return out;
+};
 
 /**
  * Great-circle bump between two surface points. Writes into a caller-owned
@@ -74,10 +119,6 @@ const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
   return out;
 };
 
-/** Copy an arc buffer into a fresh tuple array for StableLine / drei. */
-const snapshotArc = (buf: Vec3[]): Vec3[] =>
-  buf.map((p) => [p[0], p[1], p[2]] as Vec3);
-
 type LinePoints = ComponentProps<typeof Line>['points'];
 
 const coords = (
@@ -88,7 +129,6 @@ const coords = (
 };
 
 const samePoints = (a: LinePoints, b: LinePoints) => {
-  if (a === b) return true;
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     const pa = coords(a[i]);
@@ -102,15 +142,23 @@ const samePoints = (a: LinePoints, b: LinePoints) => {
 };
 
 /**
- * drei's Line rebuilds its geometry (and disposes its material) whenever the
- * `points` array identity changes. Points here are rebuilt every simulation
- * tick, so keep the previous array while the coordinates are unchanged —
- * otherwise every tick re-uploads all line buffers and relinks the shader.
+ * drei's Line rebuilds geometry when the `points` identity changes. We keep a
+ * shadow copy of the last uploaded coords so in-place pool mutations still
+ * trigger an update when values move, and skip when they don't.
  */
 const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
-  const stable = useRef(points);
-  if (!samePoints(stable.current, points)) stable.current = points;
-  return <Line points={stable.current} {...rest} />;
+  const published = useRef(points);
+  const shadow = useRef<LinePoints | null>(null);
+
+  if (!shadow.current || !samePoints(shadow.current, points)) {
+    // Clone tuples so drei sees a new identity when coordinates change.
+    published.current = (points as Vec3[]).map(
+      (p) => [p[0], p[1], p[2]] as Vec3,
+    );
+    shadow.current = published.current;
+  }
+
+  return <Line points={published.current} {...rest} />;
 };
 
 const PACKET_GEOMETRY = new SphereGeometry(0.028, 8, 8);
@@ -135,41 +183,61 @@ type PacketView = {
   head: Vec3;
 };
 
-interface SurfaceLifeProps {
-  simulation: Simulation;
-  selected: number | null;
-  showLinks: boolean;
-  showLabels: boolean;
-  onSelect: (id: number) => void;
-}
+type SceneViewCache = {
+  structureKey: string;
+  colonyTick: number;
+  packetTick: number;
+  colonyViews: ColonyView[];
+  packetViews: PacketView[];
+  boundaryPool: Map<string, Vec3[]>;
+  linkPool: Map<string, Vec3[]>;
+  packetPool: Map<string, Vec3[]>;
+  scratchA: Vec3;
+  scratchB: Vec3;
+  scratchArc: Vec3[];
+  scratchBoundary: Vec3[];
+};
 
-/**
- * Build the per-colony / per-packet line geometry in one O(n) pass. The WS
- * stream replaces `simulation` up to 10 Hz, so this still runs that often —
- * but never O(colonies × living) with a fresh `living()` filter each time.
- */
-const buildSceneViews = (
+const createSceneViewCache = (): SceneViewCache => ({
+  structureKey: '',
+  colonyTick: -1,
+  packetTick: -1,
+  colonyViews: [],
+  packetViews: [],
+  boundaryPool: new Map(),
+  linkPool: new Map(),
+  packetPool: new Map(),
+  scratchA: [0, 0, 0],
+  scratchB: [0, 0, 0],
+  scratchArc: makeArcBuffer(),
+  scratchBoundary: makeBoundaryBuffer(),
+});
+
+const structureKeyOf = (
   simulation: Simulation,
   showLinks: boolean,
   selected: number | null,
-): { colonyViews: ColonyView[]; packetViews: PacketView[] } => {
-  const alive = simulation.individuals.filter((i) => i.dead === null);
-  const byColony = new Map<number, Individual[]>();
-  const byId = new Map<number, Individual>();
-
-  for (const individual of alive) {
-    byId.set(individual.id, individual);
-    const list = byColony.get(individual.colony);
-    if (list) list.push(individual);
-    else byColony.set(individual.colony, [individual]);
+) => {
+  let alive = 0;
+  let dead = 0;
+  for (const individual of simulation.individuals) {
+    if (individual.dead === null) alive += 1;
+    else dead += 1;
   }
+  return `${simulation.body}|${selected}|${showLinks ? 1 : 0}|${simulation.colonies.length}|${alive}|${dead}|${simulation.packets.length}`;
+};
 
-  const scratchA: Vec3 = [0, 0, 0];
-  const scratchB: Vec3 = [0, 0, 0];
-  const scratchArc = makeArcBuffer();
-
+const rebuildColonyViews = (
+  cache: SceneViewCache,
+  simulation: Simulation,
+  showLinks: boolean,
+  selected: number | null,
+  byColony: Map<number, Individual[]>,
+) => {
+  const { scratchA, scratchB, scratchArc, scratchBoundary } = cache;
   const colonyViews: ColonyView[] = [];
-  for (const colony of activeColonies(simulation)) {
+
+  for (const colony of simulation.colonies) {
     const group = byColony.get(colony.id);
     if (!group || group.length === 0) continue;
 
@@ -187,16 +255,20 @@ const buildSceneViews = (
     const centerPos: Vec3 = [0, 0, 0];
     writePosition(centerPos, center.lat, center.lon, BOUNDARY_RADIUS);
 
-    const boundary: Vec3[] = Array.from({ length: 49 }, (_, k) => {
-      const point: Vec3 = [0, 0, 0];
+    for (let k = 0; k < BOUNDARY_STEPS; k++) {
       writePosition(
-        point,
-        center.lat + Math.sin((k / 48) * Math.PI * 2) * 0.2,
-        center.lon + Math.cos((k / 48) * Math.PI * 2) * 0.23,
+        scratchBoundary[k],
+        center.lat + Math.sin((k / (BOUNDARY_STEPS - 1)) * Math.PI * 2) * 0.2,
+        center.lon + Math.cos((k / (BOUNDARY_STEPS - 1)) * Math.PI * 2) * 0.23,
         BOUNDARY_RADIUS,
       );
-      return point;
-    });
+    }
+    const boundary = publishVec3Array(
+      cache.boundaryPool,
+      `b:${colony.id}`,
+      scratchBoundary,
+      makeBoundaryBuffer,
+    );
 
     const links: ColonyView['links'] = [];
     if (showLinks) {
@@ -206,7 +278,13 @@ const buildSceneViews = (
         writePosition(scratchA, group[j - 1].lat, group[j - 1].lon);
         writePosition(scratchB, group[j].lat, group[j].lon);
         writeArc(scratchArc, scratchA, scratchB);
-        links.push({ id: group[j].id, points: snapshotArc(scratchArc) });
+        const points = publishVec3Array(
+          cache.linkPool,
+          `l:${colony.id}:${group[j].id}`,
+          scratchArc,
+          makeArcBuffer,
+        );
+        links.push({ id: group[j].id, points });
       }
     }
 
@@ -224,41 +302,114 @@ const buildSceneViews = (
     });
   }
 
+  cache.colonyViews = colonyViews;
+  cache.colonyTick = simulation.tick;
+};
+
+const rebuildPacketViews = (
+  cache: SceneViewCache,
+  simulation: Simulation,
+  byId: Map<number, Individual>,
+) => {
+  const { scratchA, scratchB, scratchArc } = cache;
   const packetViews: PacketView[] = [];
-  if (showLinks) {
-    const packets = simulation.packets;
-    const start = Math.max(0, packets.length - 35);
-    for (let i = start; i < packets.length; i++) {
-      const packet = packets[i];
-      const from = byId.get(packet.from);
-      const to = byId.get(packet.to);
-      if (!from || !to) continue;
+  const packets = simulation.packets;
+  const start = Math.max(0, packets.length - 35);
 
-      writePosition(scratchA, from.lat, from.lon);
-      writePosition(scratchB, to.lat, to.lon);
-      writeArc(scratchArc, scratchA, scratchB);
-      const points = snapshotArc(scratchArc);
-      const travel = packet.arrival - packet.sent;
-      const idx =
-        travel <= 0
-          ? 0
-          : Math.min(
-              ARC_STEPS - 1,
-              Math.floor(
-                ((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1),
-              ),
-            );
+  for (let i = start; i < packets.length; i++) {
+    const packet = packets[i];
+    const from = byId.get(packet.from);
+    const to = byId.get(packet.to);
+    if (!from || !to) continue;
 
-      packetViews.push({
-        key: `${packet.from}-${packet.to}-${packet.sent}`,
-        points,
-        head: points[idx],
-      });
-    }
+    writePosition(scratchA, from.lat, from.lon);
+    writePosition(scratchB, to.lat, to.lon);
+    writeArc(scratchArc, scratchA, scratchB);
+    const key = `${packet.from}-${packet.to}-${packet.sent}`;
+    const points = publishVec3Array(
+      cache.packetPool,
+      key,
+      scratchArc,
+      makeArcBuffer,
+    );
+    const travel = packet.arrival - packet.sent;
+    const idx =
+      travel <= 0
+        ? 0
+        : Math.min(
+            ARC_STEPS - 1,
+            Math.floor(
+              ((simulation.tick - packet.sent) / travel) * (ARC_STEPS - 1),
+            ),
+          );
+
+    packetViews.push({
+      key,
+      points,
+      head: [points[idx][0], points[idx][1], points[idx][2]],
+    });
   }
 
-  return { colonyViews, packetViews };
+  cache.packetViews = packetViews;
+  cache.packetTick = simulation.tick;
 };
+
+/**
+ * Build / refresh colony + packet line geometry with pooled buffers.
+ * Colony polylines throttle to every COLONY_GEOMETRY_STRIDE ticks unless the
+ * membership/selection structure changes; packet heads refresh every tick.
+ */
+const syncSceneViews = (
+  cache: SceneViewCache,
+  simulation: Simulation,
+  showLinks: boolean,
+  selected: number | null,
+): { colonyViews: ColonyView[]; packetViews: PacketView[] } => {
+  const byColony = new Map<number, Individual[]>();
+  const byId = new Map<number, Individual>();
+
+  for (const individual of simulation.individuals) {
+    if (individual.dead !== null) continue;
+    byId.set(individual.id, individual);
+    const list = byColony.get(individual.colony);
+    if (list) list.push(individual);
+    else byColony.set(individual.colony, [individual]);
+  }
+
+  const structureKey = structureKeyOf(simulation, showLinks, selected);
+  const structureChanged = structureKey !== cache.structureKey;
+  const colonyDue =
+    structureChanged ||
+    simulation.tick - cache.colonyTick >= COLONY_GEOMETRY_STRIDE ||
+    cache.colonyTick < 0;
+
+  if (colonyDue) {
+    rebuildColonyViews(cache, simulation, showLinks, selected, byColony);
+    cache.structureKey = structureKey;
+  }
+
+  if (showLinks) {
+    if (structureChanged || simulation.tick !== cache.packetTick) {
+      rebuildPacketViews(cache, simulation, byId);
+    }
+  } else if (cache.packetViews.length > 0) {
+    cache.packetViews = [];
+    cache.packetTick = simulation.tick;
+  }
+
+  return {
+    colonyViews: cache.colonyViews,
+    packetViews: cache.packetViews,
+  };
+};
+
+interface SurfaceLifeProps {
+  simulation: Simulation;
+  selected: number | null;
+  showLinks: boolean;
+  showLabels: boolean;
+  onSelect: (id: number) => void;
+}
 
 interface ColonyOverlayProps {
   view: ColonyView;
@@ -405,7 +556,14 @@ export const SurfaceLife = ({
   const dummy = useMemo(() => new Object3D(), []);
   const outward = useMemo(() => new Vector3(), []);
   const color = useMemo(() => new Color(), []);
+  const sceneCache = useRef(createSceneViewCache());
   const visible = simulation.individuals;
+  const simRef = useRef(simulation);
+  const visibleRef = useRef(visible);
+  const selectedRef = useRef(selected);
+  simRef.current = simulation;
+  visibleRef.current = visible;
+  selectedRef.current = selected;
 
   const colonyColorById = useMemo(() => {
     const map = new Map<number, string>();
@@ -416,7 +574,7 @@ export const SurfaceLife = ({
   }, [simulation.colonies]);
 
   const { colonyViews, packetViews } = useMemo(
-    () => buildSceneViews(simulation, showLinks, selected),
+    () => syncSceneViews(sceneCache.current, simulation, showLinks, selected),
     [simulation, showLinks, selected],
   );
 
@@ -446,16 +604,18 @@ export const SurfaceLife = ({
   useFrame(({ clock, camera }) => {
     const target = mesh.current;
     if (!target) return;
-    const tick = simulation.tick;
-    for (let index = 0; index < visible.length; index++) {
-      const individual = visible[index];
-      // Write cartesian coords straight into the Object3D — no per-frame array.
+    const individuals = visibleRef.current;
+    const tick = simRef.current.tick;
+    const selectedId = selectedRef.current;
+    const t = clock.elapsedTime * 2;
+
+    for (let index = 0; index < individuals.length; index++) {
+      const individual = individuals[index];
       const cosLat = Math.cos(individual.lat);
-      dummy.position.set(
-        DEFAULT_RADIUS * cosLat * Math.sin(individual.lon),
-        DEFAULT_RADIUS * Math.sin(individual.lat),
-        DEFAULT_RADIUS * cosLat * Math.cos(individual.lon),
-      );
+      const x = DEFAULT_RADIUS * cosLat * Math.sin(individual.lon);
+      const y = DEFAULT_RADIUS * Math.sin(individual.lat);
+      const z = DEFAULT_RADIUS * cosLat * Math.cos(individual.lon);
+      dummy.position.set(x, y, z);
 
       // Back-face cull: hide individuals on the far side of the sphere.
       const pDotC = dummy.position.dot(camera.position);
@@ -466,16 +626,21 @@ export const SurfaceLife = ({
         continue;
       }
 
-      dummy.lookAt(outward.copy(dummy.position).multiplyScalar(2));
+      // Orient along surface normal — cheaper than lookAt each instance.
+      const len = Math.hypot(x, y, z) || 1;
+      outward.set(x / len, y / len, z / len);
+      dummy.quaternion.setFromUnitVectors(Z_AXIS, outward);
+
       const age = tick - individual.born;
       const birthScale = Math.min(1, (age + 1) / 8);
       const deathScale =
         individual.dead === null
           ? 1
           : Math.max(0, 1 - (tick - individual.dead) / 16);
-      const pulse = 1 + Math.sin(clock.elapsedTime * 2 + individual.id) * 0.13;
+      const pulse =
+        individual.dead !== null ? 1 : 1 + Math.sin(t + individual.id) * 0.13;
       const scale =
-        (individual.colony === selected ? 1.2 : 1) *
+        (individual.colony === selectedId ? 1.2 : 1) *
         birthScale *
         deathScale *
         pulse;
@@ -483,6 +648,7 @@ export const SurfaceLife = ({
       dummy.updateMatrix();
       target.setMatrixAt(index, dummy.matrix);
     }
+    target.count = individuals.length;
     target.instanceMatrix.needsUpdate = true;
   });
 
@@ -502,7 +668,7 @@ export const SurfaceLife = ({
         frustumCulled={false}
         onClick={(e) => {
           e.stopPropagation();
-          const individual = visible[e.instanceId ?? -1];
+          const individual = visibleRef.current[e.instanceId ?? -1];
           if (!individual) return;
           const cosLat = Math.cos(individual.lat);
           dummy.position.set(

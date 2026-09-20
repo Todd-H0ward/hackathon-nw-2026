@@ -24,8 +24,20 @@ export default defineConfig({
           groups: [
             { name: 'three', test: /node_modules[\\/]three[\\/]/ },
             {
+              name: 'r3f',
+              test: /node_modules[\\/]@react-three[\\/]fiber[\\/]/,
+            },
+            {
+              name: 'drei',
+              test: /node_modules[\\/]@react-three[\\/]drei[\\/]/,
+            },
+            {
               name: 'postprocessing',
               test: /node_modules[\\/](postprocessing|@react-three[\\/]postprocessing)[\\/]/,
+            },
+            {
+              name: 'motion',
+              test: /node_modules[\\/](motion|framer-motion)[\\/]/,
             },
           ],
         },

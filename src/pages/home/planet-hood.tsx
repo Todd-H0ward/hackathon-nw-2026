@@ -8,9 +8,12 @@ import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import type { PlanetInfo } from './planet-info';
 
+export type PlanetHoodStatus = 'ready' | 'loading' | 'error';
+
 interface PlanetHoodProps {
   activeBody: GlobeBodyId;
   info: PlanetInfo;
+  status?: PlanetHoodStatus;
   className?: string;
   onEnter: () => void;
 }
@@ -18,6 +21,7 @@ interface PlanetHoodProps {
 export const PlanetHood = ({
   activeBody,
   info,
+  status = 'ready',
   className,
   onEnter,
 }: PlanetHoodProps) => (
@@ -28,17 +32,25 @@ export const PlanetHood = ({
       className,
     )}
   >
-    <div className="bg-linear-to-t from-[#2a2b2e] from-35% via-[#2a2b2e]/92 via-70% to-transparent px-4 pt-20 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">
+    <div className="bg-linear-to-t from-secondary from-35% via-secondary/92 via-70% to-transparent px-4 pt-20 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-4">
         <div className="flex items-end justify-between gap-4">
           <div key={info.id} className="min-w-0">
             <p className="font-mono text-[10px] tracking-[0.18em] text-white/65 uppercase">
               Досье планеты
+              {status === 'loading' ? ' · загрузка' : null}
+              {status === 'error' ? ' · офлайн' : null}
             </p>
             <h2 className="mt-1 text-2xl font-medium tracking-tight text-white md:text-3xl">
               {info.name}
             </h2>
-            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-white/75">
+            <p
+              className={cn(
+                'mt-1.5 max-w-xl text-sm leading-relaxed',
+                status === 'error' ? 'text-primary/90' : 'text-white/75',
+              )}
+              role={status === 'error' ? 'alert' : undefined}
+            >
               {info.summary}
             </p>
           </div>
@@ -72,7 +84,11 @@ export const PlanetHood = ({
         </div>
         <dl
           key={`${info.id}-stats`}
-          className="grid grid-cols-3 gap-x-4 gap-y-3"
+          className={cn(
+            'grid grid-cols-3 gap-x-4 gap-y-3',
+            status !== 'ready' && 'opacity-55',
+          )}
+          aria-busy={status === 'loading' || undefined}
         >
           {info.stats.map((stat) => (
             <div key={stat.label} className="min-w-0">

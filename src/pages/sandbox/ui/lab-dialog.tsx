@@ -7,12 +7,20 @@ import {
   Input,
 } from '@/shared/ui';
 
-import type { Simulation } from '@/features/ecosystem';
 import type { LabModal } from '@/store';
+
+export type LabDialogStats = {
+  seed: number;
+  tick: number;
+  births: number;
+  deaths: number;
+  splits: number;
+  interventionCount: number;
+};
 
 interface LabDialogProps {
   modal: LabModal;
-  sim: Simulation;
+  stats: LabDialogStats;
   seed: string;
   onSeedChange: (value: string) => void;
   onClose: () => void;
@@ -26,7 +34,7 @@ interface LabDialogProps {
 
 export const LabDialog = ({
   modal,
-  sim,
+  stats,
   seed,
   onSeedChange,
   onClose,
@@ -86,8 +94,8 @@ export const LabDialog = ({
         </p>
         <DialogTitle>Повторить тот же эксперимент</DialogTitle>
         <DialogDescription>
-          Будут воспроизведены seed {sim.seed}, {sim.tick} тактов и{' '}
-          {sim.interventions.length} вмешательств.
+          Будут воспроизведены seed {stats.seed}, {stats.tick} тактов и{' '}
+          {stats.interventionCount} вмешательств.
         </DialogDescription>
         <div className="flex justify-end gap-2.5 mt-5">
           <Button type="button" variant="outline" size="sm" onClick={onClose}>
@@ -107,10 +115,10 @@ export const LabDialog = ({
         </p>
         <DialogTitle>Все особи погибли</DialogTitle>
         <DialogDescription>
-          На такте {sim.tick} живых особей не осталось. За прогон: рождений{' '}
-          {sim.births}, угасших {sim.deaths}, делений колоний {sim.splits}. Seed{' '}
-          {sim.seed}. Можно начать заново или создать новую колонию в том же
-          эксперименте.
+          На такте {stats.tick} живых особей не осталось. За прогон: рождений{' '}
+          {stats.births}, угасших {stats.deaths}, делений колоний {stats.splits}
+          . Seed {stats.seed}. Можно начать заново или создать новую колонию в
+          том же эксперименте.
         </DialogDescription>
         <div className="mt-4 grid grid-cols-3 gap-2 max-mobile:grid-cols-1">
           <div className="rounded-md border border-border px-3 py-2">
@@ -118,7 +126,7 @@ export const LabDialog = ({
               ТАКТ
             </div>
             <div className="mt-1 font-mono text-[16px] tabular-nums">
-              {sim.tick}
+              {stats.tick}
             </div>
           </div>
           <div className="rounded-md border border-border px-3 py-2">
@@ -126,7 +134,7 @@ export const LabDialog = ({
               РОЖДЕНИЙ
             </div>
             <div className="mt-1 font-mono text-[16px] tabular-nums">
-              {sim.births}
+              {stats.births}
             </div>
           </div>
           <div className="rounded-md border border-border px-3 py-2">
@@ -134,7 +142,7 @@ export const LabDialog = ({
               УГАСШИХ
             </div>
             <div className="mt-1 font-mono text-[16px] tabular-nums">
-              {sim.deaths}
+              {stats.deaths}
             </div>
           </div>
         </div>

@@ -21,15 +21,46 @@ import {
   useAudioPreferences,
 } from '@/shared/voice/action-speech';
 
+/** Lab backend / stream health shown on the rail status pip. */
+export type LabConnectionStatus =
+  | 'online'
+  | 'degraded'
+  | 'offline'
+  | 'unknown';
+
 export interface LabRailProps {
   seed?: number;
   /** Optional voice control (sandbox). FAQ omits this. */
   voiceSlot?: ReactNode;
+  /** Defaults to `unknown` (FAQ / outside live lab). */
+  connectionStatus?: LabConnectionStatus;
   onExport?: () => void;
   onStartTour?: () => void;
   onOpenGuide?: () => void;
   onGoHome?: () => void;
 }
+
+const CONNECTION_META: Record<
+  LabConnectionStatus,
+  { label: string; className: string }
+> = {
+  online: {
+    label: 'Связь с сервером активна',
+    className: 'bg-xeno-green shadow-[0_0_8px_var(--xeno-green)]',
+  },
+  degraded: {
+    label: 'Связь нестабильна или идёт подключение',
+    className: 'bg-primary shadow-[0_0_8px_var(--primary)]',
+  },
+  offline: {
+    label: 'Сервер симуляции недоступен',
+    className: 'bg-destructive',
+  },
+  unknown: {
+    label: 'Вне лаборатории — статус сервера не отслеживается',
+    className: 'bg-muted-foreground/50',
+  },
+};
 
 const itemClass =
   'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40';
@@ -69,6 +100,7 @@ const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
 export const LabRail = ({
   seed,
   voiceSlot,
+  connectionStatus = 'unknown',
   onExport,
   onStartTour,
   onOpenGuide,
@@ -76,6 +108,7 @@ export const LabRail = ({
 }: LabRailProps) => {
   const navigate = useNavigate();
   const audio = useAudioPreferences();
+  const connection = CONNECTION_META[connectionStatus];
 
   const handleGoHome = () => {
     if (onGoHome) {
@@ -189,10 +222,13 @@ export const LabRail = ({
       </button>
 
       <span
-        className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
-        title="Локальная модель"
+        className={cn(
+          'mt-1.5 size-1.5 rounded-full max-mobile:mt-0 max-mobile:ml-2',
+          connection.className,
+        )}
+        title={connection.label}
         role="img"
-        aria-label="Локальная модель активна"
+        aria-label={connection.label}
       />
     </nav>
   );

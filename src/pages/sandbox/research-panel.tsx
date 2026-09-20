@@ -7,13 +7,14 @@ import {
 } from '@/shared/api/xenochoice';
 import { Button, Input, Select, Slider, Switch } from '@/shared/ui';
 
+import { useLabSimStable } from '@/store';
 import { useLabStore } from '@/store/lab/store';
 
 import { applySnapshot, resetLabRuntime } from './lab-runtime';
 import { performIntervention } from './research-api';
 
 export const ResearchPanel = () => {
-  const sim = useLabStore((s) => s.sims[s.body]);
+  const sim = useLabSimStable();
   const id = useLabStore((s) => s.experimentIds[s.body]);
   const recording = useLabStore((s) => s.recording);
   const [open, setOpen] = useState(false);
@@ -311,7 +312,9 @@ export const ResearchPanel = () => {
           aria-label="Журнал исследования"
         >
           <div className="flex justify-between items-center">
-            <h2 className="text-base font-medium">Исследование · такт {sim.tick}</h2>
+            <h2 className="text-base font-medium">
+              Исследование · такт {sim.tick}
+            </h2>
             <Button
               type="button"
               variant="ghost"
@@ -400,9 +403,7 @@ export const ResearchPanel = () => {
                         className="block w-20"
                         disabled={!!recording || busy}
                         min={key === 'delay' ? 1 : 0}
-                        max={
-                          key === 'loss' ? 0.9 : key === 'delay' ? 100 : 20
-                        }
+                        max={key === 'loss' ? 0.9 : key === 'delay' ? 100 : 20}
                         step={key === 'delay' ? 1 : 0.1}
                         defaultValue={
                           key === 'power'

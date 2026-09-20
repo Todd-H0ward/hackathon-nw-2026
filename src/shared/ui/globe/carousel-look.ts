@@ -31,6 +31,3 @@ export const HOME_CAROUSEL_LOOK: Record<GlobeBodyId, Partial<GlobeConfig>> = {
     JITTER: 0.014,
   },
 };
-
-/** Match carousel density so ferry GPGPU stays cheap during dual-canvas handoff. */
-export const HOME_CAROUSEL_RESOLUTION = 280;

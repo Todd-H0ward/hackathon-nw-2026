@@ -40,7 +40,7 @@ export const FaqPage = () => {
   };
 
   const handleOpenGuide = () => {
-    selectArticle('intro-concept');
+    selectArticle('overview');
   };
 
   return (

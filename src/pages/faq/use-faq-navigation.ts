@@ -21,7 +21,7 @@ export function useFaqNavigation() {
     if (articleParam && allArticles.some((a) => a.id === articleParam)) {
       return articleParam;
     }
-    return allArticles[0]?.id || 'intro-concept';
+    return allArticles[0]?.id || 'overview';
   }, [articleParam, allArticles]);
 
   // Currently selected article

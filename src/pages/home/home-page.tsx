@@ -18,7 +18,7 @@ import {
   useTransitionPhase,
 } from '@/store';
 
-import { worldsToPlanetInfoMap } from './planet-info';
+import { fallbackPlanetInfo, worldsToPlanetInfoMap } from './planet-info';
 
 export const HomePage = () => {
   const navigate = useNavigate();
@@ -44,13 +44,35 @@ export const HomePage = () => {
   const handingOffForward = phase === 'handoff' && direction === 'forward';
   // Keep home under the ferry until land so we don't flash a small carousel planet.
   const showHome = direction !== 'back' || phase === 'land' || phase === 'idle';
+  // Freeze carousel GL when visually gone — but keep it running on reverse so
+  // poseMeasureRef can arm the landing target.
+  const needsCarouselPose = direction === 'back' && phase !== 'idle';
+  const freezeCarousel = !needsCarouselPose && (handingOffForward || !showHome);
   const hideTransitionBody =
     !!transitionBody &&
     phase !== 'idle' &&
     (direction === 'forward'
       ? phase === 'handoff'
       : phase === 'handoff' || phase === 'flight');
-  const activeInfo = catalog[activeSlide];
+  const liveInfo = catalog[activeSlide];
+  const hoodStatus = liveInfo
+    ? 'ready'
+    : worldsQuery.isError
+      ? 'error'
+      : 'loading';
+  const hoodInfo =
+    liveInfo ??
+    fallbackPlanetInfo(
+      activeSlide,
+      hoodStatus === 'error' ? 'error' : 'loading',
+    );
+
+  const enterLab = () => {
+    getLabState().setBody(activeSlide);
+    const pose = poseMeasureRef.current?.(activeSlide);
+    if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
+    else navigate(STATIC_ROUTES.SANDBOX);
+  };
 
   useEffect(() => {
     const prefetch = () => {
@@ -127,19 +149,14 @@ export const HomePage = () => {
         hiddenBody={hideTransitionBody ? transitionBody : null}
         catalog={catalog}
         poseMeasureRef={poseMeasureRef}
+        paused={freezeCarousel}
       />
-      {activeInfo ? (
-        <PlanetHood
-          activeBody={activeSlide}
-          info={activeInfo}
-          onEnter={() => {
-            getLabState().setBody(activeSlide);
-            const pose = poseMeasureRef.current?.(activeSlide);
-            if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
-            else navigate(STATIC_ROUTES.SANDBOX);
-          }}
-        />
-      ) : null}
+      <PlanetHood
+        activeBody={activeSlide}
+        info={hoodInfo}
+        status={hoodStatus}
+        onEnter={enterLab}
+      />
     </motion.div>
   );
 };

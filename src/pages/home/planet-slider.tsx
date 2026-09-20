@@ -30,6 +30,8 @@ interface PlanetSliderProps {
   poseMeasureRef?: RefObject<
     ((body: GlobeBodyId) => PlanetScreenPose | null) | null
   >;
+  /** Pause WebGL while home is hidden under the ferry. */
+  paused?: boolean;
 }
 
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
@@ -46,6 +48,7 @@ export const PlanetSlider = ({
   hiddenBody = null,
   catalog,
   poseMeasureRef,
+  paused = false,
 }: PlanetSliderProps) => {
   const navigate = useNavigate();
   const setBody = useLabSetBody();
@@ -118,6 +121,7 @@ export const PlanetSlider = ({
         onPlanetClick={handlePlanetClick}
         hiddenBody={hiddenBody}
         poseMeasureRef={poseMeasureRef}
+        paused={paused}
       />
 
       <PlanetHoverCursor ref={cursorRef} catalog={catalog} />

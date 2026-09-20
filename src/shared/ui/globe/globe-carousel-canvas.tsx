@@ -15,12 +15,16 @@ import {
   type GlobeBodyId,
   resolveGlobeConfig,
 } from './bodies';
-import { HOME_CAROUSEL_LOOK, HOME_CAROUSEL_RESOLUTION } from './carousel-look';
+import { HOME_CAROUSEL_LOOK } from './carousel-look';
 import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
 import { type PlanetScreenPose, projectedRadius } from './lib/screen-pose';
 import { Starfield } from './starfield';
+
+import {
+  resolveCarouselResolution,
+} from '@/shared/lib/perf/device-tier';
 
 /** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
@@ -205,19 +209,18 @@ const CarouselScene = ({
     ready.current = true;
   }, -2);
 
-  const bodyConfigs = useMemo(
-    () =>
-      GLOBE_BODY_IDS.map((body) => ({
-        body,
-        config: resolveGlobeConfig(body, {
-          RADIUS: GLOBE_DEFAULTS.RADIUS,
-          RESOLUTION: HOME_CAROUSEL_RESOLUTION,
-          ...HOME_CAROUSEL_LOOK[body],
-        }),
-        colorUrl: GLOBE_MAPS[body].color,
-      })),
-    [],
-  );
+  const bodyConfigs = useMemo(() => {
+    const res = resolveCarouselResolution();
+    return GLOBE_BODY_IDS.map((body) => ({
+      body,
+      config: resolveGlobeConfig(body, {
+        RADIUS: GLOBE_DEFAULTS.RADIUS,
+        RESOLUTION: res,
+        ...HOME_CAROUSEL_LOOK[body],
+      }),
+      colorUrl: GLOBE_MAPS[body].color,
+    }));
+  }, []);
 
   return (
     <>
@@ -287,6 +290,11 @@ export interface GlobeCarouselCanvasProps {
   hiddenBody?: GlobeBodyId | null;
   /** Lets a parent read live screen poses (reverse transition landing). */
   poseMeasureRef?: RefObject<MeasureBody | null>;
+  /**
+   * Pause the WebGL loop (ferry opacity 0). Keep mounted so reverse landings
+   * can re-enable without rebuilding three canvases.
+   */
+  paused?: boolean;
   className?: string;
 }
 
@@ -297,6 +305,7 @@ export const GlobeCarouselCanvas = ({
   onPlanetClick,
   hiddenBody = null,
   poseMeasureRef,
+  paused = false,
   className,
 }: GlobeCarouselCanvasProps) => {
   const activeIndex = Math.max(0, GLOBE_BODY_IDS.indexOf(activeBody));
@@ -427,6 +436,7 @@ export const GlobeCarouselCanvas = ({
         camera={CAMERA}
         dpr={GLOBE_BLOOM_DPR}
         gl={GL}
+        frameloop={paused ? 'never' : 'always'}
         className="absolute inset-0 !h-full !w-full"
         style={{ width: '100%', height: '100%', display: 'block' }}
       >

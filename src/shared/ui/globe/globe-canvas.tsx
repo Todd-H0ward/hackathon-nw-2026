@@ -3,6 +3,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 
+import { resolveSandboxResolution } from '@/shared/lib/perf/device-tier';
 import { cn } from '@/shared/lib/utils';
 
 import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
@@ -55,6 +56,11 @@ export interface GlobeCanvasProps {
   body?: GlobeBodyId;
   /** World-space globe radius. Defaults to `GLOBE_DEFAULTS.RADIUS`. */
   radius?: number;
+  /**
+   * GPGPU / point resolution. Defaults to an adaptive sandbox value
+   * (`resolveSandboxResolution`) when unset.
+   */
+  resolution?: number;
   /** Enable orbit drag. Off by default for carousel slides. */
   interactive?: boolean;
   /** Full-bleed canvas (lab/sandbox). Default keeps square letterboxed host. */
@@ -72,6 +78,7 @@ export interface GlobeCanvasProps {
 export const GlobeCanvas = ({
   body = 'earth',
   radius = GLOBE_DEFAULTS.RADIUS,
+  resolution,
   interactive = false,
   fill = false,
   stars = false,
@@ -82,14 +89,20 @@ export const GlobeCanvas = ({
 }: GlobeCanvasProps) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const [pixelSize, setPixelSize] = useState(0);
+  // Capture once per mount — avoid mid-session RES swaps remounting GPGPU.
+  const [sandboxResolution] = useState(
+    () => resolution ?? resolveSandboxResolution(),
+  );
+  const resolvedResolution = resolution ?? sandboxResolution;
 
   const config = useMemo(
     () =>
       resolveGlobeConfig(body, {
         RADIUS: radius,
+        RESOLUTION: resolvedResolution,
         PARTICLE_BRIGHTNESS: particleBrightness,
       }),
-    [body, particleBrightness, radius],
+    [body, particleBrightness, radius, resolvedResolution],
   );
   const maps = useMemo(() => GLOBE_MAPS[body], [body]);
 
