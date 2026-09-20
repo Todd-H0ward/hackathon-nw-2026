@@ -10,7 +10,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import { LabRail, ToastProvider } from '@/shared/ui';
+import { type LabConnectionStatus, LabRail, ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem';
 import { useLabTour } from '@/features/lab-tour';
@@ -28,6 +28,7 @@ import {
   useLabSimDialogStats,
   useLabSimSeed,
   useLabStreamStatus,
+  useLabToggleExpanded,
   useTransitionDirection,
   useTransitionLaunch,
   useTransitionPhase,
@@ -65,11 +66,37 @@ const SandboxShell = () => {
   const modal = useLabModal();
   const setModal = useLabSetModal();
   const expanded = useLabExpanded();
+  const toggleExpanded = useLabToggleExpanded();
   const booting = useLabBooting();
   const streamStatus = useLabStreamStatus();
 
   const world = worlds.catalog[body];
   const editorActive = location.pathname === STATIC_ROUTES.SANDBOX;
+
+  const connectionStatus: LabConnectionStatus = (() => {
+    if (worlds.isError || streamStatus === 'failed') return 'offline';
+    if (
+      worlds.isLoading ||
+      booting ||
+      streamStatus === 'connecting' ||
+      streamStatus === 'reconnecting'
+    ) {
+      return 'degraded';
+    }
+    if (streamStatus === 'open') return 'online';
+    return 'degraded';
+  })();
+
+  useEffect(() => {
+    if (!expanded || modal !== null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      toggleExpanded();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [expanded, modal, toggleExpanded]);
 
   const pauseIfRunning = useCallback(() => {
     const { body: current, sims } = getLabState();
@@ -138,9 +165,12 @@ const SandboxShell = () => {
       <LabRail
         seed={simSeed}
         voiceSlot={<ResearchVoice />}
+        connectionStatus={connectionStatus}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
-        onOpenGuide={() => navigate(STATIC_ROUTES.FAQ)}
+        onOpenGuide={() =>
+          navigate(`${STATIC_ROUTES.FAQ}?article=overview`)
+        }
         onGoHome={goHome}
       />
 

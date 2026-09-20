@@ -5,6 +5,7 @@ import {
   Focus,
   Layers3,
   Maximize2,
+  Minimize2,
   Radio,
   Settings,
   Zap,
@@ -260,12 +261,20 @@ export const PlanetViewport = ({
         <button
           type="button"
           className={toolClass}
-          title="Расширить сцену"
-          aria-label="Расширить сцену"
+          title={
+            expanded
+              ? 'Свернуть панели (Esc)'
+              : 'Расширить сцену'
+          }
+          aria-label={
+            expanded
+              ? 'Свернуть панели (Esc)'
+              : 'Расширить сцену'
+          }
           aria-pressed={expanded}
           onClick={onToggleExpanded}
         >
-          <Maximize2 size={17} />
+          {expanded ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
         </button>
         <button
           type="button"

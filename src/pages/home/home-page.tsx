@@ -18,7 +18,7 @@ import {
   useTransitionPhase,
 } from '@/store';
 
-import { worldsToPlanetInfoMap } from './planet-info';
+import { fallbackPlanetInfo, worldsToPlanetInfoMap } from './planet-info';
 
 export const HomePage = () => {
   const navigate = useNavigate();
@@ -54,7 +54,25 @@ export const HomePage = () => {
     (direction === 'forward'
       ? phase === 'handoff'
       : phase === 'handoff' || phase === 'flight');
-  const activeInfo = catalog[activeSlide];
+  const liveInfo = catalog[activeSlide];
+  const hoodStatus = liveInfo
+    ? 'ready'
+    : worldsQuery.isError
+      ? 'error'
+      : 'loading';
+  const hoodInfo =
+    liveInfo ??
+    fallbackPlanetInfo(
+      activeSlide,
+      hoodStatus === 'error' ? 'error' : 'loading',
+    );
+
+  const enterLab = () => {
+    getLabState().setBody(activeSlide);
+    const pose = poseMeasureRef.current?.(activeSlide);
+    if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
+    else navigate(STATIC_ROUTES.SANDBOX);
+  };
 
   useEffect(() => {
     const prefetch = () => {
@@ -133,18 +151,12 @@ export const HomePage = () => {
         poseMeasureRef={poseMeasureRef}
         paused={freezeCarousel}
       />
-      {activeInfo ? (
-        <PlanetHood
-          activeBody={activeSlide}
-          info={activeInfo}
-          onEnter={() => {
-            getLabState().setBody(activeSlide);
-            const pose = poseMeasureRef.current?.(activeSlide);
-            if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
-            else navigate(STATIC_ROUTES.SANDBOX);
-          }}
-        />
-      ) : null}
+      <PlanetHood
+        activeBody={activeSlide}
+        info={hoodInfo}
+        status={hoodStatus}
+        onEnter={enterLab}
+      />
     </motion.div>
   );
 };

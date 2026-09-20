@@ -18,6 +18,38 @@ export type PlanetInfo = {
 /** Catalog keyed by body; a missing entry means `/worlds` has not provided it. */
 export type PlanetInfoCatalog = Partial<Record<GlobeBodyId, PlanetInfo>>;
 
+const FALLBACK_NAMES: Record<GlobeBodyId, string> = {
+  earth: 'Земля',
+  mars: 'Марс',
+  venus: 'Венера',
+};
+
+const PLACEHOLDER_STATS: PlanetStat[] = [
+  { label: 'Температура', value: '—' },
+  { label: 'Кельвин', value: '—' },
+  { label: 'Гравитация', value: '—' },
+  { label: 'Давление', value: '—' },
+  { label: 'Приток', value: '—' },
+  { label: 'Шум', value: '—' },
+];
+
+/**
+ * Offline / loading dossier so the home CTA never disappears when `/worlds`
+ * is slow or down. Lab still opens with the selected body.
+ */
+export const fallbackPlanetInfo = (
+  body: GlobeBodyId,
+  reason: 'loading' | 'error' = 'loading',
+): PlanetInfo => ({
+  id: body,
+  name: FALLBACK_NAMES[body],
+  summary:
+    reason === 'error'
+      ? 'Сервер справочника недоступен. Можно открыть лабораторию с базовым сценарием.'
+      : 'Загружаем физические параметры планеты…',
+  stats: PLACEHOLDER_STATS,
+});
+
 const formatTemp = (celsius: number) => {
   const rounded = Math.round(celsius);
   return rounded > 0 ? `+${rounded}` : String(rounded);
