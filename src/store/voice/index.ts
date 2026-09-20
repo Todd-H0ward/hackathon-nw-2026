@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// PUBLIC VOICE STORE API
+// ═══════════════════════════════════════════
+
 export {
   getVoiceState,
   useClearVoiceHistory,

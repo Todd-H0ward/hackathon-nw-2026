@@ -3,11 +3,21 @@ import { ShieldAlert, Sparkles, Waves, Zap } from 'lucide-react';
 import { TOUR_ANCHORS } from '@/shared/constants';
 import { Button } from '@/shared/ui';
 
+/** Quick intervention bar: pulse, disturbance, and scarcity. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface InterventionBarProps {
   onPulse: () => void;
   onStorm: () => void;
   onScarcity: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const InterventionBar = ({
   onPulse,

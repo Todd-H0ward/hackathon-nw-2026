@@ -1,10 +1,21 @@
 import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
 
+/** Sandbox utilities: formatting and local experiment export. */
+
+// ═══════════════════════════════════════════
+// TYPE EXPORTS
+// ═══════════════════════════════════════════
+
 export type { LabModal } from '@/store';
 
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Zero-pads a number to two digits (for colony labels). */
 export const pad = (n: number) => String(n).padStart(2, '0');
 
-/** Local fallback download when the API export is unavailable. */
+/** Local JSON download when API export is unavailable. */
 export const downloadExperiment = (s: Simulation) => {
   const data = {
     modelVersion: MODEL_VERSION,

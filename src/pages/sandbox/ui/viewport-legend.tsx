@@ -4,6 +4,12 @@ import { cn } from '@/shared/lib/utils';
 
 import { VIEWPORT_LEGEND, type ViewportLegendKind } from '@/features/ecosystem';
 
+/** Popover legend for surface-layer markers on the globe. */
+
+// ═══════════════════════════════════════════
+// HELPER COMPONENT
+// ═══════════════════════════════════════════
+
 const LegendSwatch = ({
   kind,
   color,
@@ -52,12 +58,20 @@ const LegendSwatch = ({
   );
 };
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ViewportLegendPanelProps {
   open: boolean;
   onClose: () => void;
 }
 
-/** Side panel inside the viewport — explains surface markers on the globe. */
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
+/** In-viewport sidebar — decodes markers on the globe. */
 export const ViewportLegendPanel = ({
   open,
   onClose,

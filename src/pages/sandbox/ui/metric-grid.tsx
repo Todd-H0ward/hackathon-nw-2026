@@ -1,6 +1,12 @@
 import { TOUR_ANCHORS } from '@/shared/constants';
 import { MetricCard } from '@/shared/ui';
 
+/** Metric grid with sparklines: power, latency, efficiency, entropy. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 type MetricPoint = {
   power: number;
   delay: number | null;
@@ -12,6 +18,10 @@ interface MetricGridProps {
   current: MetricPoint;
   history: MetricPoint[];
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const MetricGrid = ({ current, history }: MetricGridProps) => {
   const items = [

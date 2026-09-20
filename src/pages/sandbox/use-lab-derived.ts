@@ -3,10 +3,14 @@ import { useMemo } from 'react';
 import { activeColonies, living } from '@/features/ecosystem';
 import { useLabSelected, useLabSim } from '@/store';
 
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 /**
- * Values derived from the latest snapshot. Kept in one hook so the panels are
- * not each re-deriving the same lists, and memoised on the snapshot reference —
- * the stream replaces it up to 10× per second.
+ * Derived values from the latest snapshot. One hook for panels —
+ * lists are not recomputed separately; memoized by sim reference
+ * (stream replaces it up to 10× per second).
  */
 export const useLabDerived = () => {
   const sim = useLabSim();

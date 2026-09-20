@@ -1,10 +1,20 @@
+/** SVG sparkline — mini metric trend chart. */
+
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export interface SparklineProps {
   values: number[];
   color?: string;
   className?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Sparkline = ({
   values,

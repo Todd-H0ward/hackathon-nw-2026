@@ -3,6 +3,12 @@ import { Link } from 'react-router';
 import { STATIC_ROUTES } from '@/shared/constants';
 import { Button } from '@/shared/ui';
 
+/** 404 page — route not found. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const NotFoundPage = () => {
   return (
     <div className="flex h-full flex-col items-start justify-center gap-6 p-8">

@@ -12,6 +12,12 @@ import {
   PARTICLE_BRIGHTNESS_MIN,
 } from './viewport-settings-storage';
 
+/** Viewport visualization settings dialog (globe particle brightness). */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ViewportSettingsDialogProps {
   open: boolean;
   brightnessPercent: number;
@@ -20,7 +26,11 @@ interface ViewportSettingsDialogProps {
   onReset?: () => void;
 }
 
-/** Lab viewport look settings — particle brightness for the spark globe. */
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
+/** Lab view settings — spark-globe particle brightness. */
 export const ViewportSettingsDialog = ({
   open,
   brightnessPercent,

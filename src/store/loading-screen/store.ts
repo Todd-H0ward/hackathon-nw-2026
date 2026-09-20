@@ -1,9 +1,18 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { create } from 'zustand';
 
+// ═══════════════════════════════════════════
+// STORE TYPE
+// ═══════════════════════════════════════════
+
+/** Zustand store for the app loading screen. */
 export type LoadingScreenStore = {
-  /** Активен ли экран загрузки */
+  /** Whether the loading screen is active. */
   isLoading: boolean;
-  /** Текст текущего статуса */
+  /** Current status text. */
   statusText: string;
   setStatusText: (text: string) => void;
   startLoading: (statusText?: string) => void;
@@ -11,7 +20,15 @@ export type LoadingScreenStore = {
   dismiss: () => void;
 };
 
+// ═══════════════════════════════════════════
+// DEFAULTS
+// ═══════════════════════════════════════════
+
 const DEFAULT_STATUS = 'Синхронизация орбитальных систем';
+
+// ═══════════════════════════════════════════
+// STORE IMPLEMENTATION
+// ═══════════════════════════════════════════
 
 export const useLoadingScreenStore = create<LoadingScreenStore>((set) => ({
   isLoading: true,

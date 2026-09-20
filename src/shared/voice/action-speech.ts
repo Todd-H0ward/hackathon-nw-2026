@@ -1,4 +1,10 @@
+/** UI action speech via SpeechSynthesis and zustand preferences. */
+
 import { create } from 'zustand';
+
+// ═══════════════════════════════════════════
+// STORE
+// ═══════════════════════════════════════════
 
 export const useAudioPreferences = create<{
   enabled: boolean;
@@ -12,6 +18,10 @@ export const useAudioPreferences = create<{
       return { enabled: !state.enabled };
     }),
 }));
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 /** Mouse and keyboard actions speak only after an authoritative success. */
 export function announceAction(text: string) {

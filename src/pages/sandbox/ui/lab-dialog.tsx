@@ -9,6 +9,12 @@ import {
 
 import type { LabModal } from '@/store';
 
+/** Lab modal dialogs: reset, replay, and extinction. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type LabDialogStats = {
   seed: number;
   tick: number;
@@ -31,6 +37,10 @@ interface LabDialogProps {
   onAddColony?: () => void;
   onOpenDemo?: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const LabDialog = ({
   modal,

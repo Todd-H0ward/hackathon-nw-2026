@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// FULLSCREEN QUAD — FBO pass vertex
+// ═══════════════════════════════════════════
+
 precision highp float;
 
 varying vec2 vUv;

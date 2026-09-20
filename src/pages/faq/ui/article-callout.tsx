@@ -2,10 +2,20 @@ import { AlertCircle, Info, Sparkles } from 'lucide-react';
 
 import { cn } from '@/shared/lib/utils';
 
+/** Highlighted callout block inside an article. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ArticleCalloutProps {
   content: string;
   variant?: 'info' | 'success' | 'warning';
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function ArticleCallout({
   content,

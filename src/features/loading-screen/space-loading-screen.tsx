@@ -1,13 +1,25 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { useEffect, useState } from 'react';
 
 import { useFinishLoading, useIsLoading, useLoadingStatusText } from '@/store';
 
 import { OrbitalSpinner } from './orbital-spinner';
 
+// ═══════════════════════════════════════════
+// PROP TYPES
+// ═══════════════════════════════════════════
+
 interface SpaceLoadingScreenProps {
-  /** Минимальное время показа лоадера в мс (по умолчанию 1000ms для плавности) */
+  /** Minimum loader display time in ms (default 1000ms for smoothness). */
   minDurationMs?: number;
 }
+
+// ═══════════════════════════════════════════
+// LOADING SCREEN COMPONENT
+// ═══════════════════════════════════════════
 
 export const SpaceLoadingScreen = ({
   minDurationMs = 1000,
@@ -18,8 +30,12 @@ export const SpaceLoadingScreen = ({
   const [isRendered, setIsRendered] = useState(true);
   const [opacityClass, setOpacityClass] = useState('opacity-100');
 
+  // ═══════════════════════════════════════════
+  // TIMING EFFECTS
+  // ═══════════════════════════════════════════
+
   useEffect(() => {
-    // Минимальная задержка перед скрытием, чтобы экран не мелькал
+    // Minimum delay before hide to avoid screen flicker
     const timer = setTimeout(() => {
       finishLoading();
     }, minDurationMs);
@@ -39,6 +55,10 @@ export const SpaceLoadingScreen = ({
     setIsRendered(true);
   }, [isLoading]);
 
+  // ═══════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════
+
   if (!isRendered) return null;
 
   return (
@@ -47,10 +67,10 @@ export const SpaceLoadingScreen = ({
       aria-live="polite"
       className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black transition-opacity duration-500 select-none ${opacityClass}`}
     >
-      {/* Центрированный орбитальный спиннер */}
+      {/* Centered orbital spinner */}
       <OrbitalSpinner size={120} />
 
-      {/* Минималистичная подпись в стиле XenoChoice UI */}
+      {/* Minimal XenoChoice UI status caption */}
       <div className="mt-8 flex items-center gap-2.5">
         <span className="size-1.5 rounded-full bg-primary animate-pulse" />
         <span className="font-mono text-[10px] tracking-[0.24em] text-white/50 uppercase">

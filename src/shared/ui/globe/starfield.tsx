@@ -1,3 +1,5 @@
+/** Background starfield — opaque clear + AdditiveBlending compatibility. */
+
 import { useLayoutEffect, useMemo, useRef } from 'react';
 
 import { Stars } from '@react-three/drei';
@@ -5,6 +7,10 @@ import { useThree } from '@react-three/fiber';
 import { Color, type Points } from 'three';
 
 import { resolveDenseStarCount } from '@/shared/lib/perf/device-tier';
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 /**
  * Soft background starfield for home carousel and sandbox viewport.
@@ -23,6 +29,7 @@ export const Starfield = ({ dense = false }: { dense?: boolean }) => {
     [dense],
   );
 
+  // ── Clear color: black background required for AdditiveBlending ──
   useLayoutEffect(() => {
     const prevBackground = scene.background;
     const prevAlpha = gl.getContextAttributes()?.alpha ?? true;
@@ -34,6 +41,7 @@ export const Starfield = ({ dense = false }: { dense?: boolean }) => {
     };
   }, [gl, scene]);
 
+  // ── Render order: stars drawn first ──
   useLayoutEffect(() => {
     const points = starsRef.current;
     if (!points) return;

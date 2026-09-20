@@ -30,6 +30,12 @@ import {
   STAGES,
 } from './lib';
 
+/** Auto-play "Choice Machine" demo: individual decision episodes. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const DemoPage = () => {
   const query = useQuery({
     queryKey: ['narrated-choice-demo'],
@@ -161,6 +167,10 @@ export const DemoPage = () => {
   );
 };
 
+// ═══════════════════════════════════════════
+// LOADING STATE
+// ═══════════════════════════════════════════
+
 const LoadingState = ({
   isError,
   onRetry,
@@ -201,6 +211,10 @@ interface DemoContentProps {
   seed?: number;
   onJump: (index: number) => void;
 }
+
+// ═══════════════════════════════════════════
+// DEMO CONTENT
+// ═══════════════════════════════════════════
 
 const DemoContent = ({
   frames,
@@ -369,6 +383,10 @@ const DemoContent = ({
     </>
   );
 };
+
+// ═══════════════════════════════════════════
+// METRIC CARDS
+// ═══════════════════════════════════════════
 
 const InputsCard = ({ frame }: { frame: Frame }) => (
   <Card className="border-border bg-card">

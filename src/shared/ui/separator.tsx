@@ -1,10 +1,20 @@
+/** shadcn/ui Separator wrapper — horizontal or vertical divider. */
+
 import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SeparatorProps extends HTMLAttributes<HTMLHRElement> {
   orientation?: 'horizontal' | 'vertical';
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Separator = ({
   className,

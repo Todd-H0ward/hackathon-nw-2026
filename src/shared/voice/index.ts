@@ -1,4 +1,8 @@
-// Barrel export для voice-модуля
+/** Barrel export for voice module. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
 
 export { voiceCommands } from './commands';
 export { findCommand, resolveResponse } from './matcher';

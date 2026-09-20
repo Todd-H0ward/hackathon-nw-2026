@@ -1,22 +1,29 @@
-// Voice command types
+/** Voice module types — commands, args, and session state. */
+
+// ═══════════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════════
 
 export type VoiceCommandArgs = {
-  /** Полный распознанный текст пользователя */
+  /** Full recognized user transcript */
   transcript: string;
-  /** Захваченные группы из регулярного выражения (если используется) */
+  /** Captured regex groups (when used) */
   matches: RegExpMatchArray | null;
 };
 
 export type VoiceCommand = {
-  /** Ключевые слова/фразы-триггеры (строчные) */
+  /** Trigger keywords/phrases (lowercase) */
   triggers: string[];
-  /** Текстовый ответ программы (строка или функция) */
+  /** Program text response (string or function) */
   response: string | ((args: VoiceCommandArgs) => string);
-  /** Действие, которое выполняется при совпадении */
+  /** Action executed on match */
   action: (args: VoiceCommandArgs) => void;
 };
 
+// ═══════════════════════════════════════════
+// SESSION
 // Voice session types — the live state itself lives in `store/voice`.
+// ═══════════════════════════════════════════
 
 export type VoiceStatus = 'idle' | 'listening' | 'processing' | 'speaking';
 

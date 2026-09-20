@@ -1,5 +1,11 @@
+/** Home carousel look presets — haze, bloom, SPIN/JITTER for ferry. */
+
 import type { GlobeBodyId } from './bodies';
 import type { GlobeConfig } from './config';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 /**
  * Home carousel / ferry look: soft motion + haze so entry doesn't pop from

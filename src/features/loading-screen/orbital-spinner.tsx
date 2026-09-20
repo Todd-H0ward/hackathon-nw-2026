@@ -1,9 +1,22 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// PROP TYPES
+// ═══════════════════════════════════════════
 
 interface OrbitalSpinnerProps {
   className?: string;
+  /** Container diameter in px. */
   size?: number;
 }
+
+// ═══════════════════════════════════════════
+// ORBITAL SPINNER COMPONENT
+// ═══════════════════════════════════════════
 
 export const OrbitalSpinner = ({
   className,
@@ -17,10 +30,12 @@ export const OrbitalSpinner = ({
       )}
       style={{ width: size, height: size }}
     >
-      {/* Мягкое глубинное акцентное свечение в центре */}
+      {/* Soft depth accent glow at center */}
       <div className="absolute size-24 rounded-full bg-primary/10 blur-xl pointer-events-none" />
 
-      {/* SVG астрономический орбитальный спиннер */}
+      {/* ═══════════════════════════════════════════
+          SVG GRAPHICS
+          ═══════════════════════════════════════════ */}
       <svg
         viewBox="0 0 120 120"
         role="img"
@@ -30,14 +45,14 @@ export const OrbitalSpinner = ({
         <title>Орбитальный индикатор загрузки</title>
 
         <defs>
-          {/* Градиент основной вращающейся орбиты */}
+          {/* Primary rotating orbit gradient */}
           <linearGradient id="orbit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--primary)" stopOpacity="1" />
             <stop offset="60%" stopColor="var(--primary)" stopOpacity="0.3" />
             <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
           </linearGradient>
 
-          {/* Градиент вторичной обратной орбиты */}
+          {/* Secondary reverse orbit gradient */}
           <linearGradient
             id="orbit-grad-reverse"
             x1="100%"
@@ -51,7 +66,7 @@ export const OrbitalSpinner = ({
           </linearGradient>
         </defs>
 
-        {/* 1. Фоновый тонкий статический координатный контур */}
+        {/* 1. Background thin static coordinate ring */}
         <circle
           cx="60"
           cy="60"
@@ -61,7 +76,7 @@ export const OrbitalSpinner = ({
           strokeWidth="1"
         />
 
-        {/* Четыре навигационные отсечки на внешней шкале (0°, 90°, 180°, 270°) */}
+        {/* Four navigation ticks on the outer scale (0°, 90°, 180°, 270°) */}
         <line
           x1="60"
           y1="9"
@@ -95,7 +110,7 @@ export const OrbitalSpinner = ({
           strokeWidth="1"
         />
 
-        {/* 2. Внешняя вращающаяся орбитальная дуга с планетой-спутником */}
+        {/* 2. Outer rotating orbital arc with satellite planet */}
         <g className="origin-center animate-[spin_2.8s_linear_infinite]">
           <circle
             cx="60"
@@ -107,7 +122,7 @@ export const OrbitalSpinner = ({
             strokeLinecap="round"
             strokeDasharray="160 142"
           />
-          {/* Спутник на конце дуги */}
+          {/* Satellite at arc end */}
           <circle
             cx="60"
             cy="12"
@@ -116,7 +131,7 @@ export const OrbitalSpinner = ({
           />
         </g>
 
-        {/* 3. Средняя обратная пунктирная орбита */}
+        {/* 3. Middle reverse dashed orbit */}
         <g className="origin-center animate-[spin_4.2s_linear_infinite_reverse]">
           <circle
             cx="60"
@@ -128,11 +143,11 @@ export const OrbitalSpinner = ({
             strokeLinecap="round"
             strokeDasharray="4 8 16 8"
           />
-          {/* Малая точка на средней орбите */}
+          {/* Small dot on the middle orbit */}
           <circle cx="25" cy="60" r="1.5" fill="rgba(255, 255, 255, 0.7)" />
         </g>
 
-        {/* 4. Внутренняя быстрая дуга */}
+        {/* 4. Inner fast arc */}
         <g className="origin-center animate-[spin_1.6s_linear_infinite]">
           <circle
             cx="60"
@@ -147,7 +162,7 @@ export const OrbitalSpinner = ({
           />
         </g>
 
-        {/* 5. Центральное светило / планетарное ядро */}
+        {/* 5. Central star / planetary core */}
         <circle
           cx="60"
           cy="60"

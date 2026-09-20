@@ -1,6 +1,12 @@
+/** Interpolate two GlobeConfig values — RES stays on `from` (remount sim). */
+
 import { MathUtils } from 'three';
 
 import type { GlobeConfig } from '../config';
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 const lerpNum = (a: number, b: number, t: number) => MathUtils.lerp(a, b, t);
 

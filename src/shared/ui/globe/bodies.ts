@@ -1,25 +1,17 @@
+/** Planet ids, textures, and per-body look presets. */
+
 import { GLOBE_DEFAULTS, type GlobeConfig } from './config';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export const GLOBE_BODY_IDS = ['earth', 'mars', 'venus'] as const;
 
 export type GlobeBodyId = (typeof GLOBE_BODY_IDS)[number];
 
-export const GLOBE_BODY_LABELS: Record<GlobeBodyId, string> = {
-  earth: 'Earth',
-  mars: 'Mars',
-  venus: 'Venus',
-};
-
 export type GlobeMaps = {
   color: string;
-};
-
-const ASSET = '/images/globe';
-
-export const GLOBE_MAPS: Record<GlobeBodyId, GlobeMaps> = {
-  earth: { color: `${ASSET}/earth_color.jpg` },
-  mars: { color: `${ASSET}/mars_color.jpg` },
-  venus: { color: `${ASSET}/venus_color.jpg` },
 };
 
 type BodyLook = Pick<
@@ -38,6 +30,24 @@ type BodyLook = Pick<
   | 'BLOOM_RADIUS'
   | 'SPIN'
 >;
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+export const GLOBE_BODY_LABELS: Record<GlobeBodyId, string> = {
+  earth: 'Earth',
+  mars: 'Mars',
+  venus: 'Venus',
+};
+
+const ASSET = '/images/globe';
+
+export const GLOBE_MAPS: Record<GlobeBodyId, GlobeMaps> = {
+  earth: { color: `${ASSET}/earth_color.jpg` },
+  mars: { color: `${ASSET}/mars_color.jpg` },
+  venus: { color: `${ASSET}/venus_color.jpg` },
+};
 
 const LOOK: Record<GlobeBodyId, BodyLook> = {
   earth: {
@@ -87,6 +97,11 @@ const LOOK: Record<GlobeBodyId, BodyLook> = {
   },
 };
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
+/** Merge GLOBE_DEFAULTS + per-body look + patch into final GlobeConfig. */
 export const resolveGlobeConfig = (
   body: GlobeBodyId,
   patch: Partial<GlobeConfig> = {},

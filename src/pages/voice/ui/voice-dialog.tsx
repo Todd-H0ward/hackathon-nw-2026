@@ -7,16 +7,26 @@ import { Button } from '@/shared/ui';
 
 import { useClearVoiceHistory, useVoiceHistory } from '@/store';
 
+/** User dialog history with the voice assistant. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface VoiceDialogProps {
   className?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const VoiceDialog = ({ className }: VoiceDialogProps) => {
   const history = useVoiceHistory();
   const clearHistory = useClearVoiceHistory();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Автоскролл вниз при новых сообщениях
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (history.length > 0) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,7 +53,7 @@ export const VoiceDialog = ({ className }: VoiceDialogProps) => {
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
-      {/* Шапка */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-muted-foreground">
           История диалога
@@ -58,7 +68,7 @@ export const VoiceDialog = ({ className }: VoiceDialogProps) => {
         </Button>
       </div>
 
-      {/* Сообщения */}
+      {/* Messages */}
       <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-1">
         {history.map((entry) => (
           <div
@@ -70,7 +80,7 @@ export const VoiceDialog = ({ className }: VoiceDialogProps) => {
                 : 'self-start',
             )}
           >
-            {/* Аватар */}
+            {/* Avatar */}
             <div
               className={cn(
                 'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-[10px]',
@@ -86,7 +96,7 @@ export const VoiceDialog = ({ className }: VoiceDialogProps) => {
               )}
             </div>
 
-            {/* Пузырь */}
+            {/* Bubble */}
             <div
               className={cn(
                 'rounded-[10px] px-3 py-2 text-[13px] leading-[1.6]',

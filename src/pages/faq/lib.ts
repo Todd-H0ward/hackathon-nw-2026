@@ -1,8 +1,12 @@
 import type { FaqArticle, FaqCategory } from './types';
 
-/**
- * Exports the active article and full catalog data as a downloadable JSON file.
- */
+/** Reference page utilities. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
+/** Downloads the active article and catalog as a JSON file. */
 export function exportArticleJson(
   article: FaqArticle | undefined,
   categories: FaqCategory[],

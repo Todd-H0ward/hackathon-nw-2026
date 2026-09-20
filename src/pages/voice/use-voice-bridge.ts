@@ -9,8 +9,18 @@ import {
 
 import { getVoiceState } from '@/store';
 
+/** Bridge between Web Speech API and store/voice. Mounted exactly once. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const LANG = 'ru-RU';
 const FALLBACK_RESPONSE = 'Не понял команду. Попробуйте ещё раз.';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export type VoiceBridge = {
   isSupported: boolean;
@@ -18,11 +28,11 @@ export type VoiceBridge = {
   stopListening: () => void;
 };
 
-/**
- * Wires the browser speech APIs into `store/voice`. Must be mounted exactly
- * once — a second instance would open a second recogniser. There is no context
- * around it: the single call site is what guarantees uniqueness.
- */
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
+/** Connects speech recognition and synthesis to the global store. */
 export const useVoiceBridge = (): VoiceBridge => {
   const { speak } = useSpeechSynthesis({ lang: LANG });
 

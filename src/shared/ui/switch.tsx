@@ -1,12 +1,22 @@
+/** shadcn/ui Switch wrapper — checkbox toggle with label. */
+
 import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 interface SwitchProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: ReactNode;
   description?: ReactNode;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Switch = ({
   className,

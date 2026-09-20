@@ -1,7 +1,16 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { create } from 'zustand';
 
 import type { VoiceHistoryEntry, VoiceStatus } from '@/shared/voice';
 
+// ═══════════════════════════════════════════
+// STORE SCHEMA
+// ═══════════════════════════════════════════
+
+/** Voice assistant state (STT/TTS bridge). */
 export type VoiceStore = {
   status: VoiceStatus;
   history: VoiceHistoryEntry[];
@@ -20,7 +29,11 @@ export type VoiceStore = {
   dismiss: () => void;
 };
 
-/** Monotonic id for history entries; never read outside this module. */
+// ═══════════════════════════════════════════
+// STORE IMPLEMENTATION
+// ═══════════════════════════════════════════
+
+/** Monotonic history entry id; not read outside this module. */
 let nextEntryId = 0;
 
 export const useVoiceStore = create<VoiceStore>((set, get) => ({

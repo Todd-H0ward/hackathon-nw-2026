@@ -1,3 +1,8 @@
+// ═══════════════════════════════════════════
+// GPGPU BLIT — copy texture into FBO
+// ═══════════════════════════════════════════
+// Seeds rest pose and settles at zero motion.
+
 precision highp float;
 
 uniform sampler2D uTexture;

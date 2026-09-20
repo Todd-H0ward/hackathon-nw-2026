@@ -1,3 +1,9 @@
+/** Planet screen pose — center, silhouette radius, camera distance. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 /** Where a globe sits on screen: center + silhouette radius in CSS px, eye distance in world units. */
 export type PlanetScreenPose = {
   x: number;
@@ -5,6 +11,10 @@ export type PlanetScreenPose = {
   radius: number;
   distance: number;
 };
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 /** Screen-space silhouette radius of a sphere seen by a perspective camera. */
 export const projectedRadius = (

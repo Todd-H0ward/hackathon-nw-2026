@@ -1,10 +1,20 @@
 import { cn } from '@/shared/lib/utils';
 
+/** Parameter table in a reference article. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ParameterTableProps {
   headers?: string[];
   rows?: string[][];
   description?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function ParameterTable({
   headers,

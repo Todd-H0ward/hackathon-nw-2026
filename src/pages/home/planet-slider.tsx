@@ -22,6 +22,12 @@ import {
 } from './planet-hover-cursor';
 import type { PlanetInfoCatalog } from './planet-info';
 
+/** 3D planet carousel with navigation and lab entry. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface PlanetSliderProps {
   activeSlide: GlobeBodyId;
   setActiveSlide: (value: GlobeBodyId) => void;
@@ -34,6 +40,10 @@ interface PlanetSliderProps {
   paused?: boolean;
 }
 
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
 const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
   const index = GLOBE_BODY_IDS.indexOf(current);
   const next =
@@ -41,6 +51,10 @@ const shiftBody = (current: GlobeBodyId, delta: number): GlobeBodyId => {
     GLOBE_BODY_IDS.length;
   return GLOBE_BODY_IDS[next];
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const PlanetSlider = ({
   activeSlide,

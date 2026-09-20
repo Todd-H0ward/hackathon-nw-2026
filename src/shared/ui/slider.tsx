@@ -1,6 +1,12 @@
+/** shadcn/ui Slider wrapper — range input with label and value display. */
+
 import { type InputHTMLAttributes, type ReactNode, useId } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 interface SliderProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -10,6 +16,10 @@ interface SliderProps
   minLabel?: string;
   maxLabel?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Slider = ({
   className,

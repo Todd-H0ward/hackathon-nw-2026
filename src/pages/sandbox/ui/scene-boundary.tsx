@@ -2,6 +2,12 @@ import { Component, type ReactNode } from 'react';
 
 import { Globe2 } from 'lucide-react';
 
+/** Error boundary for the WebGL scene — fallback when 3D is unavailable. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SceneBoundaryProps {
   children: ReactNode;
 }
@@ -9,6 +15,10 @@ interface SceneBoundaryProps {
 interface SceneBoundaryState {
   failed: boolean;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export class SceneBoundary extends Component<
   SceneBoundaryProps & { resetKey?: string },

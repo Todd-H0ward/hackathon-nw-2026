@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// PUBLIC PLANET-TRANSITION STORE API
+// ═══════════════════════════════════════════
+
 export {
   getTransitionState,
   useTransitionBody,

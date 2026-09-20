@@ -1,3 +1,9 @@
+/** Barrel export for reference UI components. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export { ArticleCallout } from './article-callout';
 export { CodeSnippetCard } from './code-snippet-card';
 export { FaqArticleView } from './faq-article-view';

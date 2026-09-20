@@ -1,5 +1,10 @@
+// ═══════════════════════════════════════════
+// HAZE FRAGMENT — atmospheric fresnel glow
+// ═══════════════════════════════════════════
+
 precision highp float;
 
+// ── Uniforms (atmosphere) ──
 uniform float atmOpacity;
 uniform float atmPowFactor;
 uniform float atmMultiplier;
@@ -11,6 +16,10 @@ varying vec3 vNormal;
 varying vec3 vEye;
 varying vec3 vModelDir;
 varying vec2 vUv;
+
+// ═══════════════════════════════════════════
+// HELPERS — noise / dither
+// ═══════════════════════════════════════════
 
 float hash31(vec3 p) {
   p = fract(p * 0.3183099 + 0.1);

@@ -4,12 +4,22 @@ import { Button } from '@/shared/ui';
 
 import type { FaqArticle } from '../types';
 
+/** Full-text search results list for the reference. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SearchResultsViewProps {
   searchQuery: string;
   searchResults: FaqArticle[];
   onSelectArticle: (id: string) => void;
   onResetSearch: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function SearchResultsView({
   searchQuery,

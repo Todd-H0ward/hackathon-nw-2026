@@ -1,3 +1,9 @@
+/** Fuzzy lab voice command parser — intents, fields, and speed. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type ResearchIntent =
   | 'impulse'
   | 'storm'
@@ -32,8 +38,12 @@ export type VoiceCommandResult =
       value: 1 | 2 | 5;
     };
 
+// ═══════════════════════════════════════════
+// UTILITIES — FUZZY MATCH
+// ═══════════════════════════════════════════
+
 /**
- * Расстояние Дамерау-Левенштейна (учитывает вставки, удаления, замены и перестановки соседних букв).
+ * Damerau-Levenshtein distance (insertions, deletions, substitutions, adjacent transpositions).
  */
 export function damerauLevenshtein(a: string, b: string): number {
   const al = a.length;
@@ -53,12 +63,12 @@ export function damerauLevenshtein(a: string, b: string): number {
     for (let j = 1; j <= bl; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       d[i][j] = Math.min(
-        d[i - 1][j] + 1, // удаление
-        d[i][j - 1] + 1, // вставка
-        d[i - 1][j - 1] + cost, // замена
+        d[i - 1][j] + 1, // deletion
+        d[i][j - 1] + 1, // insertion
+        d[i - 1][j - 1] + cost, // substitution
       );
       if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
-        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1); // перестановка (transposition)
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1); // transposition
       }
     }
   }
@@ -66,11 +76,11 @@ export function damerauLevenshtein(a: string, b: string): number {
 }
 
 /**
- * Нормализация для нечеткого поиска:
- * - нижний регистр
- * - замена ё на е
- * - удаление мягких (ь) и твердых (ъ) знаков, так как при распознавании речи они часто теряются
- * - очистка знаков препинания
+ * Normalization for fuzzy matching:
+ * - lowercase
+ * - map ё → е
+ * - drop soft (ь) and hard (ъ) signs — often lost in speech recognition
+ * - strip punctuation
  */
 export function normalizeFuzzy(text: string): string {
   return text
@@ -82,8 +92,12 @@ export function normalizeFuzzy(text: string): string {
     .trim();
 }
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 /**
- * Словарь чисел на русском языке для распознавания числительных от речи.
+ * Russian number word dictionary for spoken numerals.
  */
 const RUSSIAN_NUMBER_WORDS: Record<string, number> = {
   ноль: 0,
@@ -120,16 +134,16 @@ const RUSSIAN_NUMBER_WORDS: Record<string, number> = {
 };
 
 /**
- * Извлекает число из строки (как цифры, так и слова).
+ * Extract number from string (digits or words).
  */
 function extractNumber(text: string): number | null {
-  // Прямое число в цифрах
+  // Direct numeric digits
   const digitMatch = text.match(/([+-]?\d+(?:\.\d+)?)/);
   if (digitMatch) {
     return Number.parseFloat(digitMatch[1]);
   }
 
-  // Поиск по словам
+  // Word lookup
   const words = text.split(/\s+/);
   let total = 0;
   let found = false;
@@ -150,7 +164,7 @@ function extractNumber(text: string): number | null {
 }
 
 /**
- * Проверяет, подходит ли слово под ключевое слово с допустимым расстоянием Дамерау-Левенштейна.
+ * Check word against keyword within allowed Damerau-Levenshtein distance.
  */
 function matchesFuzzyWord(word: string, target: string, maxDist = 2): boolean {
   const normWord = normalizeFuzzy(word);
@@ -166,7 +180,7 @@ function matchesFuzzyWord(word: string, target: string, maxDist = 2): boolean {
 }
 
 /**
- * Проверяет наличие ключевого слова в наборе слов фразы.
+ * Check phrase words for a fuzzy keyword match.
  */
 function containsFuzzyKeyword(
   words: string[],
@@ -183,17 +197,21 @@ function containsFuzzyKeyword(
   return false;
 }
 
+// ═══════════════════════════════════════════
+// PARSER — FIELDS & SETTINGS
+// ═══════════════════════════════════════════
+
 /**
- * Парсер команд изменения настроек и полей:
- * - Приток ресурса (resource)
- * - Шум среды (noise)
- * - Мутации (mutation)
- * - Скорость (speed)
+ * Field and setting change command parser:
+ * - Resource inflow (resource)
+ * - Environment noise (noise)
+ * - Mutations (mutation)
+ * - Speed (speed)
  */
 function parseFieldCommand(rawText: string): VoiceCommandResult | null {
   const normalized = rawText.toLowerCase().replace(/ё/g, 'е').trim();
 
-  // 1. Мутации при делении: включить / выключить
+  // 1. Division mutations: enable / disable
   const mutationKeywords = [
     'мутаци',
     'мутации',
@@ -209,7 +227,7 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
       return { type: 'mutation', value: true };
   }
 
-  // 2. Скорость симуляции
+  // 2. Simulation speed
   if (
     /(?:скорост\S*|темп|быстрее|замедл\S*|ускор\S*|медленнее)/.test(normalized)
   ) {
@@ -232,14 +250,14 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
     }
   }
 
-  // 3. Приток ресурса (resource) или Шум среды (noise)
+  // 3. Resource inflow (resource) or environment noise (noise)
   const isResource = /(?:приток|ресурс\S*|поток)/.test(normalized);
   const isNoise = /(?:шум\S*|помех\S*)/.test(normalized);
 
   if (isResource || isNoise) {
     const setting: FieldSetting = isResource ? 'resource' : 'noise';
 
-    // Определяем знак/направление изменения
+    // Determine sign/direction of change
     const isIncrease =
       /(?:увелич\S*|прибав\S*|подним\S*|повыс\S*|добав\S*|\bплюс\b|\+)/.test(
         normalized,
@@ -268,7 +286,7 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
           value: -Math.abs(num),
         };
       }
-      // Если указан явный знак в строке (+10 или -10)
+      // Explicit sign in string (+10 or -10)
       if (/\+/.test(normalized)) {
         return {
           type: 'setting',
@@ -286,7 +304,7 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
         };
       }
 
-      // Если сказано: "поменяй приток на 70%" или "приток 50" -> абсолютное значение
+      // Absolute value: "set inflow to 70%" or "inflow 50"
       if (
         /(?:поменяй|измени|установи|поставь|сделай|на)/.test(normalized) ||
         (!isIncrease && !isDecrease)
@@ -304,9 +322,13 @@ function parseFieldCommand(rawText: string): VoiceCommandResult | null {
   return null;
 }
 
+// ═══════════════════════════════════════════
+// CONSTANTS — INTENTS
+// ═══════════════════════════════════════════
+
 /**
- * Конфигурация для нечеткого распознавания намерений (интентов).
- * Включает распространенные опечатки и фонетические вариации речи.
+ * Fuzzy intent recognition config.
+ * Includes common typos and phonetic speech variants.
  */
 const INTENT_PREDICTORS: {
   intent: ResearchIntent;
@@ -316,7 +338,7 @@ const INTENT_PREDICTORS: {
 }[] = [
   {
     intent: 'impulse',
-    // Опечатки и формы: импульс, импулс, имплус, инпульс, импус, импуль, pulse
+    // Typos and forms: импульс, импулс, имплус, инпульс, импус, импуль, pulse
     keywords: [
       'импульс',
       'импулс',
@@ -409,10 +431,14 @@ const INTENT_PREDICTORS: {
   },
 ];
 
+// ═══════════════════════════════════════════
+// PARSER — ENTRY POINT
+// ═══════════════════════════════════════════
+
 /**
- * Основная функция разбора голосовой команды:
- * Сначала проверяет команды управления полями/параметрами среды,
- * затем нечетко ищет намерения симуляции с предсказанием искаженных слов.
+ * Main voice command parser:
+ * Checks field/environment setting commands first,
+ * then fuzzy-matches simulation intents with distorted-word tolerance.
  */
 export function parseResearchVoiceCommand(
   text: string,
@@ -424,16 +450,16 @@ export function parseResearchVoiceCommand(
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Отрицание отменяет команду
+  // Negation cancels command
   if (/(?:^|\s)(?:не|нет|отмени|нельзя)(?:\s|$)/.test(normalized)) return null;
 
   if (/(?:^|\s)(?:и|затем|потом|одновременно)(?:\s|$)/.test(normalized))
     return null;
 
-  // 1. Проверяем команды изменения полей и настроек
+  // 1. Check field and setting commands
   const fieldCmd = parseFieldCommand(text);
 
-  // 2. Проверяем интенты (регулярки + нечеткое сопоставление)
+  // 2. Check intents (regex + fuzzy match)
   const words = normalized
     .split(/\s+/)
     .filter(
@@ -460,7 +486,7 @@ export function parseResearchVoiceCommand(
   for (const predictor of INTENT_PREDICTORS) {
     let matched = false;
 
-    // Сначала быстрая проверка регулярным выражением
+    // Fast regex check first
     if (predictor.regex?.test(normalized)) {
       matched = true;
     } else if (
@@ -474,7 +500,7 @@ export function parseResearchVoiceCommand(
     }
   }
 
-  // Разрешение неоднозначностей: если указана метрика, приоритет над 'analytics'
+  // Disambiguation: metric intent wins over 'analytics'
   let filtered = matchedIntents;
   if (
     filtered.some((i) =>
@@ -505,9 +531,13 @@ export function parseResearchVoiceCommand(
   return null;
 }
 
+// ═══════════════════════════════════════════
+// EXPORT — BACK-COMPAT
+// ═══════════════════════════════════════════
+
 /**
- * Совместимость со старым API parseResearchIntent:
- * Возвращает ResearchIntent или null.
+ * Back-compat for legacy parseResearchIntent API.
+ * Returns ResearchIntent or null.
  */
 export function parseResearchIntent(text: string): ResearchIntent | null {
   const res = parseResearchVoiceCommand(text);

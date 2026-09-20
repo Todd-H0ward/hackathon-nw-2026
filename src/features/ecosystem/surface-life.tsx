@@ -1,3 +1,16 @@
+/**
+ * Surface life layer on the globe (sandbox viewport).
+ *
+ * Visual vocabulary:
+ *   • octahedra ("crystals") — individuals
+ *   • contour / arcs          — colony and links
+ *   • white dot on arc        — resource packet in transit
+ *   • C—01 badge              — colony label (HTML)
+ *
+ * UI colors and legend: `surface-markers.ts`.
+ * Colony landing draft: `research-scene.tsx` (yellow pin).
+ */
+
 import {
   type ComponentProps,
   type CSSProperties,
@@ -25,19 +38,35 @@ import { cn } from '@/shared/lib/utils';
 import type { Colony, Individual, Simulation } from './model';
 import { LOW_ENERGY_THRESHOLD, SURFACE_MARKER } from './surface-markers';
 
+// ═══════════════════════════════════════════
+// CONSTANTS & GEOMETRY
+// ═══════════════════════════════════════════
+
 type Vec3 = [number, number, number];
 
+/** Number of arc segments for a link / packet. */
 const ARC_STEPS = 20;
+/** Number of colony contour points (closed ring on the sphere). */
 const BOUNDARY_STEPS = 49;
+/** Radius for placing individuals on the sphere. */
 const DEFAULT_RADIUS = 2.33;
+/** Colony contour radius (slightly above the surface). */
 const BOUNDARY_RADIUS = 2.35;
+/** HTML colony label radius. */
 const LABEL_RADIUS = 2.46;
-/** Rebuild colony boundary/link polylines every N sim ticks (packets update every tick). */
+/**
+ * Rebuild contours/links every N simulation ticks —
+ * packet heads update every tick separately.
+ */
 const COLONY_GEOMETRY_STRIDE = 2;
 
 const Z_AXIS = new Vector3(0, 0, 1);
 
-/** Spherical → cartesian into a reusable tuple (no per-call array alloc). */
+// ═══════════════════════════════════════════
+// SPHERE MATH / BUFFERS
+// ═══════════════════════════════════════════
+
+/** Lat/lon → XYZ into a reusable tuple (no per-frame allocations). */
 const writePosition = (
   out: Vec3,
   lat: number,
@@ -82,8 +111,8 @@ const sameVec3Array = (a: Vec3[], b: Vec3[]) => {
 };
 
 /**
- * Publish scratch coords into a stable array identity. Returns the previous
- * published buffer when coordinates are unchanged so drei Line can skip work.
+ * Publishes scratch coordinates with stable array identity.
+ * If points are unchanged — return the previous buffer (drei Line skips rebuild).
  */
 const publishVec3Array = (
   cache: Map<string, Vec3[]>,
@@ -100,8 +129,8 @@ const publishVec3Array = (
 };
 
 /**
- * Great-circle bump between two surface points. Writes into a caller-owned
- * buffer so a 10 Hz stream never allocates 20 Vector3s per link.
+ * Arc "above" the surface between two points (link or packet trajectory).
+ * Writes into the caller buffer — 10 Hz stream avoids Vector3 per link.
  */
 const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
   for (let i = 0; i < ARC_STEPS; i++) {
@@ -118,6 +147,10 @@ const writeArc = (out: Vec3[], a: Vec3, b: Vec3) => {
   }
   return out;
 };
+
+// ═══════════════════════════════════════════
+// STABLE LINE (drei)
+// ═══════════════════════════════════════════
 
 type LinePoints = ComponentProps<typeof Line>['points'];
 
@@ -142,16 +175,14 @@ const samePoints = (a: LinePoints, b: LinePoints) => {
 };
 
 /**
- * drei's Line rebuilds geometry when the `points` identity changes. We keep a
- * shadow copy of the last uploaded coords so in-place pool mutations still
- * trigger an update when values move, and skip when they don't.
+ * drei Line rebuilds geometry when `points` identity changes.
+ * Clone tuples only when coordinates actually moved.
  */
 const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
   const published = useRef(points);
   const shadow = useRef<LinePoints | null>(null);
 
   if (!shadow.current || !samePoints(shadow.current, points)) {
-    // Clone tuples so drei sees a new identity when coordinates change.
     published.current = (points as Vec3[]).map(
       (p) => [p[0], p[1], p[2]] as Vec3,
     );
@@ -161,28 +192,38 @@ const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
   return <Line points={published.current} {...rest} />;
 };
 
+// ═══════════════════════════════════════════
+// SCENE TYPES
+// ═══════════════════════════════════════════
+
+/** Shared geometry for a resource packet head (white sphere on arc). */
 const PACKET_GEOMETRY = new SphereGeometry(0.028, 8, 8);
 const PACKET_MATERIAL = new MeshBasicMaterial({
   color: SURFACE_MARKER.packet,
   toneMapped: false,
 });
 
+/** Ready view for one colony: contour, links, center, badge position. */
 type ColonyView = {
   colony: Colony;
   group: Individual[];
   center: { lat: number; lon: number };
   centerPos: Vec3;
+  /** Ring around the colony on the sphere. */
   boundary: Vec3[];
+  /** Arcs between adjacent individuals (when showLinks). */
   links: { id: number; points: Vec3[] }[];
   labelPosition: Vec3;
 };
 
+/** In-transit packet: arc + current head position. */
 type PacketView = {
   key: string;
   points: Vec3[];
   head: Vec3;
 };
 
+/** Buffer pools + tick cache to avoid per-frame WS allocations. */
 type SceneViewCache = {
   structureKey: string;
   colonyTick: number;
@@ -213,6 +254,11 @@ const createSceneViewCache = (): SceneViewCache => ({
   scratchBoundary: makeBoundaryBuffer(),
 });
 
+// ═══════════════════════════════════════════
+// VIEW BUILD (COLONIES / PACKETS)
+// ═══════════════════════════════════════════
+
+/** Scene structure key — composition/selection change forces contour rebuild. */
 const structureKeyOf = (
   simulation: Simulation,
   showLinks: boolean,
@@ -227,6 +273,7 @@ const structureKeyOf = (
   return `${simulation.body}|${selected}|${showLinks ? 1 : 0}|${simulation.colonies.length}|${alive}|${dead}|${simulation.packets.length}`;
 };
 
+/** Colony contours + link arcs between individuals. */
 const rebuildColonyViews = (
   cache: SceneViewCache,
   simulation: Simulation,
@@ -255,6 +302,7 @@ const rebuildColonyViews = (
     const centerPos: Vec3 = [0, 0, 0];
     writePosition(centerPos, center.lat, center.lon, BOUNDARY_RADIUS);
 
+    // Elliptical ring around the colony center.
     for (let k = 0; k < BOUNDARY_STEPS; k++) {
       writePosition(
         scratchBoundary[k],
@@ -272,6 +320,7 @@ const rebuildColonyViews = (
 
     const links: ColonyView['links'] = [];
     if (showLinks) {
+      // Selected colony gets more arcs — easier to read the network.
       const maxLinks = selected === colony.id ? 16 : 5;
       const linkCount = Math.min(group.length - 1, maxLinks);
       for (let j = 1; j <= linkCount; j++) {
@@ -306,6 +355,7 @@ const rebuildColonyViews = (
   cache.colonyTick = simulation.tick;
 };
 
+/** Resource packet arcs + heads (inTransit from snapshot). */
 const rebuildPacketViews = (
   cache: SceneViewCache,
   simulation: Simulation,
@@ -314,6 +364,7 @@ const rebuildPacketViews = (
   const { scratchA, scratchB, scratchArc } = cache;
   const packetViews: PacketView[] = [];
   const packets = simulation.packets;
+  // Do not draw infinite history — last ~35 packets only.
   const start = Math.max(0, packets.length - 35);
 
   for (let i = start; i < packets.length; i++) {
@@ -355,9 +406,9 @@ const rebuildPacketViews = (
 };
 
 /**
- * Build / refresh colony + packet line geometry with pooled buffers.
- * Colony polylines throttle to every COLONY_GEOMETRY_STRIDE ticks unless the
- * membership/selection structure changes; packet heads refresh every tick.
+ * Sync view models with the simulation.
+ * Contours — every COLONY_GEOMETRY_STRIDE ticks (or on composition change);
+ * packet heads — every tick when links are enabled.
  */
 const syncSceneViews = (
   cache: SceneViewCache,
@@ -403,10 +454,16 @@ const syncSceneViews = (
   };
 };
 
+// ═══════════════════════════════════════════
+// TYPES (PROPS)
+// ═══════════════════════════════════════════
+
 interface SurfaceLifeProps {
   simulation: Simulation;
   selected: number | null;
+  /** "Links" toggle: arcs between individuals + packets. */
   showLinks: boolean;
+  /** "Labels" toggle: HTML C—01 badges. */
   showLabels: boolean;
   onSelect: (id: number) => void;
 }
@@ -420,7 +477,15 @@ interface ColonyOverlayProps {
   onSelect: (id: number) => void;
 }
 
-/** Horizon occlusion + bright colony chrome; geometry comes from the parent memo. */
+interface PacketOverlayProps {
+  view: PacketView;
+}
+
+// ═══════════════════════════════════════════
+// OVERLAY: COLONY (boundary · links · badge)
+// ═══════════════════════════════════════════
+
+/** Colony contour, optional links and label; hidden behind the horizon. */
 const ColonyOverlay = ({
   view,
   selected,
@@ -439,7 +504,7 @@ const ColonyOverlay = ({
 
   useFrame(({ camera }) => {
     if (!groupRef.current) return;
-    // Horizon occlusion: P · C − |P|² > −0.35 (margin so edges don't clip early).
+    // Horizon occlusion: P · C − |P|² > −0.35
     const pDotC = centerVec.dot(camera.position);
     const isVisible = pDotC - centerVec.lengthSq() > -0.35;
 
@@ -456,6 +521,7 @@ const ColonyOverlay = ({
 
   return (
     <group ref={groupRef}>
+      {/* Colony contour — colored ring */}
       <StableLine
         points={boundary}
         color={colony.color}
@@ -463,6 +529,7 @@ const ColonyOverlay = ({
         opacity={selected ? 0.95 : 0.65}
         lineWidth={selected ? 2.8 : 1.8}
       />
+      {/* Links between individuals ("Links" toggle) */}
       {showLinks &&
         links.map((link) => (
           <StableLine
@@ -474,6 +541,7 @@ const ColonyOverlay = ({
             lineWidth={selected ? 2.2 : 1.4}
           />
         ))}
+      {/* C—NN label + live count */}
       {showLabels && (
         <Html
           position={labelPosition}
@@ -504,10 +572,11 @@ const ColonyOverlay = ({
   );
 };
 
-interface PacketOverlayProps {
-  view: PacketView;
-}
+// ═══════════════════════════════════════════
+// OVERLAY: RESOURCE PACKET
+// ═══════════════════════════════════════════
 
+/** Transfer arc + white head — inTransit packet between individuals. */
 const PacketOverlay = ({ view }: PacketOverlayProps) => {
   const groupRef = useRef<Group>(null);
   const headVec = useMemo(
@@ -542,6 +611,14 @@ const PacketOverlay = ({ view }: PacketOverlayProps) => {
   );
 };
 
+// ═══════════════════════════════════════════
+// MAIN: SURFACE LIFE
+// ═══════════════════════════════════════════
+
+/**
+ * Life layer above the planet point cloud.
+ * Individuals — instanced octahedron; colonies/packets — lines on top.
+ */
 export const SurfaceLife = ({
   simulation,
   selected,
@@ -550,8 +627,7 @@ export const SurfaceLife = ({
   onSelect,
 }: SurfaceLifeProps) => {
   const mesh = useRef<InstancedMesh>(null);
-  // Cheap stand-in for the planet: label occlusion raycasts against this only,
-  // not the whole scene (the globe's point cloud has 160k vertices).
+  // Cheap occluder for Html labels (no raycast against 160k globe points).
   const occluder = useRef<Mesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
   const outward = useMemo(() => new Vector3(), []);
@@ -578,6 +654,7 @@ export const SurfaceLife = ({
     [simulation, showLinks, selected],
   );
 
+  // Individual color: dead → divide → low energy → colony color.
   useEffect(() => {
     const target = mesh.current;
     if (!target) return;
@@ -601,6 +678,7 @@ export const SurfaceLife = ({
     if (target.instanceColor) target.instanceColor.needsUpdate = true;
   }, [visible, colonyColorById, color]);
 
+  // Position / orientation / pulse per frame.
   useFrame(({ clock, camera }) => {
     const target = mesh.current;
     if (!target) return;
@@ -617,7 +695,7 @@ export const SurfaceLife = ({
       const z = DEFAULT_RADIUS * cosLat * Math.cos(individual.lon);
       dummy.position.set(x, y, z);
 
-      // Back-face cull: hide individuals on the far side of the sphere.
+      // Hide individuals on the far side of the sphere.
       const pDotC = dummy.position.dot(camera.position);
       if (pDotC - dummy.position.lengthSq() <= -0.05) {
         dummy.scale.set(0, 0, 0);
@@ -626,7 +704,7 @@ export const SurfaceLife = ({
         continue;
       }
 
-      // Orient along surface normal — cheaper than lookAt each instance.
+      // Surface normal — cheaper than lookAt per instance.
       const len = Math.hypot(x, y, z) || 1;
       outward.set(x / len, y / len, z / len);
       dummy.quaternion.setFromUnitVectors(Z_AXIS, outward);
@@ -654,6 +732,7 @@ export const SurfaceLife = ({
 
   return (
     <group>
+      {/* Dark backdrop under life markers */}
       <mesh>
         <sphereGeometry args={[2.27, 48, 48]} />
         <meshBasicMaterial color="#05080d" />
@@ -661,6 +740,8 @@ export const SurfaceLife = ({
       <mesh ref={occluder} visible={false}>
         <sphereGeometry args={[2.3, 16, 12]} />
       </mesh>
+
+      {/* Individuals — diamond crystals (octahedron); click selects colony */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: Three.js mesh; equivalent keyboard controls are the colony list buttons. */}
       <instancedMesh
         ref={mesh}
@@ -687,6 +768,8 @@ export const SurfaceLife = ({
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
+
+      {/* Colony contours / links / labels */}
       {colonyViews.map((view) => (
         <ColonyOverlay
           key={view.colony.id}
@@ -698,6 +781,8 @@ export const SurfaceLife = ({
           onSelect={onSelect}
         />
       ))}
+
+      {/* Resource packets — only when links are enabled */}
       {showLinks &&
         packetViews.map((view) => <PacketOverlay key={view.key} view={view} />)}
     </group>

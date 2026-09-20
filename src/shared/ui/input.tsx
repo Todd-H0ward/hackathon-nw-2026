@@ -1,14 +1,24 @@
+/** shadcn/ui Input wrapper — text field with optional label. */
+
 import { type InputHTMLAttributes, useId } from 'react';
 
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface InputProps
   extends InputHTMLAttributes<HTMLInputElement>,
     VariantProps<typeof inputVariants> {
   label?: string;
 }
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
 
 export const inputVariants = cva(
   [
@@ -30,6 +40,10 @@ export const inputVariants = cva(
     },
   },
 );
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Input = ({
   className,

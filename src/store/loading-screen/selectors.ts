@@ -1,4 +1,12 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { type LoadingScreenStore, useLoadingScreenStore } from './store';
+
+// ═══════════════════════════════════════════
+// SELECTOR HOOKS
+// ═══════════════════════════════════════════
 
 export const useIsLoading = () =>
   useLoadingScreenStore((store: LoadingScreenStore) => store.isLoading);

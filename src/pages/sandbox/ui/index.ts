@@ -1,3 +1,9 @@
+/** Sandbox UI barrel — panels, viewport, dialogs, and controls. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export { ColoniesPanel } from './colonies-panel';
 export { EnvironmentPanel } from './environment-panel';
 export { InterventionBar } from './intervention-bar';

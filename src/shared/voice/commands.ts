@@ -1,19 +1,25 @@
+/** Registry of navigation and action voice commands. */
+
 import type { VoiceCommand } from './types';
 
+// ═══════════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════════
+
 /**
- * Список голосовых команд. Добавляй сюда свои команды.
+ * Voice command list. Add your commands here.
  *
- * Каждая команда — это объект:
- * - `triggers` — массив фраз-триггеров (строчные, без знаков препинания)
- * - `response` — что скажет и напишет программа в ответ
- * - `action` — функция, которая выполнит нужное действие
+ * Each command is an object:
+ * - `triggers` — trigger phrase array (lowercase, no punctuation)
+ * - `response` — program spoken/written reply
+ * - `action` — function that runs the action
  *
- * В `action` доступны:
- * - `transcript` — полный текст пользователя
- * - `matches` — результат RegExp-совпадения (если использовался)
+ * In `action`:
+ * - `transcript` — full user text
+ * - `matches` — RegExp match result (if used)
  */
 export const voiceCommands: VoiceCommand[] = [
-  // Навигация
+  // Navigation
   {
     triggers: ['перейди на главную', 'открой главную', 'домой', 'на главную'],
     response: 'Перехожу на главную страницу',
@@ -35,7 +41,7 @@ export const voiceCommands: VoiceCommand[] = [
     },
   },
 
-  // Примеры
+  // Examples
 
   // {
   //   triggers: ['увеличь счётчик', 'прибавь'],

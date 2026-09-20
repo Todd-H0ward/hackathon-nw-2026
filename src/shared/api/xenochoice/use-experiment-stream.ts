@@ -1,7 +1,13 @@
+/** WebSocket subscription to experiment snapshot stream with 10 Hz buffering. */
+
 import { useEffect, useRef, useState } from 'react';
 
 import { xenochoiceWsUrl } from './client';
 import type { StateSnapshot, StreamMessage } from './types';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 /** Cap on how often buffered WS pushes are applied to React state (10 Hz). */
 const FLUSH_MS = 100;
@@ -10,12 +16,20 @@ const RECONNECT_MAX_MS = 15_000;
 /** Give up instead of hammering a dead or unknown experiment forever. */
 const RECONNECT_MAX_ATTEMPTS = 6;
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type StreamStatus =
   | 'idle'
   | 'connecting'
   | 'open'
   | 'reconnecting'
   | 'failed';
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 /**
  * The backend is documented as `{experimentId, payload}`, but tolerate a bare
@@ -47,6 +61,10 @@ const parseSnapshot = (raw: unknown): StateSnapshot | null => {
   console.warn('[xenochoice] unrecognised stream frame', data);
   return null;
 };
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
 
 /**
  * Subscribes to `/experiments/{id}/stream`. The backend can push well past

@@ -1,4 +1,10 @@
+/** Web Speech API hook — speech synthesis with Russian voice selection. */
+
 import { useCallback, useRef, useState } from 'react';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 type UseSpeechSynthesisOptions = {
   lang?: string;
@@ -13,6 +19,10 @@ type UseSpeechSynthesisReturn = {
   isSpeaking: boolean;
   isSupported: boolean;
 };
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
 
 export const useSpeechSynthesis = ({
   lang = 'ru-RU',
@@ -33,7 +43,7 @@ export const useSpeechSynthesis = ({
         return;
       }
 
-      // Останавливаем предыдущую речь
+      // Stop previous speech
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
@@ -65,7 +75,7 @@ export const useSpeechSynthesis = ({
       utteranceRef.current = utterance;
       window.speechSynthesis.speak(utterance);
 
-      // Решение бага Chrome, когда синтез речи может зависнуть на паузе
+      // Chrome bug workaround: speech synthesis can stall while paused
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
       }

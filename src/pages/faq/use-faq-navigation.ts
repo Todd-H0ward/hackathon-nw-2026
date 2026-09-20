@@ -3,6 +3,12 @@ import { useSearchParams } from 'react-router';
 
 import { FAQ_CATEGORIES } from './faq-data';
 
+/** Reference navigation: URL, search, and mobile sidebar. */
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 export function useFaqNavigation() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');

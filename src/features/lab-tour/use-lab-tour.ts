@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
@@ -13,24 +17,33 @@ import { cn } from '@/shared/lib/utils';
 import { LAB_TOUR_EDITOR_READY_SELECTOR, LAB_TOUR_STEPS } from './steps';
 import { isLabTourSeen, markLabTourSeen } from './storage';
 
+// ═══════════════════════════════════════════
+// TYPES & OPTIONS
+// ═══════════════════════════════════════════
+
+/** Options for starting the guided lab tour. */
 export interface UseLabTourOptions {
-  /** World catalog loaded and selected body available. */
+  /** World catalog loaded and the selected body is available. */
   ready: boolean;
-  /** True only on the lab editor route (`/sandbox`), not analytics/atlas. */
+  /** true only on the editor route (`/sandbox`), not analytics/atlas. */
   editorActive: boolean;
   booting: boolean;
-  /** Planet transition phase — only auto-start when idle. */
+  /** planet-transition phase — auto-start only in idle. */
   phase: string;
-  /** Open lab modal blocks auto-start. */
+  /** An open modal blocks auto-start. */
   modalOpen: boolean;
-  /** Pause the running simulation before highlighting. */
+  /** Pause the simulation before highlighting. */
   onPause?: () => void;
   /**
-   * Silent driver.js auto-start. Prefer `LabFirstRunDialog` in the shell;
-   * leave false so first visit goes through the welcome gate.
+   * Silent driver.js auto-start. Prefer `LabFirstRunDialog`;
+   * false — first visit goes through the welcome gate.
    */
   autoStart?: boolean;
 }
+
+// ═══════════════════════════════════════════
+// STYLE CONSTANTS
+// ═══════════════════════════════════════════
 
 const POPOVER_CLASS = cn(
   '!box-border !fixed z-[1000000000] !m-0 !min-w-[260px] !max-w-[320px]',
@@ -39,14 +52,20 @@ const POPOVER_CLASS = cn(
   '!shadow-[0_12px_40px_color-mix(in_oklch,black_45%,transparent)]',
 );
 
-/** Below this, treat the tour as incomplete — do not start / persist. */
+/** Below this threshold the tour is incomplete — do not start or persist. */
 const MIN_TOUR_STEPS = 4;
 
+// ═══════════════════════════════════════════
+// VISIBILITY UTILITIES
+// ═══════════════════════════════════════════
+
+/** Respects prefers-reduced-motion for driver.js animation. */
 const prefersReducedMotion = (): boolean => {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 };
 
+/** Anchor is visible: in DOM, not hidden, opacity ≥ 0.9, non-zero rect. */
 const isSelectorVisible = (selector: string): boolean => {
   const el = document.querySelector(selector);
   if (!(el instanceof HTMLElement)) return false;
@@ -57,13 +76,18 @@ const isSelectorVisible = (selector: string): boolean => {
   return rect.width >= 1 && rect.height >= 1;
 };
 
-/** Drop steps whose anchors are missing or hidden (expanded / other routes). */
+/** Drops steps with missing or hidden anchors. */
 const resolveVisibleSteps = (): DriveStep[] =>
   LAB_TOUR_STEPS.filter((step) => {
     if (typeof step.element !== 'string') return true;
     return isSelectorVisible(step.element);
   });
 
+// ═══════════════════════════════════════════
+// POPOVER STYLING
+// ═══════════════════════════════════════════
+
+/** Popover arrow color matched to `--popover` background. */
 const styleArrow = (arrow: HTMLElement) => {
   arrow.style.borderColor = 'transparent';
   if (arrow.classList.contains('driver-popover-arrow-side-left')) {
@@ -77,6 +101,7 @@ const styleArrow = (arrow: HTMLElement) => {
   }
 };
 
+/** Applies XenoChoice UI classes to the driver.js popover. */
 const styleLabTourPopover = (popover: PopoverDOM) => {
   popover.title.className = cn(
     popover.title.className,
@@ -129,6 +154,10 @@ const styleLabTourPopover = (popover: PopoverDOM) => {
   styleArrow(popover.arrow);
 };
 
+// ═══════════════════════════════════════════
+// HOOK useLabTour
+// ═══════════════════════════════════════════
+
 export const useLabTour = ({
   ready,
   editorActive,
@@ -143,7 +172,7 @@ export const useLabTour = ({
   const onPauseRef = useRef(onPause);
   onPauseRef.current = onPause;
   const autoStartedRef = useRef(false);
-  /** When true, next destroy is teardown — do not write localStorage. */
+  /** true — next destroy is teardown; skip localStorage write. */
   const skipPersistRef = useRef(false);
 
   const destroyTour = useCallback(() => {
@@ -199,6 +228,7 @@ export const useLabTour = ({
     instance.drive();
   }, [destroyTour, editorActive]);
 
+  // ── Auto-start (legacy silent mode) ──
   useEffect(() => {
     if (!autoStart) return;
     if (autoStartedRef.current) return;
@@ -243,6 +273,7 @@ export const useLabTour = ({
     startTour,
   ]);
 
+  // ── Cleanup on unmount ──
   useEffect(() => () => destroyTour(), [destroyTour]);
 
   return { startTour };

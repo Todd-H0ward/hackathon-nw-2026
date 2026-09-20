@@ -7,6 +7,12 @@ import { STATIC_ROUTES } from '@/shared/constants';
 
 import { App } from './App';
 
+/** App route config (lazy-load for heavy pages). */
+
+// ═══════════════════════════════════════════
+// ROUTES
+// ═══════════════════════════════════════════
+
 export const router = createBrowserRouter([
   {
     path: STATIC_ROUTES.HOME,

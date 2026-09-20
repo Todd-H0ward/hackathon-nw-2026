@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// PUBLIC LOADING-SCREEN STORE API
+// ═══════════════════════════════════════════
+
 export {
   useDismissLoading,
   useFinishLoading,

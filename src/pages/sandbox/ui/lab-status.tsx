@@ -3,6 +3,12 @@ import { Loader2, PlugZap, TriangleAlert } from 'lucide-react';
 import type { StreamStatus } from '@/shared/api/xenochoice';
 import { cn } from '@/shared/lib/utils';
 
+/** Floating notice for lab connection and loading state. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface LabStatusProps {
   booting: boolean;
   streamStatus: StreamStatus;
@@ -17,12 +23,21 @@ type Notice = {
   text: string;
 };
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const TONES: Record<Notice['tone'], string> = {
   info: 'border-border bg-card/95 text-muted-foreground',
   warn: 'border-primary/40 bg-primary/15 text-primary',
   error: 'border-destructive/40 bg-destructive/15 text-destructive',
 };
 
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Picks a notice based on current boot/stream/worlds state. */
 const resolveNotice = ({
   booting,
   streamStatus,
@@ -77,10 +92,13 @@ const resolveNotice = ({
   return null;
 };
 
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 /**
- * Floating notice that explains why the lab is empty or lagging behind. Taken
- * out of the flow on purpose: it appears and disappears on its own schedule,
- * and in-flow it would shift the whole lab layout every time.
+ * Floating notice — why the lab is empty or lagging.
+ * Out of flow: appears on its own schedule, does not shift layout.
  */
 export const LabStatus = (props: LabStatusProps) => {
   const notice = resolveNotice(props);

@@ -16,6 +16,12 @@ import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import type { Settings, WorldInfo } from '@/features/ecosystem';
 
+/** Left panel: planet selection, reference parameters, and condition sliders. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface EnvironmentPanelProps {
   body: GlobeBodyId;
   settings: Settings;
@@ -25,6 +31,10 @@ interface EnvironmentPanelProps {
   onSelectWorld: (id: GlobeBodyId) => void;
   onSettings: (next: Partial<Settings>) => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const EnvironmentPanel = ({
   body,
@@ -159,6 +169,10 @@ export const EnvironmentPanel = ({
     </aside>
   );
 };
+
+// ═══════════════════════════════════════════
+// HELPER COMPONENTS
+// ═══════════════════════════════════════════
 
 interface SectionTitleProps {
   index: string;

@@ -46,6 +46,12 @@ import {
   writeParticleBrightnessPercent,
 } from './viewport-settings-storage';
 
+/** Central 3D viewport: globe, SurfaceLife, tools, and HUD. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface PlanetViewportProps {
   body: GlobeBodyId;
   world: WorldInfo;
@@ -65,9 +71,18 @@ interface PlanetViewportProps {
   onToggleExpanded: () => void;
 }
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const toolClass =
   'inline-flex size-8 items-center justify-center rounded-[5px] border border-border bg-card/80 text-muted-foreground backdrop-blur transition-colors hover:bg-secondary hover:text-foreground aria-pressed:border-primary/50 aria-pressed:bg-secondary aria-pressed:text-foreground';
 
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Measures on-screen planet pose for planet-transition. */
 const measureViewportPose = (
   el: HTMLElement | null,
 ): PlanetScreenPose | null => {
@@ -87,6 +102,10 @@ const measureViewportPose = (
     distance,
   };
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const PlanetViewport = ({
   body,
@@ -261,16 +280,8 @@ export const PlanetViewport = ({
         <button
           type="button"
           className={toolClass}
-          title={
-            expanded
-              ? 'Свернуть панели (Esc)'
-              : 'Расширить сцену'
-          }
-          aria-label={
-            expanded
-              ? 'Свернуть панели (Esc)'
-              : 'Расширить сцену'
-          }
+          title={expanded ? 'Свернуть панели (Esc)' : 'Расширить сцену'}
+          aria-label={expanded ? 'Свернуть панели (Esc)' : 'Расширить сцену'}
           aria-pressed={expanded}
           onClick={onToggleExpanded}
         >

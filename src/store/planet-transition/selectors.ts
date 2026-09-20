@@ -1,4 +1,12 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { type PlanetTransitionStore, usePlanetTransition } from './store';
+
+// ═══════════════════════════════════════════
+// SELECTOR HOOKS
+// ═══════════════════════════════════════════
 
 export const useTransitionPhase = () =>
   usePlanetTransition((store: PlanetTransitionStore) => store.phase);
@@ -20,4 +28,10 @@ export const useTransitionSetTarget = () =>
   usePlanetTransition((store: PlanetTransitionStore) => store.setTarget);
 export const useTransitionReset = () =>
   usePlanetTransition((store: PlanetTransitionStore) => store.reset);
+
+// ═══════════════════════════════════════════
+// IMPERATIVE ACCESS
+// ═══════════════════════════════════════════
+
+/** Non-reactive store snapshot — for R3F useFrame and motion callbacks. */
 export const getTransitionState = () => usePlanetTransition.getState();

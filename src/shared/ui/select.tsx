@@ -1,10 +1,20 @@
+/** shadcn/ui Select wrapper — native `<select>` with label. */
+
 import type { SelectHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Select = ({ className, label, id, ...props }: SelectProps) => {
   return (

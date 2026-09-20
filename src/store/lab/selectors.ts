@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { useShallow } from 'zustand/react/shallow';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
@@ -5,11 +9,15 @@ import type { Metric, Settings, Simulation } from '@/features/ecosystem';
 
 import { type LabStore, useLabStore } from './store';
 
+// ═══════════════════════════════════════════
+// BASE SELECTORS
+// ═══════════════════════════════════════════
+
 export const useLabBody = () => useLabStore((store: LabStore) => store.body);
 export const useLabSetBody = () =>
   useLabStore((store: LabStore) => store.setBody);
 
-/** Latest snapshot for the selected planet — a stable reference per snapshot. */
+/** Latest snapshot for the selected planet — stable snapshot reference. */
 export const useLabSim = () =>
   useLabStore((store: LabStore) => store.sims[store.body]);
 export const useLabSims = () => useLabStore((store: LabStore) => store.sims);
@@ -22,7 +30,11 @@ export const useLabStreamStatus = () =>
 export const useLabRunning = () =>
   useLabStore((store: LabStore) => store.sims[store.body].status === 'running');
 
-/** Scalar fields — avoid re-rendering chrome on every individuals/history replace. */
+// ═══════════════════════════════════════════
+// SIMULATION & METRICS
+// ═══════════════════════════════════════════
+
+/** Scalar fields — avoid re-rendering chrome on every individuals/history swap. */
 export const useLabSimSeed = () =>
   useLabStore((store: LabStore) => store.sims[store.body].seed);
 export const useLabSimTick = () =>
@@ -46,7 +58,7 @@ const EMPTY_METRIC: Metric = {
 
 type MetricsStrip = { history: Metric[]; tip: Metric };
 
-/** Sparkline + metric cards — equality on tip values, not individuals. */
+/** Sparkline + metric cards — equality by tip, not individuals. */
 export const useLabMetricsStrip = (tail = 70): MetricsStrip =>
   useStoreWithEqualityFn(
     useLabStore,
@@ -66,7 +78,7 @@ export const useLabMetricsStrip = (tail = 70): MetricsStrip =>
       a.tip.colonies === b.tip.colonies,
   );
 
-/** Extinct / replay dialog stats — no individuals array. */
+/** Stats for extinct / replay dialogs — without the individuals array. */
 export const useLabSimDialogStats = () =>
   useLabStore(
     useShallow((store: LabStore) => {
@@ -83,8 +95,8 @@ export const useLabSimDialogStats = () =>
   );
 
 /**
- * Full sim with equality on identity fields — skips re-render when only
- * nested arrays are replaced with the same tick/checksum/status/snapshot.
+ * Full sim with equality on identity fields — skip re-render when nested
+ * arrays are replaced with the same tick/checksum/status/snapshot.
  */
 export const useLabSimStable = () =>
   useStoreWithEqualityFn(
@@ -96,6 +108,10 @@ export const useLabSimStable = () =>
       a.status === b.status &&
       a.snapshot === b.snapshot,
   );
+
+// ═══════════════════════════════════════════
+// UI STATE
+// ═══════════════════════════════════════════
 
 export const useLabSpeed = () => useLabStore((store: LabStore) => store.speed);
 export const useLabSelected = () =>
@@ -125,8 +141,12 @@ export const useLabSeed = () => useLabStore((store: LabStore) => store.seed);
 export const useLabSetSeed = () =>
   useLabStore((store: LabStore) => store.setSeed);
 
+// ═══════════════════════════════════════════
+// IMPERATIVE ACCESS
+// ═══════════════════════════════════════════
+
 /**
- * Non-reactive snapshot. Async handlers read it after queueing an update, where
- * a captured render value would already be stale.
+ * Non-reactive snapshot. Async handlers read it after scheduling an update,
+ * where the render-captured value is already stale.
  */
 export const getLabState = () => useLabStore.getState();

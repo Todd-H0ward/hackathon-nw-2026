@@ -14,6 +14,12 @@ import { cn } from '@/shared/lib/utils';
 
 import type { FaqCategory } from '../types';
 
+/** Sidebar navigation for reference sections. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface FaqSidebarProps {
   categories: FaqCategory[];
   activeArticleId: string;
@@ -21,12 +27,20 @@ interface FaqSidebarProps {
   onCloseMobile?: () => void;
 }
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const CATEGORY_ICONS: Record<string, typeof Compass> = {
   Compass,
   Cpu,
   Globe,
   Server,
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function FaqSidebar({
   categories,
@@ -47,7 +61,7 @@ export function FaqSidebar({
 
   return (
     <aside className="flex h-full w-full flex-col border-r border-border bg-card/95 text-card-foreground">
-      {/* Заголовок боковой панели */}
+      {/* Sidebar header */}
       <div className="flex h-[90px] flex-col justify-between border-b border-border bg-card/60 backdrop-blur-md px-4 py-3 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -69,7 +83,7 @@ export function FaqSidebar({
         </div>
       </div>
 
-      {/* Список разделов и аккордеон статей */}
+      {/* Section list and article accordion */}
       <nav
         aria-label="Разделы документации"
         className="flex-1 overflow-y-auto p-3 space-y-3"
@@ -80,7 +94,7 @@ export function FaqSidebar({
 
           return (
             <div key={category.id} className="space-y-1">
-              {/* Шапка категории */}
+              {/* Category header */}
               <button
                 type="button"
                 onClick={() => toggleCategory(category.id)}
@@ -104,7 +118,7 @@ export function FaqSidebar({
                 </div>
               </button>
 
-              {/* Список статей в категории */}
+              {/* Articles in category */}
               {!isCollapsed && (
                 <div className="space-y-0.5 pl-3 pt-0.5 border-l border-border/40 ml-4">
                   {category.articles.map((article) => {

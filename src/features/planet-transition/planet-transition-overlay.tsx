@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { Suspense, useEffect, useMemo, useRef } from 'react';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -26,6 +30,10 @@ import {
   useTransitionReset,
 } from '@/store';
 
+// ═══════════════════════════════════════════
+// CONSTANTS — WEBGL / ANIMATION
+// ═══════════════════════════════════════════
+
 const GL = {
   alpha: true,
   antialias: true,
@@ -33,13 +41,18 @@ const GL = {
   precision: 'highp' as const,
 };
 
-/** Frames drawn before the source page may hide its own planet. */
+/** Frames before the source page may hide its planet. */
 const READY_FRAMES = 4;
 const FLIGHT = { duration: 1.1, ease: [0.65, 0, 0.35, 1] as const };
 const LAND_FADE = 0.45;
-/** Bail out if the destination never registers a landing spot. */
+/** Timeout when the landing target never registers. */
 const HANDOFF_TIMEOUT_MS = 2500;
 
+// ═══════════════════════════════════════════
+// POSE MATH
+// ═══════════════════════════════════════════
+
+/** Linear interpolation of the planet screen pose. */
 const mixPose = (
   a: PlanetScreenPose,
   b: PlanetScreenPose,
@@ -51,10 +64,15 @@ const mixPose = (
   distance: MathUtils.lerp(a.distance, b.distance, t),
 });
 
+/** Smoothstep for a smooth globe-config blend. */
 const smoothstep = (t: number) => {
   const x = MathUtils.clamp(t, 0, 1);
   return x * x * (3 - 2 * x);
 };
+
+// ═══════════════════════════════════════════
+// FLIGHT SCENE
+// ═══════════════════════════════════════════
 
 interface FlightSceneProps {
   body: GlobeBodyId;
@@ -66,6 +84,10 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   const size = useThree((state) => state.size);
   const direction = useTransitionDirection();
   const hasTarget = useTransitionHasTarget();
+
+  // ═══════════════════════════════════════════
+  // GLOBE CONFIG
+  // ═══════════════════════════════════════════
 
   // Forward: carousel motion → sandbox rest. Back: sandbox rest → carousel motion.
   // Stay on carousel density — dual bloom+GPGPU at full RES hitchs the handoff.
@@ -99,6 +121,10 @@ const FlightScene = ({ body }: FlightSceneProps) => {
     flightControlsRef.current = null;
   }, [baseConfig]);
 
+  // ═══════════════════════════════════════════
+  // FLIGHT ARMING
+  // ═══════════════════════════════════════════
+
   // Arm flight once from handoff. Ignore hasTarget flicker so animate never restarts.
   useEffect(() => {
     if (!hasTarget || flightArmedRef.current) return;
@@ -124,6 +150,10 @@ const FlightScene = ({ body }: FlightSceneProps) => {
     },
     [],
   );
+
+  // ═══════════════════════════════════════════
+  // R3F FRAME
+  // ═══════════════════════════════════════════
 
   useFrame(() => {
     const store = getTransitionState();
@@ -189,10 +219,14 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   );
 };
 
+// ═══════════════════════════════════════════
+// TRANSITION OVERLAY
+// ═══════════════════════════════════════════
+
 /**
- * Carries a planet between routes: a fixed full-screen canvas that starts at the
- * source page's planet pose and lands on the destination viewport, then fades out
- * as the destination's own canvas fades in.
+ * Moves the planet between routes: a fullscreen canvas starts in the
+ * source page pose, lands in the destination viewport, then fades out
+ * while the destination canvas appears.
  */
 export const PlanetTransitionOverlay = () => {
   const phase = useTransitionPhase();

@@ -7,6 +7,12 @@ import { useLabStore } from '@/store/lab/store';
 
 import { performIntervention } from './research-api';
 
+/** Floating colony creation form: coordinates, parameters, and strategy. */
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export const ColonyBuilder = () => {
   const draft = useLabStore((s) => s.colonyDraft);
   const body = useLabStore((s) => s.body);
