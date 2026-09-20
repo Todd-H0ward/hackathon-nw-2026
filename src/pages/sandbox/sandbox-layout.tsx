@@ -109,7 +109,7 @@ const SandboxShell = () => {
       <LabRail
         seed={sim.seed}
         onExport={actions.exportExperiment}
-        onOpenGuide={() => setModal('guide')}
+        onOpenGuide={() => navigate(STATIC_ROUTES.FAQ)}
         onGoHome={goHome}
       />
 

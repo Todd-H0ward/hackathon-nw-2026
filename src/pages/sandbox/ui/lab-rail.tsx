@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 
 import {
   Activity,
   ArrowDownToLine,
   Atom,
+  BookOpen,
   CircleHelp,
   Globe2,
   Microscope,
@@ -21,11 +22,11 @@ import {
 
 import { ResearchVoice } from '../research-voice';
 
-interface LabRailProps {
-  seed: number;
-  onExport: () => void;
-  onOpenGuide: () => void;
-  onGoHome: () => void;
+export interface LabRailProps {
+  seed?: number;
+  onExport?: () => void;
+  onOpenGuide?: () => void;
+  onGoHome?: () => void;
 }
 
 const itemClass =
@@ -65,7 +66,17 @@ export const LabRail = ({
   onOpenGuide,
   onGoHome,
 }: LabRailProps) => {
+  const navigate = useNavigate();
   const audio = useAudioPreferences();
+
+  const handleGoHome = () => {
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      navigate(STATIC_ROUTES.HOME);
+    }
+  };
+
   return (
     <nav
       aria-label="Навигация лаборатории"
@@ -73,10 +84,10 @@ export const LabRail = ({
     >
       <button
         type="button"
-        onClick={onGoHome}
+        onClick={handleGoHome}
         className={cn(
           itemClass,
-          'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2',
+          'mb-2 text-xeno-green max-mobile:mb-0 max-mobile:mr-2 cursor-pointer',
         )}
         title="XenoChoice — к выбору планеты"
         aria-label="XenoChoice — к выбору планеты"
@@ -93,24 +104,40 @@ export const LabRail = ({
       <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
         <Globe2 size={17} />
       </RailLink>
+      <RailLink to={STATIC_ROUTES.FAQ} label="Справочник">
+        <BookOpen size={17} />
+      </RailLink>
 
       <div className="flex-1" />
 
+      {onExport ? (
+        <button
+          type="button"
+          className={cn(itemClass, 'cursor-pointer')}
+          title={
+            seed !== undefined
+              ? `Экспорт эксперимента · seed ${seed}`
+              : 'Экспорт'
+          }
+          aria-label="Экспорт"
+          onClick={onExport}
+        >
+          <ArrowDownToLine size={17} />
+        </button>
+      ) : null}
       <button
         type="button"
-        className={itemClass}
-        title={`Экспорт эксперимента · seed ${seed}`}
-        aria-label="Экспорт эксперимента"
-        onClick={onExport}
-      >
-        <ArrowDownToLine size={17} />
-      </button>
-      <button
-        type="button"
-        className={itemClass}
-        title="О модели и роли исследователя"
-        aria-label="О модели и роли исследователя"
-        onClick={onOpenGuide}
+        className={cn(itemClass, 'cursor-pointer')}
+        title="Справочник и FAQ"
+        aria-label="Справочник и FAQ"
+        onClick={() => {
+          announceAction('Справочник и FAQ');
+          if (onOpenGuide) {
+            onOpenGuide();
+          } else {
+            navigate(STATIC_ROUTES.FAQ);
+          }
+        }}
       >
         <CircleHelp size={17} />
       </button>
