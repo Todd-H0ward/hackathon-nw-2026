@@ -62,8 +62,16 @@ export const ColoniesPanel = ({
         {colonies.length ? (
           colonies.map((c) => {
             const population = members(sim, c.id);
-            const energy =
-              population.reduce((v, i) => v + i.energy, 0) / population.length;
+            const energy = population.length
+              ? Math.min(
+                  100,
+                  Math.max(
+                    0,
+                    population.reduce((v, i) => v + i.energy, 0) /
+                      population.length,
+                  ),
+                )
+              : 0;
             return (
               <button
                 type="button"
@@ -179,11 +187,19 @@ export const ColoniesPanel = ({
         .map((c) => (
           <dl key={c.id} className="grid grid-cols-2 gap-1">
             <dt>Запас энергии</dt>
-            <dd>{c.metrics.totalEnergy.toFixed(2)} EU</dd>
+            <dd>
+              {c.metrics?.totalEnergy != null
+                ? `${c.metrics.totalEnergy.toFixed(2)} EU`
+                : '—'}
+            </dd>
             <dt>Структура</dt>
-            <dd>{c.metrics.totalBiomass.toFixed(2)} BU</dd>
+            <dd>
+              {c.metrics?.totalBiomass != null
+                ? `${c.metrics.totalBiomass.toFixed(2)} BU`
+                : '—'}
+            </dd>
             <dt>Живых особей</dt>
-            <dd>{c.metrics.population}</dd>
+            <dd>{c.metrics?.population ?? '—'}</dd>
           </dl>
         ))}
       <details>
@@ -201,8 +217,9 @@ export const ColoniesPanel = ({
                 </b>
                 <p>Родитель: {i.parentId ?? 'первичная структура'}</p>
                 <p>
-                  Энергия {i.energy.toFixed(2)} · структура{' '}
-                  {i.biomass.toFixed(2)} · память {i.memory.toFixed(3)}
+                  Энергия {i.energy != null ? i.energy.toFixed(2) : '—'} ·
+                  структура {i.biomass != null ? i.biomass.toFixed(2) : '—'} ·
+                  память {i.memory != null ? i.memory.toFixed(3) : '—'}
                 </p>
                 <p>Выбор: {i.lastDecision?.selectedAction ?? '—'}</p>
                 <p>{i.lastDecision?.reasoning}</p>
@@ -210,15 +227,21 @@ export const ColoniesPanel = ({
                   {Object.entries(i.lastDecision?.scores ?? {}).map(
                     ([action, value]) => (
                       <div key={action}>
-                        {action}: {value.toFixed(4)}
+                        {action}:{' '}
+                        {typeof value === 'number'
+                          ? value.toFixed(4)
+                          : String(value)}
                       </div>
                     ),
                   )}
                 </dl>
                 <p>
                   Гены:{' '}
-                  {Object.entries(i.genome)
-                    .map(([key, value]) => `${key}=${value.toFixed(3)}`)
+                  {Object.entries(i.genome ?? {})
+                    .map(
+                      ([key, value]) =>
+                        `${key}=${typeof value === 'number' ? value.toFixed(3) : String(value)}`,
+                    )
                     .join(' · ')}
                 </p>
               </div>

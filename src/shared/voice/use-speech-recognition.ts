@@ -77,7 +77,9 @@ export const useSpeechRecognition = ({
           ? 'Доступ к микрофону запрещён. Разрешите доступ в настройках браузера.'
           : event.error === 'network'
             ? 'Ошибка сети при распознавании речи.'
-            : `Ошибка распознавания: ${event.error}`;
+            : event.error === 'no-speech'
+              ? 'Речь не обнаружена. Попробуйте сказать команду ещё раз.'
+              : `Ошибка распознавания: ${event.error}`;
       onErrorRef.current?.(msg);
       setIsListening(false);
     };

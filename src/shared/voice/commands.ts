@@ -23,14 +23,15 @@ export const voiceCommands: VoiceCommand[] = [
   },
   {
     triggers: [
-      'открой about',
-      'перейди на about',
-      'страница about',
+      'справочник',
+      'открой справочник',
       'о проекте',
+      'документация',
+      'faq',
     ],
-    response: 'Открываю страницу «О проекте»',
+    response: 'Открываю справочник',
     action: () => {
-      window.location.href = '/about';
+      window.location.href = '/faq';
     },
   },
 

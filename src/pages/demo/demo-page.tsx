@@ -124,15 +124,17 @@ export const DemoPage = () => {
                   <Play size={15} />
                 )}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="С начала"
-                onClick={restart}
-              >
-                <RotateCcw size={14} />
-              </Button>
+              {!finished ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="С начала"
+                  onClick={restart}
+                >
+                  <RotateCcw size={14} />
+                </Button>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -449,7 +451,8 @@ const ScoresCard = ({ frame }: { frame: Frame }) => (
           const available = Boolean(frame.explanation.terms[action]);
           const selected = action === frame.decision.selectedAction;
           const score = frame.decision.scores[action];
-          const delta = score - frame.decision.scores.STORE;
+          const storeScore = frame.decision.scores?.STORE ?? 0;
+          const delta = (score ?? 0) - storeScore;
           return (
             <div
               key={action}

@@ -40,6 +40,9 @@ export const AnalyticsPage = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
+    setHistory([]);
+    setComparison([]);
+    setError('');
     if (!id) return;
     let active = true;
     const load = () =>
@@ -157,7 +160,7 @@ export const AnalyticsPage = () => {
                   className="w-full h-[65px]"
                 />
                 <span className="mt-2.5 block font-mono text-[8px] text-muted-foreground">
-                  Такт {visible[0]?.tick}{' '}
+                  Такт {visible[0]?.tick ?? sim.tick}{' '}
                   <span className="float-right">{sim.tick}</span>
                 </span>
               </CardContent>
@@ -199,10 +202,18 @@ export const AnalyticsPage = () => {
                 {comparison.map((r) => (
                   <tr key={r.mode}>
                     <td>{r.mode}</td>
-                    <td>{r.metrics.population}</td>
-                    <td>{r.metrics.birthsTotal}</td>
-                    <td>{r.metrics.meanWelfare.toFixed(1)}</td>
-                    <td>{r.metrics.decisionEntropy.toFixed(3)}</td>
+                    <td>{r.metrics?.population ?? '—'}</td>
+                    <td>{r.metrics?.birthsTotal ?? '—'}</td>
+                    <td>
+                      {r.metrics?.meanWelfare != null
+                        ? r.metrics.meanWelfare.toFixed(1)
+                        : '—'}
+                    </td>
+                    <td>
+                      {r.metrics?.decisionEntropy != null
+                        ? r.metrics.decisionEntropy.toFixed(3)
+                        : '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

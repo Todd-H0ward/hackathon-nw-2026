@@ -128,7 +128,7 @@ export const position = (
 };
 
 /** Best-effort short id (`ind-07` -> 7) for the numeric ids the UI/3D layer expects. */
-const numericId = (remoteId: string): number => {
+export const numericId = (remoteId: string): number => {
   const digits = remoteId.match(/(\d+)$/)?.[1];
   if (digits) return parseInt(digits, 10);
   let hash = 0;

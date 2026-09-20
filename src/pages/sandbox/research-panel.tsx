@@ -329,17 +329,30 @@ export const ResearchPanel = () => {
           </p>
           <dl className="grid grid-cols-2 gap-2 text-xs">
             <dt>Полезная мощность</dt>
-            <dd>{snap?.metrics.usefulPower.toFixed(3)} EU/TU</dd>
+            <dd>
+              {snap?.metrics?.usefulPower != null
+                ? `${snap.metrics.usefulPower.toFixed(3)} EU/TU`
+                : '—'}
+            </dd>
             <dt>Энергетическая невязка</dt>
-            <dd>{snap?.metrics.balanceResidual.toExponential(2)}</dd>
+            <dd>
+              {snap?.metrics?.balanceResidual != null
+                ? snap.metrics.balanceResidual.toExponential(2)
+                : '—'}
+            </dd>
             <dt>Задержка доставки</dt>
             <dd>
-              {snap?.metrics.deliveryMeasured
+              {snap?.metrics?.deliveryMeasured &&
+              snap.metrics.deliveryLatency != null
                 ? snap.metrics.deliveryLatency.toFixed(2)
                 : 'Нет доставок'}
             </dd>
             <dt>Благо сообщества</dt>
-            <dd>{snap?.metrics.meanWelfare.toFixed(1)}%</dd>
+            <dd>
+              {snap?.metrics?.meanWelfare != null
+                ? `${snap.metrics.meanWelfare.toFixed(1)}%`
+                : '—'}
+            </dd>
           </dl>
           <p className="my-2 text-xs text-muted-foreground">
             Ответ: первое изменение действия после воздействия, наблюдаемая
@@ -372,44 +385,45 @@ export const ResearchPanel = () => {
                   />
                   <div className="mt-1 flex gap-2">
                     {(['power', 'loss', 'delay'] as const).map((key) => (
-                      <label key={key}>
-                        {key === 'power'
-                          ? 'EU/TU'
-                          : key === 'loss'
-                            ? 'Потери'
-                            : 'Задержка'}
-                        <Input
-                          aria-label={`${ch.id} ${key}`}
-                          type="number"
-                          inputSize="sm"
-                          className="block w-20"
-                          disabled={!!recording || busy}
-                          min={key === 'delay' ? 1 : 0}
-                          max={
-                            key === 'loss' ? 0.9 : key === 'delay' ? 100 : 20
-                          }
-                          step={key === 'delay' ? 1 : 0.1}
-                          defaultValue={
-                            key === 'power'
-                              ? ch.maxPower
-                              : key === 'loss'
-                                ? ch.loss
-                                : ch.delayTicks
-                          }
-                          onBlur={(e) => {
-                            const value = Number(e.target.value);
-                            if (Number.isFinite(value))
-                              void command(() =>
-                                performIntervention({
-                                  type: 'set_channel',
-                                  targetId: ch.id,
-                                  value: ch.enabled ? 1 : 0,
-                                  params: { [key]: value },
-                                }),
-                              );
-                          }}
-                        />
-                      </label>
+                      <Input
+                        key={key}
+                        label={
+                          key === 'power'
+                            ? 'EU/TU'
+                            : key === 'loss'
+                              ? 'Потери'
+                              : 'Задержка'
+                        }
+                        aria-label={`${ch.id} ${key}`}
+                        type="number"
+                        inputSize="sm"
+                        className="block w-20"
+                        disabled={!!recording || busy}
+                        min={key === 'delay' ? 1 : 0}
+                        max={
+                          key === 'loss' ? 0.9 : key === 'delay' ? 100 : 20
+                        }
+                        step={key === 'delay' ? 1 : 0.1}
+                        defaultValue={
+                          key === 'power'
+                            ? ch.maxPower
+                            : key === 'loss'
+                              ? ch.loss
+                              : ch.delayTicks
+                        }
+                        onBlur={(e) => {
+                          const value = Number(e.target.value);
+                          if (Number.isFinite(value))
+                            void command(() =>
+                              performIntervention({
+                                type: 'set_channel',
+                                targetId: ch.id,
+                                value: ch.enabled ? 1 : 0,
+                                params: { [key]: value },
+                              }),
+                            );
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
