@@ -31,6 +31,12 @@ export const labRuntime = {
   seedByBody: {} as Partial<Record<GlobeBodyId, number>>,
   /** Pending debounced intervention per setting. */
   settingsTimers: {} as Partial<Record<string, ReturnType<typeof setTimeout>>>,
+  /**
+   * Play/pause in flight — ignore duplicate clicks until the command settles.
+   * `awaitingStatus` keeps WS snapshots from regressing the button mid-flight.
+   */
+  playToggleInflight: false,
+  awaitingStatus: null as null | 'running' | 'paused',
 };
 
 /** Drops accumulated adapter state so a fresh experiment starts from zero. */
@@ -38,6 +44,8 @@ export const resetLabRuntime = (body: GlobeBodyId, seed: number) => {
   delete labRuntime.pendingSettings[body];
   labRuntime.carries[body] = createAdapterCarry();
   labRuntime.seedByBody[body] = seed;
+  labRuntime.awaitingStatus = null;
+  labRuntime.playToggleInflight = false;
 };
 
 /** Registers (or forgets) the experiment that owns a planet. */
@@ -70,6 +78,14 @@ export const applySnapshot = (body: GlobeBodyId, snapshot: StateSnapshot) => {
     snapshot,
     labRuntime.carries[body],
   );
+
+  // Hold optimistic play/pause until the stream catches up — otherwise a stale
+  // frame can flip the button back before the command response lands.
+  const awaiting = labRuntime.awaitingStatus;
+  if (awaiting) {
+    if (snapshot.status === awaiting) labRuntime.awaitingStatus = null;
+    else sim.status = awaiting;
+  }
 
   if (!getLabState().recording)
     sim.settings = { ...sim.settings, ...labRuntime.pendingSettings[body] };

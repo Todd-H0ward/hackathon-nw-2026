@@ -78,11 +78,11 @@ export const useLabActions = () => {
     id: string,
     request: Parameters<typeof command.mutateAsync>[0],
     fallbackMessage: string,
-  ) => {
+  ): Promise<boolean> => {
     try {
       const result = await command.mutateAsync(request);
       const target = labRuntime.bodyByExperiment[id];
-      if (!target) return;
+      if (!target) return true;
       getLabState().patchSim(target, { status: result.status });
       const messages: Record<string, string> = {
         pause: 'Эксперимент на паузе',
@@ -92,23 +92,39 @@ export const useLabActions = () => {
         setSpeed: `Скорость ${request.speed}`,
       };
       announceAction(messages[request.command] ?? 'Готово');
+      return true;
     } catch (error) {
       notify(errorMessage(error, fallbackMessage));
+      return false;
     }
   };
 
   const toggleRunning = () => {
     withExperiment(async (id) => {
+      if (labRuntime.playToggleInflight) return;
+
       const { body, sims, speed } = getLabState();
       const status = sims[body].status;
+
+      if (status === 'completed' || status === 'error') {
+        notify('Сбросьте эксперимент, чтобы запустить снова');
+        return;
+      }
+
       const next =
         status === 'running'
           ? 'pause'
           : status === 'ready'
             ? 'start'
             : 'resume';
+      const optimistic = next === 'pause' ? 'paused' : 'running';
+      const previous = status;
 
-      await runCommand(
+      labRuntime.playToggleInflight = true;
+      labRuntime.awaitingStatus = optimistic;
+      getLabState().patchSim(body, { status: optimistic });
+
+      const ok = await runCommand(
         id,
         {
           experimentId: id,
@@ -117,6 +133,18 @@ export const useLabActions = () => {
         },
         'Не удалось изменить состояние симуляции',
       );
+
+      if (!ok) {
+        labRuntime.awaitingStatus = null;
+        getLabState().patchSim(body, { status: previous });
+      } else {
+        const confirmed = getLabState().sims[body].status;
+        if (confirmed === 'running' || confirmed === 'paused') {
+          labRuntime.awaitingStatus = confirmed;
+        }
+      }
+
+      labRuntime.playToggleInflight = false;
     });
   };
 
