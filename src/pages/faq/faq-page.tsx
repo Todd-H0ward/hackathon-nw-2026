@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { LabRail } from '@/pages/sandbox/ui';
+
 import { STATIC_ROUTES } from '@/shared/constants';
 
 import { exportArticleJson } from './lib';
@@ -22,6 +24,17 @@ export const FaqPage = () => {
     mobileSidebarOpen,
     setMobileSidebarOpen,
   } = useFaqNavigation();
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mobileSidebarOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileSidebarOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    drawerRef.current?.querySelector<HTMLElement>('button, a, [href]')?.focus();
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileSidebarOpen, setMobileSidebarOpen]);
 
   const handleExport = () => {
     exportArticleJson(activeArticle, categories);
@@ -58,7 +71,14 @@ export const FaqPage = () => {
             className="fixed inset-0 bg-black/70 backdrop-blur-xs border-0 cursor-pointer"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <div className="relative w-72 max-w-[85vw] h-full z-10">
+          <div
+            ref={drawerRef}
+            id="faq-mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Содержание справочника"
+            className="relative w-72 max-w-[85vw] h-full z-10"
+          >
             <FaqSidebar
               categories={categories}
               activeArticleId={activeArticleId}

@@ -34,6 +34,9 @@ const POPOVER_CLASS = cn(
   '!shadow-[0_12px_40px_color-mix(in_oklch,black_45%,transparent)]',
 );
 
+/** Below this, treat the tour as incomplete — do not start / persist. */
+const MIN_TOUR_STEPS = 4;
+
 const prefersReducedMotion = (): boolean => {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -44,6 +47,7 @@ const isSelectorVisible = (selector: string): boolean => {
   if (!(el instanceof HTMLElement)) return false;
   const style = getComputedStyle(el);
   if (style.display === 'none' || style.visibility === 'hidden') return false;
+  if (Number(style.opacity) < 0.9) return false;
   const rect = el.getBoundingClientRect();
   return rect.width >= 1 && rect.height >= 1;
 };
@@ -132,24 +136,28 @@ export const useLabTour = ({
   const onPauseRef = useRef(onPause);
   onPauseRef.current = onPause;
   const autoStartedRef = useRef(false);
+  /** When true, next destroy is teardown — do not write localStorage. */
+  const skipPersistRef = useRef(false);
 
   const destroyTour = useCallback(() => {
     const instance = driverRef.current;
     if (!instance) return;
     driverRef.current = null;
+    skipPersistRef.current = true;
     if (instance.isActive()) instance.destroy();
+    else skipPersistRef.current = false;
   }, []);
 
   const startTour = useCallback(() => {
+    if (!editorActive) return;
+
     destroyTour();
     onPauseRef.current?.();
     autoStartedRef.current = true;
+    skipPersistRef.current = false;
 
     const steps = resolveVisibleSteps();
-    if (steps.length === 0) {
-      markLabTourSeen();
-      return;
-    }
+    if (steps.length < MIN_TOUR_STEPS) return;
 
     const instance = driver({
       showProgress: true,
@@ -172,7 +180,8 @@ export const useLabTour = ({
       steps,
       onPopoverRender: styleLabTourPopover,
       onDestroyed: () => {
-        markLabTourSeen();
+        if (!skipPersistRef.current) markLabTourSeen();
+        skipPersistRef.current = false;
         if (driverRef.current === instance) {
           driverRef.current = null;
         }
@@ -181,7 +190,7 @@ export const useLabTour = ({
 
     driverRef.current = instance;
     instance.drive();
-  }, [destroyTour]);
+  }, [destroyTour, editorActive]);
 
   useEffect(() => {
     if (autoStartedRef.current) return;
@@ -209,7 +218,6 @@ export const useLabTour = ({
       startTour();
     };
 
-    // Wait for shell opacity / planet handoff to settle, then poll editor chrome.
     const initialTimer = window.setTimeout(tryStart, 600);
 
     return () => {

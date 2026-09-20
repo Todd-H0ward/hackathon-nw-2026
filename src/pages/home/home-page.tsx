@@ -77,9 +77,15 @@ export const HomePage = () => {
 
     let raf = 0;
     let cancelled = false;
+    const startedAt = performance.now();
+    const ARM_TIMEOUT_MS = 2500;
 
     const arm = () => {
       if (cancelled) return;
+      if (performance.now() - startedAt > ARM_TIMEOUT_MS) {
+        getTransitionState().reset();
+        return;
+      }
       if (!poseMeasureRef.current?.(body)) {
         raf = window.requestAnimationFrame(arm);
         return;

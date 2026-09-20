@@ -164,32 +164,35 @@ export const PlanetViewport = ({
         animate={{ opacity: sceneHidden ? 0 : 1 }}
         transition={{ duration: 0.45, ease: 'easeOut' }}
       >
-        <SceneBoundary key={body}>
-          <GlobeCanvas
-            body={body}
-            cameraReset={cameraReset}
-            fill
-            stars
-            interactive
-          >
-            {showSurface ? (
-              <>
-                <ResearchScene
-                  sim={sim}
-                  selected={selected}
-                  reset={cameraReset}
-                />
-                <SurfaceLife
-                  simulation={sim}
-                  selected={selected}
-                  showLinks={showLinks}
-                  showLabels={showLabels}
-                  onSelect={onSelect}
-                />
-              </>
-            ) : null}
-          </GlobeCanvas>
-        </SceneBoundary>
+        {/* Defer WebGL until land/idle — avoid a third canvas during ferry. */}
+        {!sceneHidden ? (
+          <SceneBoundary key={body}>
+            <GlobeCanvas
+              body={body}
+              cameraReset={cameraReset}
+              fill
+              stars
+              interactive
+            >
+              {showSurface ? (
+                <>
+                  <ResearchScene
+                    sim={sim}
+                    selected={selected}
+                    reset={cameraReset}
+                  />
+                  <SurfaceLife
+                    simulation={sim}
+                    selected={selected}
+                    showLinks={showLinks}
+                    showLabels={showLabels}
+                    onSelect={onSelect}
+                  />
+                </>
+              ) : null}
+            </GlobeCanvas>
+          </SceneBoundary>
+        ) : null}
       </motion.div>
       <div className="absolute top-[88px] right-3 z-[11] grid gap-1.5">
         <button
