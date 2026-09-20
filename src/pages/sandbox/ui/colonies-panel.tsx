@@ -43,7 +43,7 @@ export const ColoniesPanel = ({
   onSelect,
   onAddColony,
 }: ColoniesPanelProps) => (
-  <aside className="min-h-0 overflow-y-auto border-l border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-tablet:col-span-full max-tablet:grid max-tablet:grid-cols-2 max-tablet:gap-x-6 max-tablet:gap-y-2.5 max-tablet:border-t max-tablet:border-l-0 max-mobile:gap-x-[15px]">
+  <aside className="min-h-0 overflow-y-auto border-l border-border bg-card px-3 py-3.5 group-data-[expanded=true]/lab:!hidden max-tablet:col-span-full max-tablet:grid max-tablet:grid-cols-2 max-tablet:gap-x-6 max-tablet:gap-y-2.5 max-tablet:border-t max-tablet:border-l-0 max-mobile:gap-x-[15px]">
     <div data-tour={TOUR_ANCHORS.COLONIES} className="max-tablet:col-span-full">
       <div
         className={cn(
@@ -59,7 +59,7 @@ export const ColoniesPanel = ({
           {colonies.length}
         </span>
       </div>
-      <div className="grid max-h-[210px] gap-1.5 overflow-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] max-tablet:col-start-1 max-tablet:max-h-[200px]">
+      <div className="grid max-h-[210px] gap-1.5 overflow-auto max-tablet:col-start-1 max-tablet:max-h-[200px]">
         {colonies.length ? (
           colonies.map((c) => {
             const population = members(sim, c.id);
