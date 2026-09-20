@@ -20,11 +20,13 @@ import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
 import { type PlanetScreenPose, projectedRadius } from './lib/screen-pose';
+import { Starfield } from './starfield';
 
+/** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
   fov: 32,
   near: 0.1,
-  far: 80,
+  far: 1000,
   position: [0, 0.15, 9] as [number, number, number],
 };
 
@@ -221,6 +223,7 @@ const CarouselScene = ({
     <>
       <ambientLight intensity={0.55} />
       <directionalLight position={[4, 6, 8]} intensity={0.35} />
+      <Starfield />
 
       {bodyConfigs.map(({ body, config, colorUrl }, index) => (
         <group
