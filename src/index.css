@@ -130,6 +130,20 @@
 
   /* XenoChoice-specific */
   --xeno-green: oklch(0.795 0.1 130); /* #a7c984 */
+
+  /* Scrollbars */
+  --scrollbar-size: 8px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: color-mix(
+    in oklch,
+    var(--muted-foreground) 45%,
+    transparent
+  );
+  --scrollbar-thumb-hover: color-mix(
+    in oklch,
+    var(--muted-foreground) 70%,
+    transparent
+  );
 }
 
 /* No separate .dark block — the app is always dark */
@@ -137,6 +151,32 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   button,

@@ -37,7 +37,7 @@ export const EnvironmentPanel = ({
   onSettings,
 }: EnvironmentPanelProps) => {
   return (
-    <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-tablet:h-full max-mobile:grid max-mobile:h-auto max-mobile:grid-cols-2 max-mobile:gap-x-4 max-mobile:gap-y-3 max-mobile:border-r-0 max-mobile:border-b">
+    <aside className="min-h-0 overflow-y-auto border-r border-border bg-card px-3 py-3.5 group-data-[expanded=true]/lab:!hidden max-tablet:h-full max-mobile:grid max-mobile:h-auto max-mobile:grid-cols-2 max-mobile:gap-x-4 max-mobile:gap-y-3 max-mobile:border-r-0 max-mobile:border-b">
       <div
         data-tour={TOUR_ANCHORS.HABITAT}
         className="max-mobile:col-span-full max-mobile:grid max-mobile:grid-cols-2 max-mobile:gap-x-4 max-mobile:gap-y-3"
