@@ -23,6 +23,11 @@ export const lerpGlobeConfig = (
     DEPTH_RADIUS: lerpNum(from.DEPTH_RADIUS, to.DEPTH_RADIUS, k),
     TINT: k < 0.5 ? from.TINT : to.TINT,
     ENV_FILL: lerpNum(from.ENV_FILL, to.ENV_FILL, k),
+    PARTICLE_BRIGHTNESS: lerpNum(
+      from.PARTICLE_BRIGHTNESS,
+      to.PARTICLE_BRIGHTNESS,
+      k,
+    ),
     SPIN: lerpNum(from.SPIN, to.SPIN, k),
     JITTER: lerpNum(from.JITTER, to.JITTER, k),
     HAZE_OPACITY: lerpNum(from.HAZE_OPACITY, to.HAZE_OPACITY, k),
