@@ -5,6 +5,7 @@ import {
   downloadExperimentExport,
   type ExperimentMode,
 } from '@/shared/api/xenochoice';
+import { Button, Input, Select, Slider, Switch } from '@/shared/ui';
 
 import { useLabStore } from '@/store/lab/store';
 
@@ -155,29 +156,32 @@ export const ResearchPanel = () => {
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 text-xs">
-        <button
+        <Button
           type="button"
-          className="rounded border px-2 py-1"
+          variant="outline"
+          size="sm"
           onClick={() => setOpen(!open)}
         >
           Исследование и журнал
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="rounded border px-2 py-1"
+          variant="outline"
+          size="sm"
           disabled={busy || !id}
           onClick={() => void startRecording()}
         >
           Смотреть запись
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="rounded border px-2 py-1"
+          variant="outline"
+          size="sm"
           disabled={busy}
           onClick={() => file.current?.click()}
         >
           Импорт JSON
-        </button>
+        </Button>
         <input
           ref={file}
           type="file"
@@ -198,9 +202,10 @@ export const ResearchPanel = () => {
               .catch(() => setError('Некорректный JSON'));
           }}
         />
-        <button
+        <Button
           type="button"
-          className="rounded border px-2 py-1"
+          variant="outline"
+          size="sm"
           disabled={!id || busy}
           onClick={() =>
             void command(() =>
@@ -209,15 +214,15 @@ export const ResearchPanel = () => {
           }
         >
           CSV
-        </button>
-        <label
-          className="flex items-center gap-1"
+        </Button>
+        <div
+          className="flex items-center gap-1.5"
           title="Реакция: фиксированные правила. Адаптация: решения с памятью. Эволюция: решения с памятью и наследуемыми мутациями при делении."
         >
-          Режим
-          <select
+          <span className="text-muted-foreground text-xs">Режим</span>
+          <Select
             aria-label="Режим решений"
-            className="rounded border p-1"
+            className="py-1 px-2 text-xs h-[31px] w-auto"
             disabled={!!recording || busy}
             value={snap?.mode ?? 'evolutionary'}
             onChange={(e) =>
@@ -233,22 +238,29 @@ export const ResearchPanel = () => {
             <option value="reactive">Реакция</option>
             <option value="adaptive">Адаптация</option>
             <option value="evolutionary">Эволюция</option>
-          </select>
-        </label>
+          </Select>
+        </div>
 
         {importProgress && (
-          <span role="status">
+          <span role="status" className="flex items-center gap-1.5">
             {importProgress}{' '}
-            <button type="button" onClick={() => importer.current?.abort()}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={() => importer.current?.abort()}
+            >
               Отменить импорт
-            </button>
+            </Button>
           </span>
         )}
         {recording && (
           <div className="flex w-full items-center gap-3 border-t pt-2">
             <b>ЗАПИСЬ</b>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() =>
                 useLabStore
                   .getState()
@@ -256,29 +268,35 @@ export const ResearchPanel = () => {
               }
             >
               {recording.playing ? 'Пауза' : '▶ Воспроизвести'}
-            </button>
-            <input
-              aria-label="Такт записи"
-              className="min-w-20 flex-1"
-              type="range"
-              min={0}
-              max={recording.maxTick}
-              value={recording.tick}
-              onChange={(e) => {
-                useLabStore
-                  .getState()
-                  .setRecording({ ...recording, playing: false });
-                const tick = Number(e.target.value);
-                if (scrubTimer.current) clearTimeout(scrubTimer.current);
-                scrubTimer.current = setTimeout(() => void seek(tick), 250);
-              }}
-            />
+            </Button>
+            <div className="min-w-28 flex-1">
+              <Slider
+                aria-label="Такт записи"
+                className="my-0"
+                min={0}
+                max={recording.maxTick}
+                value={recording.tick}
+                onChange={(e) => {
+                  useLabStore
+                    .getState()
+                    .setRecording({ ...recording, playing: false });
+                  const tick = Number(e.target.value);
+                  if (scrubTimer.current) clearTimeout(scrubTimer.current);
+                  scrubTimer.current = setTimeout(() => void seek(tick), 250);
+                }}
+              />
+            </div>
             <span>
               {recording.tick} / {recording.maxTick}
             </span>
-            <button type="button" onClick={() => void command(exit)}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void command(exit)}
+            >
               К живому опыту
-            </button>
+            </Button>
           </div>
         )}
         {error && (
@@ -292,15 +310,17 @@ export const ResearchPanel = () => {
           className="absolute right-3 top-24 z-30 max-h-[72vh] w-96 max-w-[95vw] overflow-auto rounded-xl border border-border bg-card p-4 shadow-xl"
           aria-label="Журнал исследования"
         >
-          <div className="flex justify-between">
-            <h2 className="text-base">Исследование · такт {sim.tick}</h2>
-            <button
+          <div className="flex justify-between items-center">
+            <h2 className="text-base font-medium">Исследование · такт {sim.tick}</h2>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               aria-label="Закрыть журнал"
               onClick={() => setOpen(false)}
             >
               ×
-            </button>
+            </Button>
           </div>
           <p className="my-2 text-xs text-muted-foreground">
             Модель 3.0 · seed {sim.seed}. Запись воспроизводится по исходным
@@ -336,23 +356,20 @@ export const ResearchPanel = () => {
               .filter((_, i) => i % 2 === 0)
               .map((ch) => (
                 <div key={ch.id} className="my-2 rounded border p-2 text-xs">
-                  <label className="flex gap-2">
-                    <input
-                      type="checkbox"
-                      disabled={!!recording || busy}
-                      checked={ch.enabled}
-                      onChange={(e) =>
-                        void command(() =>
-                          performIntervention({
-                            type: 'set_channel',
-                            targetId: ch.id,
-                            value: e.target.checked ? 1 : 0,
-                          }),
-                        )
-                      }
-                    />
-                    {ch.fromId} → {ch.toId}
-                  </label>
+                  <Switch
+                    disabled={!!recording || busy}
+                    checked={ch.enabled}
+                    label={`${ch.fromId} → ${ch.toId}`}
+                    onChange={(e) =>
+                      void command(() =>
+                        performIntervention({
+                          type: 'set_channel',
+                          targetId: ch.id,
+                          value: e.target.checked ? 1 : 0,
+                        }),
+                      )
+                    }
+                  />
                   <div className="mt-1 flex gap-2">
                     {(['power', 'loss', 'delay'] as const).map((key) => (
                       <label key={key}>
@@ -361,10 +378,11 @@ export const ResearchPanel = () => {
                           : key === 'loss'
                             ? 'Потери'
                             : 'Задержка'}
-                        <input
+                        <Input
                           aria-label={`${ch.id} ${key}`}
                           type="number"
-                          className="block w-20 rounded border"
+                          inputSize="sm"
+                          className="block w-20"
                           disabled={!!recording || busy}
                           min={key === 'delay' ? 1 : 0}
                           max={
@@ -405,13 +423,16 @@ export const ResearchPanel = () => {
                   key={`${event.tick}-${event.text}`}
                   className="rounded bg-secondary p-2"
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs font-normal h-auto py-1 px-1.5"
                     disabled={!recording}
                     onClick={() => void seek(event.tick)}
                   >
                     Такт {event.tick} · {event.text}
-                  </button>
+                  </Button>
                 </li>
               ))
             ) : (

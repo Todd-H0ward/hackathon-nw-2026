@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { useLabStore } from '@/store/lab/store';
+import { Button, Input, Select } from '@/shared/ui';
 
 import { performIntervention } from './research-api';
 
@@ -71,40 +72,42 @@ export const ColonyBuilder = () => {
       className="fixed bottom-4 right-4 z-40 max-h-[85dvh] w-[340px] max-w-[94vw] overflow-auto rounded-xl border border-primary/40 bg-card p-4 shadow-2xl"
       aria-label="Создание колонии"
     >
-      <div className="flex justify-between">
-        <h2 className="text-base">Создать колонию</h2>
-        <button
+      <div className="flex justify-between items-center">
+        <h2 className="text-base font-medium">Создать колонию</h2>
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={() => useLabStore.getState().setColonyDraft(null)}
           aria-label="Закрыть создание колонии"
         >
           ×
-        </button>
+        </Button>
       </div>
       <p className="my-3 text-xs text-muted-foreground">
         Перетащите зародыш на планету или задайте координаты. Цветная точка
         показывает место размещения.
       </p>
-      <button
+      <Button
         type="button"
+        variant="outline"
         draggable
         onDragStart={(e) => {
           e.dataTransfer.setData('text/plain', 'colony');
           e.dataTransfer.effectAllowed = 'copy';
         }}
-        className="my-3 cursor-grab rounded-lg border border-dashed border-primary p-3 text-center"
+        className="my-3 w-full cursor-grab border-dashed border-primary py-3 text-center"
       >
         ✦ Перетащить колонию на планету
-      </button>
-      <label className="block text-xs">
-        Название
-        <input
-          className="my-1 w-full rounded border p-2"
+      </Button>
+      <div className="my-2">
+        <Input
+          label="Название"
           maxLength={80}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-      </label>
+      </div>
       <div className="grid grid-cols-2 gap-2">
         {[
           {
@@ -153,43 +156,40 @@ export const ColonyBuilder = () => {
             set: setPower,
           },
         ].map((f) => (
-          <label key={f.label} className="text-xs">
-            {f.label}
-            <input
-              type="number"
-              className="my-1 w-full rounded border p-2"
-              min={f.min}
-              max={f.max}
-              step={f.label === 'Особей' ? 1 : 0.1}
-              value={Number(f.value.toFixed(2))}
-              onChange={(e) =>
-                f.set(Math.max(f.min, Math.min(f.max, Number(e.target.value))))
-              }
-            />
-          </label>
-        ))}
-        <label className="text-xs">
-          Цвет
-          <input
-            type="color"
-            className="mt-1 block"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
+          <Input
+            key={f.label}
+            label={f.label}
+            type="number"
+            inputSize="sm"
+            min={f.min}
+            max={f.max}
+            step={f.label === 'Особей' ? 1 : 0.1}
+            value={Number(f.value.toFixed(2))}
+            onChange={(e) =>
+              f.set(Math.max(f.min, Math.min(f.max, Number(e.target.value))))
+            }
           />
-        </label>
+        ))}
+        <Input
+          label="Цвет"
+          type="color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+          inputSize="sm"
+          className="h-[31px] p-1 cursor-pointer"
+        />
       </div>
-      <label className="my-3 block text-xs">
-        Наследуемая стратегия
-        <select
-          className="mt-1 w-full rounded border p-2"
+      <div className="my-3">
+        <Select
+          label="Наследуемая стратегия"
           value={strategy}
           onChange={(e) => setStrategy(e.target.value)}
         >
           <option value="balanced">Баланс и сохранение</option>
           <option value="growth">Рост и размножение</option>
           <option value="cooperation">Помощь соседям</option>
-        </select>
-      </label>
+        </Select>
+      </div>
       <p className="text-xs text-muted-foreground">
         Ресурс определяет запас прочности, структура — готовность к делению,
         расстояния и мощность связей — передачу энергии. Стратегия меняет оценки
@@ -200,14 +200,15 @@ export const ColonyBuilder = () => {
           {error}
         </p>
       )}
-      <button
+      <Button
         type="button"
+        variant="primary"
         disabled={busy || !name.trim()}
         onClick={() => void create()}
-        className="mt-3 w-full rounded bg-primary p-2 text-primary-foreground disabled:opacity-50"
+        className="mt-3 w-full"
       >
         {busy ? 'Создаём…' : 'Создать в выбранном месте'}
-      </button>
+      </Button>
     </aside>
   );
 };

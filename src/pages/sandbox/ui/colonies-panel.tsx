@@ -6,6 +6,7 @@ import { pad } from '@/pages/sandbox/lib';
 
 import { TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
+import { Badge, Button } from '@/shared/ui';
 
 import {
   ACTIONS,
@@ -55,9 +56,7 @@ export const ColoniesPanel = ({
         <h2 className="m-0 flex-1 text-[11px] font-medium text-foreground">
           Живые сообщества
         </h2>
-        <span className="rounded-[3px] border border-xeno-green/30 px-1.5 py-0.5 font-mono text-[9px] text-xeno-green">
-          {colonies.length}
-        </span>
+        <Badge variant="green">{colonies.length}</Badge>
       </div>
       <div className="grid max-h-[210px] gap-1.5 overflow-auto max-tablet:col-start-1 max-tablet:max-h-[200px]">
         {colonies.length ? (
@@ -109,16 +108,18 @@ export const ColoniesPanel = ({
         )}
       </div>
     </div>
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
       data-tour={TOUR_ANCHORS.ADD_COLONY}
-      className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-xeno-green/40 bg-xeno-green/5 p-2 text-[10px] text-xeno-green transition-colors hover:bg-xeno-green/10 disabled:opacity-50 max-tablet:col-start-1 max-tablet:mt-0"
+      className="mt-2 w-full border-dashed border-xeno-green/40 bg-xeno-green/5 text-[10px] text-xeno-green hover:bg-xeno-green/10 max-tablet:col-start-1 max-tablet:mt-0"
       onClick={onAddColony}
       disabled={aliveCount >= maxPopulation || colonies.length >= maxColonies}
     >
       <Plus size={15} />
       Внести зародыши
-    </button>
+    </Button>
     <div
       data-tour={TOUR_ANCHORS.INSPECTOR}
       className="mt-3.5 border-t border-border pt-3.5 max-tablet:col-start-2 max-tablet:row-span-2 max-tablet:row-start-2 max-tablet:m-0 max-tablet:border-0 max-tablet:p-0"
