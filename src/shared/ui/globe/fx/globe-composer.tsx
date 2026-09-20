@@ -14,7 +14,10 @@ import {
   EffectPass,
 } from 'postprocessing';
 
-import { shouldEnableComposerNoise } from '@/shared/lib/perf/device-tier';
+import {
+  resolveBloomTierScale,
+  shouldEnableComposerNoise,
+} from '@/shared/lib/perf/device-tier';
 import { getComposerFrameBufferType } from '@/shared/lib/webgl/texture-types';
 import { GLOBE_DEFAULTS, type GlobeConfig } from '@/shared/ui/globe/config';
 
@@ -54,12 +57,15 @@ const applyBloom = (bloom: BloomEffect, params: BloomParams) => {
   bloom.mipmapBlurPass.radius = params.radius;
 };
 
-const bloomParamsFrom = (cfg: GlobeConfig): BloomParams => ({
-  intensity: cfg.BLOOM_INTENSITY,
-  threshold: cfg.BLOOM_THRESHOLD,
-  smoothing: cfg.BLOOM_SMOOTHING,
-  radius: cfg.BLOOM_RADIUS,
-});
+const bloomParamsFrom = (cfg: GlobeConfig): BloomParams => {
+  const scale = resolveBloomTierScale();
+  return {
+    intensity: cfg.BLOOM_INTENSITY * scale.intensity,
+    threshold: cfg.BLOOM_THRESHOLD,
+    smoothing: cfg.BLOOM_SMOOTHING,
+    radius: cfg.BLOOM_RADIUS * scale.radius,
+  };
+};
 
 const bloomParamsEqual = (a: BloomParams, b: BloomParams) =>
   a.intensity === b.intensity &&
@@ -103,15 +109,16 @@ export const GlobeFx = ({ configRef }: GlobeFxProps) => {
   const frameBufferType = useMemo(() => getComposerFrameBufferType(gl), [gl]);
   const d = GLOBE_DEFAULTS;
   const enableNoise = shouldEnableComposerNoise();
+  const bloomScale = resolveBloomTierScale();
 
   return (
     <EffectComposer frameBufferType={frameBufferType} multisampling={0}>
       <Bloom
         mipmapBlur
-        intensity={d.BLOOM_INTENSITY}
+        intensity={d.BLOOM_INTENSITY * bloomScale.intensity}
         luminanceThreshold={d.BLOOM_THRESHOLD}
         luminanceSmoothing={d.BLOOM_SMOOTHING}
-        radius={d.BLOOM_RADIUS}
+        radius={d.BLOOM_RADIUS * bloomScale.radius}
       />
       {enableNoise ? (
         <Noise

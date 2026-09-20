@@ -66,5 +66,32 @@ export const resolveDenseStarCount = (): number => {
   }
 };
 
+/** Home carousel center-planet GPGPU resolution (N → N²). */
+export const resolveCarouselResolution = (): number => {
+  switch (resolveDeviceTier()) {
+    case 'low':
+      return 160;
+    case 'mid':
+      return 200;
+    default:
+      return 240;
+  }
+};
+
 export const shouldEnableComposerNoise = (): boolean =>
   resolveDeviceTier() !== 'low';
+
+/** Multipliers applied on top of per-body bloom knobs. */
+export const resolveBloomTierScale = (): {
+  intensity: number;
+  radius: number;
+} => {
+  switch (resolveDeviceTier()) {
+    case 'low':
+      return { intensity: 0.5, radius: 0.65 };
+    case 'mid':
+      return { intensity: 0.72, radius: 0.82 };
+    default:
+      return { intensity: 1, radius: 1 };
+  }
+};

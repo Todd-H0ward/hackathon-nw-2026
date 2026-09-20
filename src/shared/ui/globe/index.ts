@@ -5,10 +5,12 @@ export {
   GLOBE_MAPS,
   resolveGlobeConfig,
 } from './bodies';
+export { HOME_CAROUSEL_LOOK } from './carousel-look';
 export {
-  HOME_CAROUSEL_LOOK,
-  HOME_CAROUSEL_RESOLUTION,
-} from './carousel-look';
+  resolveCarouselResolution,
+  /** @deprecated Prefer `resolveCarouselResolution()`. */
+  resolveCarouselResolution as HOME_CAROUSEL_RESOLUTION,
+} from '@/shared/lib/perf/device-tier';
 export type { GlobeConfig } from './config';
 export {
   GLOBE_BLOOM_DPR,

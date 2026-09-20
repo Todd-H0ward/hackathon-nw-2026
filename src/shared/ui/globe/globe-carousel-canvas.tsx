@@ -15,12 +15,16 @@ import {
   type GlobeBodyId,
   resolveGlobeConfig,
 } from './bodies';
-import { HOME_CAROUSEL_LOOK, HOME_CAROUSEL_RESOLUTION } from './carousel-look';
+import { HOME_CAROUSEL_LOOK } from './carousel-look';
 import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS, type GlobeConfig } from './config';
 import { GlobeFx } from './fx/globe-composer';
 import { Globe } from './globe';
 import { type PlanetScreenPose, projectedRadius } from './lib/screen-pose';
 import { Starfield } from './starfield';
+
+import {
+  resolveCarouselResolution,
+} from '@/shared/lib/perf/device-tier';
 
 /** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
@@ -205,19 +209,18 @@ const CarouselScene = ({
     ready.current = true;
   }, -2);
 
-  const bodyConfigs = useMemo(
-    () =>
-      GLOBE_BODY_IDS.map((body) => ({
-        body,
-        config: resolveGlobeConfig(body, {
-          RADIUS: GLOBE_DEFAULTS.RADIUS,
-          RESOLUTION: HOME_CAROUSEL_RESOLUTION,
-          ...HOME_CAROUSEL_LOOK[body],
-        }),
-        colorUrl: GLOBE_MAPS[body].color,
-      })),
-    [],
-  );
+  const bodyConfigs = useMemo(() => {
+    const res = resolveCarouselResolution();
+    return GLOBE_BODY_IDS.map((body) => ({
+      body,
+      config: resolveGlobeConfig(body, {
+        RADIUS: GLOBE_DEFAULTS.RADIUS,
+        RESOLUTION: res,
+        ...HOME_CAROUSEL_LOOK[body],
+      }),
+      colorUrl: GLOBE_MAPS[body].color,
+    }));
+  }, []);
 
   return (
     <>
