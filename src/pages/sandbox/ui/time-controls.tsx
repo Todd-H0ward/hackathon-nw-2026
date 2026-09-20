@@ -16,11 +16,12 @@ interface TimeControlsProps {
   onSpeedChange: (speed: number) => void;
 }
 
-const isTypingTarget = (target: EventTarget | null) => {
+/** Only block Space when the user is clearly typing — not on every button. */
+const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
   return Boolean(
     target.closest(
-      'input, textarea, select, button, [contenteditable="true"], [role="textbox"]',
+      'input, textarea, select, [contenteditable="true"], [role="textbox"]',
     ),
   );
 };
@@ -39,7 +40,9 @@ export const TimeControls = ({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Space' && event.key !== ' ') return;
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
-      if (isTypingTarget(event.target)) return;
+      if (isEditableTarget(event.target)) return;
+      // Always preventDefault so a focused control doesn't also activate,
+      // and we never double-toggle with the native button Space behavior.
       event.preventDefault();
       onToggleRunning();
     };
