@@ -19,6 +19,9 @@ interface LabDialogProps {
   onDownload: () => void;
   onReset: () => void;
   onReplay: () => void;
+  onRestart?: () => void;
+  onAddColony?: () => void;
+  onOpenDemo?: () => void;
 }
 
 export const LabDialog = ({
@@ -30,6 +33,9 @@ export const LabDialog = ({
   onDownload,
   onReset,
   onReplay,
+  onRestart,
+  onAddColony,
+  onOpenDemo,
 }: LabDialogProps) => (
   <Dialog
     open={modal !== null}
@@ -86,6 +92,88 @@ export const LabDialog = ({
         <Button type="button" variant="primary" size="sm" onClick={onReplay}>
           Воспроизвести и сравнить
         </Button>
+      </>
+    )}
+
+    {modal === 'extinct' && (
+      <>
+        <p className="font-mono text-[9px] tracking-[1.45px] text-muted-foreground">
+          КОНЕЦ ПОПУЛЯЦИИ
+        </p>
+        <DialogTitle>Все особи погибли</DialogTitle>
+        <DialogDescription>
+          На такте {sim.tick} живых особей не осталось. За прогон: рождений{' '}
+          {sim.births}, угасших {sim.deaths}, делений колоний {sim.splits}. Seed{' '}
+          {sim.seed}. Можно начать заново или создать новую колонию в том же
+          эксперименте.
+        </DialogDescription>
+        <div className="mt-4 grid grid-cols-3 gap-2 max-mobile:grid-cols-1">
+          <div className="rounded-md border border-border px-3 py-2">
+            <div className="font-mono text-[8px] tracking-[1px] text-muted-foreground">
+              ТАКТ
+            </div>
+            <div className="mt-1 font-mono text-[16px] tabular-nums">
+              {sim.tick}
+            </div>
+          </div>
+          <div className="rounded-md border border-border px-3 py-2">
+            <div className="font-mono text-[8px] tracking-[1px] text-muted-foreground">
+              РОЖДЕНИЙ
+            </div>
+            <div className="mt-1 font-mono text-[16px] tabular-nums">
+              {sim.births}
+            </div>
+          </div>
+          <div className="rounded-md border border-border px-3 py-2">
+            <div className="font-mono text-[8px] tracking-[1px] text-muted-foreground">
+              УГАСШИХ
+            </div>
+            <div className="mt-1 font-mono text-[16px] tabular-nums">
+              {sim.deaths}
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 flex flex-wrap justify-end gap-2.5">
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            Закрыть
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onDownload}
+          >
+            Экспортировать
+          </Button>
+          {onOpenDemo ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onOpenDemo}
+            >
+              Демо-режим
+            </Button>
+          ) : null}
+          {onAddColony ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onAddColony}
+            >
+              Создать колонию
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={() => onRestart?.()}
+          >
+            Начать заново
+          </Button>
+        </div>
       </>
     )}
   </Dialog>
