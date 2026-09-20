@@ -5,13 +5,13 @@ import { animate, motion } from 'motion/react';
 import { type Group, MathUtils, type PerspectiveCamera } from 'three';
 
 import {
-  GLOBE_DEFAULTS,
   GLOBE_MAPS,
   GLOBE_TRANSITION_DPR,
   Globe,
   type GlobeBodyId,
   type GlobeConfig,
   HOME_CAROUSEL_LOOK,
+  HOME_CAROUSEL_RESOLUTION,
   lerpGlobeConfig,
   type PlanetScreenPose,
   resolveGlobeConfig,
@@ -68,14 +68,14 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   const hasTarget = useTransitionHasTarget();
 
   // Forward: carousel motion → sandbox rest. Back: sandbox rest → carousel motion.
-  // RESOLUTION stays on the destination density so land matches the sandbox viewport.
+  // Stay on carousel density — dual bloom+GPGPU at full RES hitchs the handoff.
   const { fromConfig, toConfig, baseConfig } = useMemo(() => {
     const carousel = resolveGlobeConfig(body, {
-      RESOLUTION: GLOBE_DEFAULTS.RESOLUTION,
+      RESOLUTION: HOME_CAROUSEL_RESOLUTION,
       ...HOME_CAROUSEL_LOOK[body],
     });
     const sandbox = resolveGlobeConfig(body, {
-      RESOLUTION: GLOBE_DEFAULTS.RESOLUTION,
+      RESOLUTION: HOME_CAROUSEL_RESOLUTION,
     });
     if (direction === 'forward') {
       return { fromConfig: carousel, toConfig: sandbox, baseConfig: carousel };
@@ -86,30 +86,43 @@ const FlightScene = ({ body }: FlightSceneProps) => {
   const liveConfigRef = useRef<GlobeConfig>(baseConfig);
   const frames = useRef(0);
   const progress = useRef(0);
+  const flightArmedRef = useRef(false);
+  const flightControlsRef = useRef<ReturnType<typeof animate> | null>(null);
 
   useEffect(() => {
     liveConfigRef.current = baseConfig;
     frames.current = 0;
     progress.current = 0;
+    flightArmedRef.current = false;
+    flightControlsRef.current?.stop();
+    flightControlsRef.current = null;
   }, [baseConfig]);
 
-  // motion drives the timeline; the frame loop maps it onto the live target.
+  // Arm flight once from handoff. Ignore hasTarget flicker so animate never restarts.
   useEffect(() => {
-    if (!hasTarget) return;
+    if (!hasTarget || flightArmedRef.current) return;
     const { phase, setPhase } = getTransitionState();
-    if (phase !== 'handoff' && phase !== 'flight') return;
+    if (phase !== 'handoff') return;
 
+    flightArmedRef.current = true;
     setPhase('flight');
     progress.current = 0;
-    const controls = animate(0, 1, {
+    flightControlsRef.current = animate(0, 1, {
       ...FLIGHT,
       onUpdate: (value) => {
         progress.current = value;
       },
       onComplete: () => getTransitionState().setPhase('land'),
     });
-    return () => controls.stop();
   }, [hasTarget]);
+
+  useEffect(
+    () => () => {
+      flightControlsRef.current?.stop();
+      flightControlsRef.current = null;
+    },
+    [],
+  );
 
   useFrame(() => {
     const store = getTransitionState();
@@ -168,6 +181,8 @@ const FlightScene = ({ body }: FlightSceneProps) => {
         config={baseConfig}
         liveConfigRef={liveConfigRef}
         colorUrl={GLOBE_MAPS[body].color}
+        // Carousel / sandbox already bloom — a third composer hitchs the handoff.
+        enableFx={false}
       />
     </group>
   );

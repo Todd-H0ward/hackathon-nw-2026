@@ -129,26 +129,29 @@ export const ResearchPanel = () => {
       setBusy(false);
     }
   };
-  const events = [
-    ...(snap?.interventions ?? [])
-      .filter((i) => i.tick <= sim.tick)
-      .map((i) => ({
-        tick: i.tick,
-        text: `${i.type} · ${i.targetId} · ${i.value}`,
-      })),
-    ...(snap?.individuals ?? [])
-      .filter((i) => i.parentId)
-      .map((i) => ({
-        tick: i.birthTick,
-        text: `Рождение ${i.id}, родитель ${i.parentId}`,
-      })),
-    ...(snap?.individuals ?? [])
-      .filter((i) => !i.alive)
-      .map((i) => ({
-        tick: (i as typeof i & { deathTick?: number }).deathTick ?? sim.tick,
-        text: `Гибель ${i.id}`,
-      })),
-  ].sort((a, b) => a.tick - b.tick);
+  const events = open
+    ? [
+        ...(snap?.interventions ?? [])
+          .filter((i) => i.tick <= sim.tick)
+          .map((i) => ({
+            tick: i.tick,
+            text: `${i.type} · ${i.targetId} · ${i.value}`,
+          })),
+        ...(snap?.individuals ?? [])
+          .filter((i) => i.parentId)
+          .map((i) => ({
+            tick: i.birthTick,
+            text: `Рождение ${i.id}, родитель ${i.parentId}`,
+          })),
+        ...(snap?.individuals ?? [])
+          .filter((i) => !i.alive)
+          .map((i) => ({
+            tick:
+              (i as typeof i & { deathTick?: number }).deathTick ?? sim.tick,
+            text: `Гибель ${i.id}`,
+          })),
+      ].sort((a, b) => a.tick - b.tick)
+    : [];
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 text-xs">

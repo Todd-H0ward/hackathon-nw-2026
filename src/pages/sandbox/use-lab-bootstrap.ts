@@ -53,8 +53,7 @@ export const useLabBootstrap = () => {
     getLabState().setStreamStatus(streamStatus);
   }, [streamStatus]);
 
-  const streamDown =
-    streamStatus === 'reconnecting' || streamStatus === 'failed';
+  const streamDown = streamStatus === 'failed';
   const statePolling = useExperimentStatePolling(experimentId, streamDown);
 
   useEffect(() => {
