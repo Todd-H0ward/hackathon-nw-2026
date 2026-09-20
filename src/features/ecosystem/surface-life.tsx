@@ -28,6 +28,7 @@ import {
   type Individual,
   type Simulation,
 } from './model';
+import { LOW_ENERGY_THRESHOLD, SURFACE_MARKER } from './surface-markers';
 
 type Vec3 = [number, number, number];
 
@@ -114,7 +115,7 @@ const StableLine = ({ points, ...rest }: ComponentProps<typeof Line>) => {
 
 const PACKET_GEOMETRY = new SphereGeometry(0.028, 8, 8);
 const PACKET_MATERIAL = new MeshBasicMaterial({
-  color: '#ffffff',
+  color: SURFACE_MARKER.packet,
   toneMapped: false,
 });
 
@@ -376,7 +377,7 @@ const PacketOverlay = ({ view }: PacketOverlayProps) => {
     <group ref={groupRef}>
       <StableLine
         points={view.points}
-        color="#ffffff"
+        color={SURFACE_MARKER.packet}
         transparent
         opacity={0.8}
         lineWidth={1.6}
@@ -429,12 +430,13 @@ export const SurfaceLife = ({
         index,
         color.set(
           individual.dead !== null
-            ? '#ff5d66'
+            ? SURFACE_MARKER.dead
             : individual.action === 'divide'
-              ? '#ffffff'
-              : individual.energy < 18
-                ? '#ff805e'
-                : (colonyColorById.get(individual.colony) ?? '#70e0c4'),
+              ? SURFACE_MARKER.divide
+              : individual.energy < LOW_ENERGY_THRESHOLD
+                ? SURFACE_MARKER.lowEnergy
+                : (colonyColorById.get(individual.colony) ??
+                  SURFACE_MARKER.individual),
         ),
       );
     }

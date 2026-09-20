@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Raycaster, Sphere, Vector2, Vector3 } from 'three';
 
 import { position, type Simulation } from '@/features/ecosystem/model';
+import { SURFACE_MARKER } from '@/features/ecosystem/surface-markers';
 import { useLabStore } from '@/store/lab/store';
 
 export const ResearchScene = ({
@@ -108,7 +109,7 @@ export const ResearchScene = ({
       )}
     >
       <sphereGeometry args={[0.055, 16, 16]} />
-      <meshBasicMaterial color="#ffcd70" />
+      <meshBasicMaterial color={SURFACE_MARKER.draft} />
     </mesh>
   );
 };

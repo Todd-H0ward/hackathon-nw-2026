@@ -7,3 +7,4 @@ export { MetricGrid } from './metric-grid';
 export { PlanetViewport } from './planet-viewport';
 export { SceneBoundary } from './scene-boundary';
 export { TimeControls } from './time-controls';
+export { ViewportLegendPanel } from './viewport-legend';
