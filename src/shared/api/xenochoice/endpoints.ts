@@ -1,3 +1,5 @@
+/** REST endpoints for XenoChoice Sandbox API v2. */
+
 import { xenoApi } from './client';
 import type {
   ApiResponse,
@@ -14,6 +16,10 @@ import type {
   World,
 } from './types';
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
 /** Unwraps the `{success, data}` / `{success:false, error}` envelope. */
 async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>) {
   const { data: body } = await promise;
@@ -22,6 +28,23 @@ async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>) {
   }
   return body.data;
 }
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+export type ImportProgress = {
+  id: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  tick: number;
+  total: number;
+  experimentId?: string;
+  error?: string;
+};
+
+// ═══════════════════════════════════════════
+// ENDPOINTS
+// ═══════════════════════════════════════════
 
 export const getWorlds = () => unwrap<World[]>(xenoApi.get('/worlds'));
 
@@ -60,14 +83,6 @@ export const replayExperiment = (id: string, request: ReplayRequest) =>
     xenoApi.post(`/experiments/${id}/replay`, request, { timeout: 120_000 }),
   );
 
-export type ImportProgress = {
-  id: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  tick: number;
-  total: number;
-  experimentId?: string;
-  error?: string;
-};
 export const importExperiment = async (
   bundle: unknown,
   progress?: (job: ImportProgress) => void,

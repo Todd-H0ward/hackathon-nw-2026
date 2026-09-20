@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// ECOSYSTEM EXPORT CATALOG
+// ═══════════════════════════════════════════
+
 export type {
   Action,
   AdapterCarry,

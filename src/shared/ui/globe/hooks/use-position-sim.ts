@@ -1,3 +1,5 @@
+/** GPGPU position sim — FBO ping-pong evolve/blit, dispose on unmount. */
+
 import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useFrame, useThree } from '@react-three/fiber';
@@ -19,6 +21,10 @@ import { buildFibonacciField } from '@/shared/ui/globe/lib/fibonacci';
 import blitFrag from '@/shared/ui/globe/sim/shaders/blit.frag';
 import evolveFrag from '@/shared/ui/globe/sim/shaders/evolve.frag';
 import fullscreenVert from '@/shared/ui/globe/sim/shaders/fullscreen.vert';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export type UsePositionSimParams = {
   size: number;
@@ -43,6 +49,10 @@ export type UsePositionSimResult = {
   ready: boolean;
 };
 
+// ═══════════════════════════════════════════
+// UTILITIES — FBO
+// ═══════════════════════════════════════════
+
 const createTarget = (size: number) =>
   new WebGLRenderTarget(size, size, {
     minFilter: NearestFilter,
@@ -52,6 +62,10 @@ const createTarget = (size: number) =>
     depthBuffer: false,
     stencilBuffer: false,
   });
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
 
 export const usePositionSim = ({
   size,
@@ -69,6 +83,7 @@ export const usePositionSim = ({
   const flipRef = useRef(false);
   const timeRef = useRef(0);
 
+  // ── Seed: Fibonacci rest texture ──
   const restTexture = useMemo(() => {
     const data = buildFibonacciField(size);
     const texture = new DataTexture(data, size, size, RGBAFormat, FloatType);
@@ -95,6 +110,7 @@ export const usePositionSim = ({
     return { current, previous };
   }, [size]);
 
+  // ── Shaders: blit + evolve materials ──
   const blitMaterial = useMemo(
     () =>
       new ShaderMaterial({
@@ -156,6 +172,7 @@ export const usePositionSim = ({
   paramsRef.current = { spin, jitter };
   const settleRestRef = useRef(false);
 
+  // ── Evolve loop (priority −1): ping-pong FBO ──
   useFrame((_, delta) => {
     if (!ready) return;
     // Carousel writes this from a higher-priority frame (−2); skip invisible
@@ -202,6 +219,7 @@ export const usePositionSim = ({
     return flipRef.current ? previous.texture : current.texture;
   };
 
+  // ── Dispose: FBO, textures, geometry, materials ──
   useEffect(
     () => () => {
       targets.current.dispose();

@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { create } from 'zustand';
 
 import type { StreamStatus } from '@/shared/api/xenochoice';
@@ -7,19 +11,33 @@ import { emptySimulation, type Simulation } from '@/features/ecosystem';
 
 import { syncLabSimRef } from './sim-ref';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+/** Lab modal identifier. */
 export type LabModal = 'reset' | 'replay' | 'extinct' | null;
 
+/** Default experiment seed. */
 export const DEFAULT_SEED = 2048;
 
+// ═══════════════════════════════════════════
+// INITIAL STATE
+// ═══════════════════════════════════════════
+
+/** Empty simulations for each planet at startup. */
 const initialSims = (): Record<GlobeBodyId, Simulation> =>
   Object.fromEntries(
     GLOBE_BODY_IDS.map((id) => [id, emptySimulation(id)]),
   ) as Record<GlobeBodyId, Simulation>;
 
+// ═══════════════════════════════════════════
+// STORE SCHEMA
+// ═══════════════════════════════════════════
+
 /**
- * Lab state: which planet is selected, the latest snapshot per planet and the
- * viewer's own UI choices. Everything here is plain data with plain setters —
- * API orchestration lives in `pages/sandbox/use-lab-bootstrap`.
+ * Lab state: selected planet, latest snapshot per planet, and observer UI
+ * choices. API orchestration lives in `pages/sandbox/use-lab-bootstrap`.
  */
 export type LabStore = {
   recording: {
@@ -56,7 +74,7 @@ export type LabStore = {
 
   setSpeed: (speed: 1 | 2 | 5) => void;
   setSelected: (selected: number | null) => void;
-  /** Keeps the current pick, or falls back to the first colony once one exists. */
+  /** Keeps the current selection or falls back to the first colony. */
   selectFallback: (colonyId: number | null) => void;
   toggleShowLinks: () => void;
   toggleShowLabels: () => void;
@@ -65,6 +83,10 @@ export type LabStore = {
   toggleExpanded: () => void;
   setSeed: (seed: string) => void;
 };
+
+// ═══════════════════════════════════════════
+// STORE IMPLEMENTATION
+// ═══════════════════════════════════════════
 
 export const useLabStore = create<LabStore>((set) => ({
   recording: null,
@@ -125,6 +147,10 @@ export const useLabStore = create<LabStore>((set) => ({
   toggleExpanded: () => set((state) => ({ expanded: !state.expanded })),
   setSeed: (seed) => set({ seed }),
 }));
+
+// ═══════════════════════════════════════════
+// REF SYNC
+// ═══════════════════════════════════════════
 
 // Keep refs aligned with the initial empty sims.
 for (const id of GLOBE_BODY_IDS) {

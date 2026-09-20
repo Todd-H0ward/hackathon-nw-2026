@@ -7,6 +7,12 @@ import { position, type Simulation } from '@/features/ecosystem/model';
 import { SURFACE_MARKER } from '@/features/ecosystem/surface-markers';
 import { useLabStore } from '@/store/lab/store';
 
+/** R3F research scene: camera to colony, drag-and-drop colony draft. */
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export const ResearchScene = ({
   sim,
   selected,

@@ -18,6 +18,12 @@ import {
   useLabSims,
 } from '@/store';
 
+/** Planet catalog with physical parameters and experiment status. */
+
+// ═══════════════════════════════════════════
+// HELPER COMPONENTS
+// ═══════════════════════════════════════════
+
 interface FactProps {
   label: string;
   children: ReactNode;
@@ -33,6 +39,10 @@ const Fact = ({ label, children }: FactProps) => (
     </dd>
   </div>
 );
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
 
 export const AtlasPage = () => {
   const navigate = useNavigate();

@@ -1,3 +1,7 @@
+/** R3F Canvas wrapper for single globe — sandbox / carousel slide. */
+
+/** Canvas wrapper for single globe — sandbox, lab, and static slides. */
+
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { OrbitControls } from '@react-three/drei';
@@ -10,6 +14,10 @@ import { GLOBE_MAPS, type GlobeBodyId, resolveGlobeConfig } from './bodies';
 import { GLOBE_BLOOM_DPR, GLOBE_DEFAULTS } from './config';
 import { Globe } from './globe';
 import { Starfield } from './starfield';
+
+// ═══════════════════════════════════════════
+// CONSTANTS — CAMERA / GL
+// ═══════════════════════════════════════════
 
 /** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
@@ -35,6 +43,10 @@ const GL = {
   preserveDrawingBuffer: false,
 };
 
+// ═══════════════════════════════════════════
+// COMPONENT — CAMERA
+// ═══════════════════════════════════════════
+
 /** Keeps the projection matrix matching the real drawable aspect (avoids ellipse squash). */
 const SquareCameraRig = () => {
   const { camera, size } = useThree();
@@ -51,6 +63,10 @@ const SquareCameraRig = () => {
 
   return null;
 };
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export interface GlobeCanvasProps {
   body?: GlobeBodyId;
@@ -74,6 +90,10 @@ export interface GlobeCanvasProps {
   className?: string;
   children?: ReactNode;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const GlobeCanvas = ({
   body = 'earth',

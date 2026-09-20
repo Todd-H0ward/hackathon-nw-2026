@@ -1,11 +1,23 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import type { DriveStep } from 'driver.js';
 
 import { TOUR_ANCHORS, tourAnchorSelector } from '@/shared/constants';
 
-/** Editor is ready when the planet viewport chrome is mounted and visible. */
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Editor is ready when the viewport is mounted and visible. */
 export const LAB_TOUR_EDITOR_READY_SELECTOR = tourAnchorSelector(
   TOUR_ANCHORS.VIEWPORT,
 );
+
+// ═══════════════════════════════════════════
+// LAB TOUR STEPS
+// ═══════════════════════════════════════════
 
 export const LAB_TOUR_STEPS: DriveStep[] = [
   {

@@ -1,8 +1,14 @@
+/** Match voice command from transcript and resolve response. */
+
 import { voiceCommands } from './commands';
 import type { VoiceCommand, VoiceCommandArgs } from './types';
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
 /**
- * Нормализует текст: строчные буквы, убирает лишние пробелы и пунктуацию.
+ * Normalize text: lowercase, trim extra spaces and punctuation.
  */
 const normalize = (text: string): string => {
   return text
@@ -11,9 +17,13 @@ const normalize = (text: string): string => {
     .trim();
 };
 
+// ═══════════════════════════════════════════
+// MATCHER
+// ═══════════════════════════════════════════
+
 /**
- * Ищет голосовую команду по транскрипту.
- * Возвращает найденную команду и аргументы, или null.
+ * Find voice command from transcript.
+ * Returns matched command and args, or null.
  */
 export const findCommand = (
   transcript: string,
@@ -25,7 +35,7 @@ export const findCommand = (
     for (const trigger of command.triggers) {
       const normalizedTrigger = normalize(trigger);
       if (normalized.includes(normalizedTrigger)) {
-        // Попробуем захватить числа или слова из транскрипта
+        // Try to capture numbers or words from transcript
         const matches = normalized.match(
           new RegExp(`${normalizedTrigger}\\s*(.*)`, 'i'),
         );
@@ -41,7 +51,7 @@ export const findCommand = (
 };
 
 /**
- * Разворачивает response: если это функция — вызывает её, если строка — возвращает как есть.
+ * Resolve response: call if function, return string as-is.
  */
 export const resolveResponse = (
   command: VoiceCommand,

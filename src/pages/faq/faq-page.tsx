@@ -8,6 +8,12 @@ import { exportArticleJson } from './lib';
 import { FaqArticleView, FaqHeader, FaqSidebar, SearchResultsView } from './ui';
 import { useFaqNavigation } from './use-faq-navigation';
 
+/** Reference page: search, sidebar, and article viewing. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const FaqPage = () => {
   const navigate = useNavigate();
   const {
@@ -45,14 +51,14 @@ export const FaqPage = () => {
 
   return (
     <div className="flex h-dvh w-dvw overflow-hidden bg-background text-foreground font-sans max-mobile:flex-col">
-      {/* Левый рейл навигации */}
+      {/* Left navigation rail */}
       <LabRail
         onGoHome={() => navigate(STATIC_ROUTES.HOME)}
         onExport={handleExport}
         onOpenGuide={handleOpenGuide}
       />
 
-      {/* Десктопный сайдбар со структурой статей */}
+      {/* Desktop sidebar with article structure */}
       <div className="hidden md:flex w-64 lg:w-72 shrink-0 h-full">
         <FaqSidebar
           categories={categories}
@@ -61,7 +67,7 @@ export const FaqPage = () => {
         />
       </div>
 
-      {/* Мобильный сайдбар (Drawer) */}
+      {/* Mobile sidebar (Drawer) */}
       {mobileSidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <button
@@ -88,7 +94,7 @@ export const FaqPage = () => {
         </div>
       )}
 
-      {/* Основная область: шапка поиска и контент */}
+      {/* Main area: search header and content */}
       <div className="flex flex-1 flex-col min-w-0 h-full overflow-hidden bg-background">
         <FaqHeader
           searchQuery={searchQuery}

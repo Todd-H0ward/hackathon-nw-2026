@@ -16,6 +16,12 @@ import {
   type Simulation,
 } from '@/features/ecosystem';
 
+/** Right panel: colony list, inspector, and field event log. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface ColoniesPanelProps {
   sim: Simulation;
   colonies: Colony[];
@@ -30,6 +36,10 @@ interface ColoniesPanelProps {
   onSelect: (id: number) => void;
   onAddColony: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const ColoniesPanel = ({
   sim,

@@ -1,3 +1,5 @@
+/** Toast notifications with context provider and auto-dismiss. */
+
 import {
   createContext,
   type HTMLAttributes,
@@ -9,6 +11,10 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 type ToastItem = {
   id: number;
@@ -24,13 +30,21 @@ interface ToastProviderProps {
   duration?: number;
 }
 
+interface ToastProps extends HTMLAttributes<HTMLDivElement> {}
+
+// ═══════════════════════════════════════════
+// CONTEXT / HOOK
+// ═══════════════════════════════════════════
+
 const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
 export const useToast = () => {
   return useContext(ToastContext);
 };
 
-interface ToastProps extends HTMLAttributes<HTMLDivElement> {}
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Toast = ({ className, ...props }: ToastProps) => {
   return (

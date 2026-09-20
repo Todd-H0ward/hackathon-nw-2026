@@ -7,14 +7,24 @@ import { ArticleCallout } from './article-callout';
 import { CodeSnippetCard } from './code-snippet-card';
 import { ParameterTable } from './parameter-table';
 
+/** Renders a single reference article with content sections. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface FaqArticleViewProps {
   article: FaqArticle;
 }
 
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export function FaqArticleView({ article }: FaqArticleViewProps) {
   return (
     <article className="mx-auto max-w-4xl px-4 py-8 sm:px-8 space-y-8">
-      {/* 1. Заголовок статьи и метаданные */}
+      {/* 1. Article title and metadata */}
       <header className="space-y-3 border-b border-border/80 pb-6">
         <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground font-mono">
           <span className="flex items-center gap-1">
@@ -36,7 +46,7 @@ export function FaqArticleView({ article }: FaqArticleViewProps) {
           {article.shortDescription}
         </p>
 
-        {/* Теги статьи */}
+        {/* Article tags */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2">
           <Tag size={12} className="text-muted-foreground/60 mr-0.5" />
           {article.tags.map((tag) => (
@@ -47,7 +57,7 @@ export function FaqArticleView({ article }: FaqArticleViewProps) {
         </div>
       </header>
 
-      {/* 2. Секции контента статьи */}
+      {/* 2. Article content sections */}
       <div className="space-y-8">
         {article.sections.map((section, idx) => (
           <section key={section.title || `sec-${idx}`} className="space-y-3">
@@ -58,14 +68,14 @@ export function FaqArticleView({ article }: FaqArticleViewProps) {
               </h2>
             )}
 
-            {/* Обычный текст */}
+            {/* Plain text */}
             {(!section.type || section.type === 'text') && (
               <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line space-y-2.5">
                 {section.content}
               </div>
             )}
 
-            {/* Коллаут */}
+            {/* Callout */}
             {section.type === 'callout' && (
               <ArticleCallout
                 content={section.content}
@@ -73,7 +83,7 @@ export function FaqArticleView({ article }: FaqArticleViewProps) {
               />
             )}
 
-            {/* Таблица параметров */}
+            {/* Parameter table */}
             {section.type === 'table' && (
               <ParameterTable
                 headers={section.tableHeaders}
@@ -82,7 +92,7 @@ export function FaqArticleView({ article }: FaqArticleViewProps) {
               />
             )}
 
-            {/* Блок кода */}
+            {/* Code block */}
             {section.type === 'code' && section.codeSnippet && (
               <CodeSnippetCard
                 language={section.codeSnippet.language}

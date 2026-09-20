@@ -1,6 +1,12 @@
+/** Sync GlobeConfig → shader uniforms (haze + spark). */
+
 import type { Color, ShaderMaterial } from 'three';
 
 import type { GlobeConfig } from '@/shared/ui/globe/config';
+
+// ═══════════════════════════════════════════
+// HAZE UNIFORMS
+// ═══════════════════════════════════════════
 
 export const syncHazeUniforms = (
   material: ShaderMaterial,
@@ -14,6 +20,10 @@ export const syncHazeUniforms = (
   u.atmColorDotDiv.value = cfg.HAZE_DOT_DIV;
   u.atmColorScale.value = cfg.HAZE_COLOR_SCALE;
 };
+
+// ═══════════════════════════════════════════
+// SPARK UNIFORMS
+// ═══════════════════════════════════════════
 
 export const syncSparkUniforms = (
   material: ShaderMaterial,

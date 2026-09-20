@@ -3,11 +3,21 @@ import { Check, Copy } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 
+/** Code block with a copy button. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface CodeSnippetCardProps {
   language: string;
   code: string;
   description?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function CodeSnippetCard({
   language,

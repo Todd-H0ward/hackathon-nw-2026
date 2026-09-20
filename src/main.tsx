@@ -6,6 +6,12 @@ import { router } from '@/router';
 
 import './index.css';
 
+/** Entry point: mount React app with router. */
+
+// ═══════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {

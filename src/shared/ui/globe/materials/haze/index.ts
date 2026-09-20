@@ -1,9 +1,15 @@
+/** Haze atmosphere ShaderMaterial — R3F registration. */
+
 import { shaderMaterial } from '@react-three/drei';
 import { extend } from '@react-three/fiber';
 import { Color } from 'three';
 
 import fragmentShader from './shaders/fragment.glsl';
 import vertexShader from './shaders/vertex.glsl';
+
+// ═══════════════════════════════════════════
+// MATERIAL — UNIFORMS
+// ═══════════════════════════════════════════
 
 const HazeMaterial = shaderMaterial(
   {
@@ -17,5 +23,9 @@ const HazeMaterial = shaderMaterial(
   vertexShader,
   fragmentShader,
 );
+
+// ═══════════════════════════════════════════
+// REGISTRATION
+// ═══════════════════════════════════════════
 
 extend({ HazeMaterial });

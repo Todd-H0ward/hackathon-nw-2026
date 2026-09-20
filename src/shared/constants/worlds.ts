@@ -1,4 +1,10 @@
+/** Planet constants — thumbnail textures and Russian UI declensions. */
+
 import type { GlobeBodyId } from '@/shared/ui/globe';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 /** Planet texture as a round thumbnail background (atlas, environment panel). */
 export const WORLD_THUMB: Record<GlobeBodyId, string> = {
@@ -13,5 +19,9 @@ export const WORLD_LOCATIVE: Record<GlobeBodyId, string> = {
   mars: 'Марсе',
   venus: 'Венере',
 };
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 export const worldCaseName = (body: GlobeBodyId) => WORLD_LOCATIVE[body];

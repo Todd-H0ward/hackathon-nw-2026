@@ -1,3 +1,9 @@
+/** Reference data model types. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type FaqCategoryGroup = 'all' | 'model' | 'worlds' | 'backend' | 'faq';
 
 export interface FaqParameterRow {

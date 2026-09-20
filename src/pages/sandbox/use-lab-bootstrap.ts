@@ -13,12 +13,13 @@ import { useLabStore } from '@/store/lab/store';
 import { applySnapshot, clampSeed, labRuntime } from './lab-runtime';
 import { useEnsureExperiment } from './use-ensure-experiment';
 
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 /**
- * Owns everything with a lifecycle: creating the experiment for the selected
- * planet, holding the WebSocket stream and falling back to REST polling.
- *
- * Must be mounted exactly once (SandboxLayout). There is no context around it —
- * the single call site is what guarantees one experiment and one socket.
+ * Lab lifecycle: experiment creation, WebSocket stream,
+ * and REST polling fallback. Mounted exactly once (SandboxLayout).
  */
 export const useLabBootstrap = () => {
   const body = useLabBody();

@@ -1,11 +1,11 @@
+/** XenoChoice Sandbox Axios client (camelCase on wire, no snake_case interceptors). */
+
 import axios from 'axios';
 
-/**
- * Dedicated client for the XenoChoice Sandbox API. Unlike `shared/api/api.ts`,
- * this backend speaks camelCase on the wire in both directions (`worldId`,
- * `colonyId`, ...), so it must NOT go through the snake_case<->camelCase
- * interceptors the generic `API` client applies.
- */
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const DEFAULT_BASE_URL = '/api/v2';
 
 export const XENOCHOICE_BASE_URL =
@@ -13,6 +13,31 @@ export const XENOCHOICE_BASE_URL =
 
 /** The API budget is ~100 calls per 50 s, so a hung request must not hold a slot. */
 const REQUEST_TIMEOUT_MS = 10_000;
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+type ApiErrorBody = { error?: { message?: string; code?: string } };
+
+// ═══════════════════════════════════════════
+// CLIENT
+// ═══════════════════════════════════════════
+
+/**
+ * Dedicated client for the XenoChoice Sandbox API. Unlike `shared/api/api.ts`,
+ * this backend speaks camelCase on the wire in both directions (`worldId`,
+ * `colonyId`, ...), so it must NOT go through the snake_case<->camelCase
+ * interceptors the generic `API` client applies.
+ */
+export const xenoApi = axios.create({
+  baseURL: XENOCHOICE_BASE_URL,
+  timeout: REQUEST_TIMEOUT_MS,
+});
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 /**
  * WS endpoint for `/experiments/{id}/stream`. A relative base URL (dev proxy)
@@ -26,12 +51,9 @@ export const xenochoiceWsUrl = (path: string) => {
   return `${absolute.replace(/^http/, 'ws').replace(/\/$/, '')}${path}`;
 };
 
-export const xenoApi = axios.create({
-  baseURL: XENOCHOICE_BASE_URL,
-  timeout: REQUEST_TIMEOUT_MS,
-});
-
-type ApiErrorBody = { error?: { message?: string; code?: string } };
+// ═══════════════════════════════════════════
+// INTERCEPTORS
+// ═══════════════════════════════════════════
 
 /**
  * Axios rejects any non-2xx before `unwrap` can read the body, so without this

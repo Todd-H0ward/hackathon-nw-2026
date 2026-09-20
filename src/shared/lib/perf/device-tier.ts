@@ -1,14 +1,27 @@
 /**
- * Coarse device tier for adaptive WebGL quality.
- * Prefer under-drawing on weak GPUs over hitching the lab.
+ * Rough device capability estimate for adaptive WebGL quality.
+ * Prefer under-rendering on weak GPUs over lab stutters.
  */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export type DeviceTier = 'low' | 'mid' | 'high';
 
 type NavigatorWithMemory = Navigator & { deviceMemory?: number };
 
+// ═══════════════════════════════════════════
+// CACHE
+// ═══════════════════════════════════════════
+
 let cached: DeviceTier | null = null;
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
+/** Detect device tier from memory, CPU cores, and DPR. */
 export const resolveDeviceTier = (): DeviceTier => {
   if (cached) return cached;
   if (typeof navigator === 'undefined') {

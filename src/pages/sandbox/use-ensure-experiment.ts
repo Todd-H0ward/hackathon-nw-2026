@@ -15,10 +15,14 @@ import {
   resetLabRuntime,
 } from './lab-runtime';
 
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 /**
- * Creates the experiment for a planet and starts it. Idempotent: the
- * `labRuntime.creating` guard is module-level, so two call sites (bootstrap and
- * the reset handler) can never open two experiments for the same planet.
+ * Creates and starts an experiment for a planet. Idempotent:
+ * module-level `labRuntime.creating` guard — bootstrap and reset
+ * cannot open two experiments for the same planet.
  */
 export const useEnsureExperiment = () => {
   const { toast: notify } = useToast();

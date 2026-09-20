@@ -7,8 +7,18 @@ import type { GlobeBodyId } from '@/shared/ui/globe';
 
 import type { PlanetInfoCatalog } from './planet-info';
 
+/** Custom cursor with tooltip on planet hover. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const OFFSET_X = 18;
 const OFFSET_Y = 0;
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export type PlanetHoverCursorHandle = {
   show: (body: GlobeBodyId, clientX: number, clientY: number) => void;
@@ -19,6 +29,10 @@ export type PlanetHoverCursorHandle = {
 interface PlanetHoverCursorProps {
   catalog: PlanetInfoCatalog;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const PlanetHoverCursor = forwardRef<
   PlanetHoverCursorHandle,

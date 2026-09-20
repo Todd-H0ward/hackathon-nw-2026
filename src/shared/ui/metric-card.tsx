@@ -1,6 +1,12 @@
+/** Metric card with label, value, and built-in sparkline. */
+
 import type { HTMLAttributes, ReactNode, SVGProps } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 export type SparklinePoint = {
   value: number;
@@ -21,6 +27,10 @@ interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
   sparkData?: SparklinePoint[];
   sparkColor?: string;
 }
+
+// ═══════════════════════════════════════════
+// HELPER COMPONENT
+// ═══════════════════════════════════════════
 
 /**
  * Inline 68×20 spark for the card footer. Deliberately not exported: the shared
@@ -60,6 +70,10 @@ const MetricSparkline = ({
     </svg>
   );
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const MetricCard = ({
   className,

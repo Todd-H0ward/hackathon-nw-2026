@@ -1,3 +1,9 @@
+/** Query key factory for React Query (XenoChoice API). */
+
+// ═══════════════════════════════════════════
+// KEYS
+// ═══════════════════════════════════════════
+
 /** Query key factory for the XenoChoice API. */
 export const xenoKeys = {
   all: ['xenochoice'] as const,

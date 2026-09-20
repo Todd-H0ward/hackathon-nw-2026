@@ -1,9 +1,13 @@
 /**
- * Types for the XenoChoice Sandbox API v2 ("Машина выбора").
+ * XenoChoice Sandbox API v2 types ("Choice Machine").
  * Mirrors the live backend response shapes (http://80.78.247.32:8080/swagger/index.html),
  * which are richer than the OpenAPI schema's simplified examples — field names and
  * nullability below were verified against real responses, not just the spec.
  */
+
+// ═══════════════════════════════════════════
+// BASE API TYPES
+// ═══════════════════════════════════════════
 
 export type WorldId = 'earth' | 'mars' | 'venus';
 
@@ -13,6 +17,10 @@ export type ApiFailure = {
   error: { code: string; message: string };
 };
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
+
+// ═══════════════════════════════════════════
+// WORLDS & CONFIG
+// ═══════════════════════════════════════════
 
 export type PlanetaryReference = {
   bodyName: string;
@@ -51,6 +59,10 @@ export type World = {
   model: ModelConfig;
   textureUrl: string;
 };
+
+// ═══════════════════════════════════════════
+// ORGANISMS & COLONIES
+// ═══════════════════════════════════════════
 
 export type Genome = {
   wE: number;
@@ -114,6 +126,10 @@ export type Colony = {
   };
 };
 
+// ═══════════════════════════════════════════
+// CHANNELS & SIGNALS
+// ═══════════════════════════════════════════
+
 export type Channel = {
   id: string;
   fromId: string;
@@ -136,6 +152,10 @@ export type Signal = {
   emittedTick: number;
   deliveryTick: number;
 };
+
+// ═══════════════════════════════════════════
+// METRICS & BALANCE
+// ═══════════════════════════════════════════
 
 export type MetricsSnapshot = {
   tick: number;
@@ -173,6 +193,10 @@ export type EnergyBalance = {
   overflow: number;
   deathDissipation: number;
 };
+
+// ═══════════════════════════════════════════
+// EXPERIMENT
+// ═══════════════════════════════════════════
 
 export type ExperimentStatus =
   | 'ready'
@@ -244,6 +268,10 @@ export type Experiment = {
   updatedAt: string;
 };
 
+// ═══════════════════════════════════════════
+// REQUESTS & RESPONSES
+// ═══════════════════════════════════════════
+
 export type CreateExperimentRequest = {
   name: string;
   worldId: WorldId;
@@ -296,6 +324,10 @@ export type ExportBundle = {
   finalSnapshot: StateSnapshot;
   metricsHistory: MetricsSnapshot[];
 };
+
+// ═══════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════
 
 /** WS push envelope from `/experiments/{id}/stream`. */
 export type StreamMessage = {

@@ -4,6 +4,12 @@ import { cn } from '@/shared/lib/utils';
 
 import { useVoiceError, useVoiceStatus } from '@/store';
 
+/** Microphone button with recognition status indicator. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface VoiceMicButtonProps {
   /** Controls come from `useVoiceBridge`, which the page mounts once. */
   isSupported: boolean;
@@ -11,6 +17,10 @@ interface VoiceMicButtonProps {
   stopListening: () => void;
   className?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const VoiceMicButton = ({
   isSupported,
@@ -37,9 +47,9 @@ export const VoiceMicButton = ({
 
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
-      {/* Кнопка */}
+      {/* Button */}
       <div className="relative">
-        {/* Пульс при прослушивании */}
+        {/* Pulse while listening */}
         {isListening && (
           <span className="absolute inset-0 rounded-full bg-red-500/30 animate-ping" />
         )}
@@ -72,7 +82,7 @@ export const VoiceMicButton = ({
         </button>
       </div>
 
-      {/* Статус-текст */}
+      {/* Status text */}
       <span className="text-[11px] text-muted-foreground select-none">
         {isListening
           ? 'Слушаю...'
@@ -83,7 +93,7 @@ export const VoiceMicButton = ({
               : 'Голос'}
       </span>
 
-      {/* Ошибка */}
+      {/* Error */}
       {error && (
         <p className="text-[11px] text-destructive max-w-[180px] text-center">
           {error}

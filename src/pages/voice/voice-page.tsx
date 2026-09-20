@@ -3,12 +3,18 @@ import { voiceCommands } from '@/shared/voice';
 import { VoiceDialog, VoiceMicButton } from './ui';
 import { useVoiceBridge } from './use-voice-bridge';
 
+/** Voice control page: microphone, dialog, and command list. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const VoicePage = () => {
   const { isSupported, startListening, stopListening } = useVoiceBridge();
 
   return (
     <div className="flex h-full min-h-svh flex-col gap-8 p-8">
-      {/* Заголовок */}
+      {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">
           Голосовое управление
@@ -20,9 +26,9 @@ export const VoicePage = () => {
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-        {/* Левая колонка: кнопка + диалог */}
+        {/* Left column: button + dialog */}
         <div className="flex flex-1 flex-col gap-6">
-          {/* Кнопка микрофона */}
+          {/* Microphone button */}
           <div className="flex justify-center py-4">
             <VoiceMicButton
               isSupported={isSupported}
@@ -31,11 +37,11 @@ export const VoicePage = () => {
             />
           </div>
 
-          {/* История диалога */}
+          {/* Dialog history */}
           <VoiceDialog />
         </div>
 
-        {/* Правая колонка: список доступных команд */}
+        {/* Right column: available command list */}
         <aside className="w-full lg:w-72 shrink-0">
           <div className="rounded-[14px] border border-border p-5 flex flex-col gap-4">
             <h2 className="text-[13px] font-medium text-foreground">

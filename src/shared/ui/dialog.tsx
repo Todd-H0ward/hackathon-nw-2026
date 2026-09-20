@@ -1,3 +1,5 @@
+/** shadcn/ui Dialog wrapper — modal on native `<dialog>`. */
+
 import {
   type ButtonHTMLAttributes,
   createContext,
@@ -10,6 +12,10 @@ import {
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 type DialogContextValue = {
   close: () => void;
 };
@@ -19,9 +25,23 @@ interface DialogProps extends HTMLAttributes<HTMLDialogElement> {
   onClose?: () => void;
 }
 
+interface DialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+
+interface DialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
+
+interface DialogCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+
+// ═══════════════════════════════════════════
+// CONTEXT
+// ═══════════════════════════════════════════
+
 const DialogContext = createContext<DialogContextValue>({ close: () => {} });
 
 const useDialogContext = () => useContext(DialogContext);
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
   ({ className, open, onClose, children, ...props }, forwardedRef) => {
@@ -89,8 +109,6 @@ export const Dialog = forwardRef<HTMLDialogElement, DialogProps>(
 );
 Dialog.displayName = 'Dialog';
 
-interface DialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
-
 export const DialogTitle = ({ className, ...props }: DialogTitleProps) => {
   return (
     <h2
@@ -100,8 +118,6 @@ export const DialogTitle = ({ className, ...props }: DialogTitleProps) => {
     />
   );
 };
-
-interface DialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
 
 export const DialogDescription = ({
   className,
@@ -118,8 +134,6 @@ export const DialogDescription = ({
     />
   );
 };
-
-interface DialogCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
 
 export const DialogClose = ({ className, ...props }: DialogCloseProps) => {
   const { close } = useDialogContext();

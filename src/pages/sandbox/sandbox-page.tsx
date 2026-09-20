@@ -31,7 +31,13 @@ import { useLabActions } from './use-lab-actions';
 import { useLabDerived } from './use-lab-derived';
 import { usePopulationEnd } from './use-population-end';
 
-/** Settings + habitat — ignores 10 Hz individuals churn. */
+/** Main sandbox page: three-column grid (environment · viewport · colonies). */
+
+// ═══════════════════════════════════════════
+// COMPONENTS (PAGE SECTIONS)
+// ═══════════════════════════════════════════
+
+/** Environment and settings panel — no 10 Hz individual churn. */
 const SandboxEnvironment = ({
   world,
   worlds,
@@ -55,7 +61,7 @@ const SandboxEnvironment = ({
   );
 };
 
-/** 3D + colonies overlay — still needs the full simulation snapshot. */
+/** 3D viewport and colony overlay — requires full simulation snapshot. */
 const SandboxViewportColumn = ({ world }: { world: WorldInfo }) => {
   const body = useLabBody();
   const { sim, selected, colonies, alive } = useLabDerived();
@@ -154,6 +160,10 @@ const SandboxColonies = ({ world }: { world: WorldInfo }) => {
     />
   );
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT (PAGE)
+// ═══════════════════════════════════════════
 
 export const SandboxPage = () => {
   const worlds = useWorldCatalog();

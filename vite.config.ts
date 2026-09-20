@@ -5,11 +5,20 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 
-/** Upstream for the optional `/api/v2` dev proxy — see `.env-example`. */
+/** Vite config: plugins, aliases, chunks, and dev proxy. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Upstream for optional dev proxy `/api/v2` — see `.env-example`. */
 const XENOCHOICE_ORIGIN =
   process.env.XENOCHOICE_ORIGIN || 'http://127.0.0.1:8080';
 
-// https://vite.dev/config/
+// ═══════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), glsl()],
   resolve: {

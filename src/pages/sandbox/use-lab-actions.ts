@@ -29,7 +29,17 @@ import {
 import { performIntervention } from './research-api';
 import { useEnsureExperiment } from './use-ensure-experiment';
 
+/** All lab commands that call the API (play/pause, settings, export). */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 type UiIntervention = 'pulse' | 'storm' | 'scarcity';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 const UI_TO_API: Record<UiIntervention, InterventionType> = {
   pulse: 'impulse',
@@ -47,9 +57,13 @@ const EFFECT_UNTIL = 60;
 /** A range input fires on every drag step; the API budget is ~100 calls / 50 s. */
 const SETTINGS_DEBOUNCE_MS = 300;
 
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 /**
- * Every lab command that talks to the API. Handlers read the store through
- * `getLabState()` rather than closing over render values, so they stay correct
+ * All lab commands to the API. Handlers read the store via
+ * `getLabState()`, not render closure — stay correct
  * when called from a stale callback.
  */
 export const useLabActions = () => {

@@ -1,3 +1,9 @@
+/** Barrel export for routes, storage keys, and world constants. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export {
   DYNAMIC_ROUTE_PATTERNS,
   DYNAMIC_ROUTES,

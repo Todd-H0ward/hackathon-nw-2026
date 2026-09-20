@@ -1,12 +1,22 @@
+/** shadcn/ui Badge wrapper — compact tag with color variants. */
+
 import type { HTMLAttributes } from 'react';
 
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export interface BadgeProps
   extends HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
 
 export const badgeVariants = cva(
   'inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[1.5px] uppercase rounded px-[7px] py-[5px] leading-none select-none',
@@ -29,6 +39,10 @@ export const badgeVariants = cva(
     },
   },
 );
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Badge = ({ className, variant, ...props }: BadgeProps) => {
   return (

@@ -1,3 +1,9 @@
+/** Barrel export for 3D globe and planet carousel. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export type { GlobeBodyId, GlobeMaps } from './bodies';
 export {
   GLOBE_BODY_IDS,

@@ -1,34 +1,51 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import type { World } from '@/shared/api/xenochoice';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-/** Matches the live engine behind `/api/v2`. */
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Engine version behind `/api/v2`. */
 export const MODEL_VERSION = 'xenochoice-api-v2';
 
-/** Accent colors used by the lab chrome (not provided by the API). */
+/** Lab chrome accent colors (not provided by the API). */
 export const WORLD_COLORS: Record<GlobeBodyId, string> = {
   earth: '#70e0c4',
   mars: '#ffb66e',
   venus: '#d8bd80',
 };
 
-/** Human label for `world.model.organismType` — falls back to a humanized slug. */
+// ═══════════════════════════════════════════
+// LABEL DICTIONARIES
+// ═══════════════════════════════════════════
+
+/** Human-readable label for `world.model.organismType`. */
 const ORGANISM_LABELS: Record<string, string> = {
   mineral_conductive: 'Электрические градиенты',
   dust_resonator: 'Трибоэлектрические импульсы',
   thermal_structure: 'Локальные тепловые градиенты',
 };
 
+/** Slug → title-cased label. */
 const humanize = (slug: string) =>
   slug.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
-/** Orbital position from the Sun — cosmetic flavor, not part of the API. */
+/** Orbital position from the Sun — cosmetic, not part of the API. */
 const SOL_POSITION: Record<GlobeBodyId, string> = {
   venus: 'SOL / 02',
   earth: 'SOL / 03',
   mars: 'SOL / 04',
 };
 
-/** Display-facing planet info, derived entirely from `/worlds`. */
+// ═══════════════════════════════════════════
+// TYPE & MAPPING
+// ═══════════════════════════════════════════
+
+/** Planet card for the UI, fully derived from `/worlds`. */
 export type WorldInfo = {
   id: GlobeBodyId;
   name: string;
@@ -43,11 +60,12 @@ export type WorldInfo = {
   color: string;
   baseFlow: number;
   noiseAmplitude: number;
-  /** Engine ceilings from `world.model` — the lab must not offer to exceed them. */
+  /** Engine caps from `world.model` — the lab must not exceed them. */
   maxPopulation: number;
   maxColonies: number;
 };
 
+/** Maps a World API object to WorldInfo for the UI. */
 export const worldToInfo = (world: World): WorldInfo => ({
   id: world.id,
   name: world.name,
@@ -68,12 +86,17 @@ export const worldToInfo = (world: World): WorldInfo => ({
   maxColonies: world.model.maxColonies,
 });
 
+// ═══════════════════════════════════════════
+// WORLD CATALOG
+// ═══════════════════════════════════════════
+
 /**
- * Planet catalog keyed by body. Bodies missing from `/worlds` stay absent —
- * there are no offline placeholders, so the UI must skip what it cannot show.
+ * Planet catalog keyed by body id. Bodies missing from `/worlds` are not
+ * backfilled — the UI skips what the API did not return.
  */
 export type WorldCatalog = Partial<Record<GlobeBodyId, WorldInfo>>;
 
+/** Builds a WorldInfo map from a `/worlds` array. */
 export const worldsToInfoMap = (worlds: World[] | undefined): WorldCatalog => {
   const map: WorldCatalog = {};
   for (const world of worlds ?? []) {

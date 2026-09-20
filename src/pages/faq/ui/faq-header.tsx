@@ -6,6 +6,12 @@ import { Button, Input } from '@/shared/ui';
 
 import type { FaqArticle, FaqCategory } from '../types';
 
+/** Reference header: search, breadcrumbs, and Share. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface FaqHeaderProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
@@ -13,6 +19,10 @@ interface FaqHeaderProps {
   activeArticle?: FaqArticle;
   onToggleMobileSidebar: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export function FaqHeader({
   searchQuery,
@@ -40,9 +50,9 @@ export function FaqHeader({
 
   return (
     <header className="flex h-22.5 flex-col justify-between border-b border-border bg-card/60 backdrop-blur-md px-4 py-3 shrink-0">
-      {/* Верхний ряд: кнопка мобильного меню, поиск и действия */}
+      {/* Top row: mobile menu button, search, and actions */}
       <div className="flex items-center justify-between gap-3">
-        {/* Мобильная кнопка меню */}
+        {/* Mobile menu button */}
         <Button
           type="button"
           variant="outline"
@@ -56,7 +66,7 @@ export function FaqHeader({
           <Menu size={18} />
         </Button>
 
-        {/* Поисковая строка */}
+        {/* Search input */}
         <div className="relative flex-1 max-w-md">
           <Search
             size={15}
@@ -83,7 +93,7 @@ export function FaqHeader({
           )}
         </div>
 
-        {/* Правые кнопки действий */}
+        {/* Right action buttons */}
         <div className="flex items-center gap-2 shrink-0">
           <Button
             type="button"
@@ -108,7 +118,7 @@ export function FaqHeader({
         </div>
       </div>
 
-      {/* Нижний ряд: хлебные крошки */}
+      {/* Bottom row: breadcrumbs */}
       <nav
         aria-label="Хлебные крошки"
         className="flex items-center gap-1.5 overflow-x-auto text-[11px] text-muted-foreground"

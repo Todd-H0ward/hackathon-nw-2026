@@ -1,9 +1,15 @@
+/** Spark particle-cloud ShaderMaterial — GPGPU positions, bloom-compatible. */
+
 import { shaderMaterial } from '@react-three/drei';
 import { extend } from '@react-three/fiber';
 import { Color } from 'three';
 
 import fragmentShader from './shaders/fragment.glsl';
 import vertexShader from './shaders/vertex.glsl';
+
+// ═══════════════════════════════════════════
+// MATERIAL — UNIFORMS
+// ═══════════════════════════════════════════
 
 const SparkMaterial = shaderMaterial(
   {
@@ -24,5 +30,9 @@ const SparkMaterial = shaderMaterial(
   vertexShader,
   fragmentShader,
 );
+
+// ═══════════════════════════════════════════
+// REGISTRATION
+// ═══════════════════════════════════════════
 
 extend({ SparkMaterial });

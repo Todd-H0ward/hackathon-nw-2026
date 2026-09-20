@@ -1,4 +1,12 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import { useVoiceStore, type VoiceStore } from './store';
+
+// ═══════════════════════════════════════════
+// SELECTOR HOOKS
+// ═══════════════════════════════════════════
 
 export const useVoiceStatus = () =>
   useVoiceStore((store: VoiceStore) => store.status);
@@ -17,8 +25,12 @@ export const useToggleVoiceListening = () =>
 export const useDismissVoice = () =>
   useVoiceStore((store: VoiceStore) => store.dismiss);
 
+// ═══════════════════════════════════════════
+// IMPERATIVE ACCESS
+// ═══════════════════════════════════════════
+
 /**
- * Non-reactive snapshot. The speech bridge writes here from browser-API
- * callbacks and must not re-render on its own updates.
+ * Non-reactive snapshot. Speech bridge writes here from browser-API callbacks
+ * and must not re-render from its own updates.
  */
 export const getVoiceState = () => useVoiceStore.getState();

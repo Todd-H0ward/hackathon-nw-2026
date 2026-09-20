@@ -1,9 +1,20 @@
+/** N×N UV point grid for spark shader — geometry + dispose. */
+
 import { useEffect, useMemo } from 'react';
 
 import { BufferGeometry, Float32BufferAttribute, Sphere, Vector3 } from 'three';
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const SHELL = 1.15;
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
+/** Create BufferGeometry with UV attribute for RES×RES particles. */
 export const createPointGrid = (size: number) => {
   const count = size * size;
   const uv = new Float32Array(count * 2);
@@ -22,6 +33,10 @@ export const createPointGrid = (size: number) => {
   geometry.boundingSphere = new Sphere(new Vector3(0, 0, 0), SHELL);
   return geometry;
 };
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
 
 export const usePointGrid = (size: number) => {
   const geometry = useMemo(() => createPointGrid(size), [size]);

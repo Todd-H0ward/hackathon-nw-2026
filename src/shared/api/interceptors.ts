@@ -1,5 +1,15 @@
+/** Recursive object key transform camelCase ↔ snake_case. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const CAMEL_CASE_RE = /[_-]([a-z])/gi;
 const SNAKE_CASE_RE = /([a-z0-9])([A-Z])/g;
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 const toCamelCase = (value: string) =>
   value.replace(CAMEL_CASE_RE, (_, letter: string) => letter.toUpperCase());
@@ -33,5 +43,9 @@ const transformKeys = <T>(
 const keysToCamelCase = <T>(value: T): T => transformKeys(value, toCamelCase);
 
 const keysToSnakeCase = <T>(value: T): T => transformKeys(value, toSnakeCase);
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
 
 export { keysToCamelCase, keysToSnakeCase };

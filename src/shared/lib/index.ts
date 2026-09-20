@@ -1,3 +1,9 @@
+/** Barrel export for utilities and adaptive WebGL. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export {
   type DeviceTier,
   resolveBloomTierScale,

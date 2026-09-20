@@ -1,18 +1,18 @@
 /**
- * Adapts XenoChoice backend snapshots (`@/shared/api/xenochoice`) into the
- * shape the lab UI and the 3D scene (`surface-life.tsx`) already render.
+ * Adapts XenoChoice snapshots (`@/shared/api/xenochoice`) into the shape
+ * already rendered by the lab UI and 3D scene (`surface-life.tsx`).
  *
- * The backend is authoritative for everything biological — positions,
- * energy, decisions, colonies, metrics. A handful of things it does not
- * report are tracked here, client-side, and are clearly the exception:
- *  - `dead`: the tick an individual was first observed dead (for the fade
- *    animation) — the backend only gives a boolean `alive` flag.
- *  - `events`: a short human-readable log, synthesized by diffing
- *    consecutive snapshots (real transitions, not fabricated data).
- *  - `settings` / `effect`: optimistic UI state for the resource/noise
- *    sliders and the intervention banner — the backend has no "current
- *    settings" or "active effect" endpoint, only one-shot interventions.
+ * Backend is the source of truth for biology: positions, energy, decisions,
+ * colonies, metrics. Client-only exceptions:
+ *  - `dead` — tick of first observed death (fade animation);
+ *  - `events` — short log synthesized from snapshot diffs;
+ *  - `settings` / `effect` — optimistic UI state for sliders and banner.
  */
+
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import type {
   DecisionAction,
   Colony as RemoteColony,
@@ -21,11 +21,23 @@ import type {
 } from '@/shared/api/xenochoice';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const DEG2RAD = Math.PI / 180;
-/** How many ticks a dead individual stays rendered (fading out), like before. */
+
+/** How many ticks a dead individual stays on screen (fade-out). */
 const DEATH_FADE_TICKS = 16;
 
+// ═══════════════════════════════════════════
+// TYPES & ACTIONS
+// ═══════════════════════════════════════════
+
+/** Individual action in the UI layer (not the DecisionAction API). */
 export type Action = 'accumulate' | 'signal' | 'divide' | 'grow' | 'starve';
+
+/** Human-readable action labels for the inspector. */
 export const ACTIONS: Record<Action, string> = {
   accumulate: 'Накапливает ресурс',
   grow: 'Наращивает структуру',
@@ -34,6 +46,7 @@ export const ACTIONS: Record<Action, string> = {
   starve: 'Экономит ресурс',
 };
 
+/** Individual in the shape expected by the UI and 3D scene. */
 export type Individual = {
   id: number;
   remoteId: string;
@@ -48,16 +61,18 @@ export type Individual = {
   reason: string;
 };
 
+/** Colony with UI metadata (color, name, primary flag). */
 export type Colony = {
   id: number;
   remoteId: string;
-  /** True for a colony present at tick 0 (a founding colony, not a later split). */
+  /** true — colony at tick 0 (primary, not split off). */
   primary: boolean;
   born: number;
   name: string;
   color: string;
 };
 
+/** Experiment event log entry. */
 export type Event = {
   id: number;
   tick: number;
@@ -65,8 +80,10 @@ export type Event = {
   text: string;
 };
 
+/** Experiment condition sliders (optimistic UI state). */
 export type Settings = { resource: number; noise: number; mutation: boolean };
 
+/** Resource packet in transit between individuals. */
 export type Packet = {
   from: number;
   to: number;
@@ -75,6 +92,7 @@ export type Packet = {
   energy: number;
 };
 
+/** Metric sample at a single tick. */
 export type Metric = {
   tick: number;
   population: number;
@@ -85,6 +103,7 @@ export type Metric = {
   delay: number | null;
 };
 
+/** Full simulation state for the lab UI. */
 export type Simulation = {
   snapshot?: StateSnapshot;
   body: GlobeBodyId;
@@ -105,17 +124,25 @@ export type Simulation = {
   splits: number;
 };
 
+// ═══════════════════════════════════════════
+// SIMULATION SELECTORS
+// ═══════════════════════════════════════════
+
+/** Living individuals (dead === null). */
 export const living = (s: Simulation) =>
   s.individuals.filter((i) => i.dead === null);
 
+/** Living individuals in the given colony. */
 export const members = (s: Simulation, colony: number) =>
   living(s).filter((i) => i.colony === colony);
 
+/** Colonies with at least one living individual. */
 export const activeColonies = (s: Simulation) =>
   s.colonies.filter((c) =>
     s.individuals.some((i) => i.colony === c.id && i.dead === null),
   );
 
+/** Lat/lon → XYZ on a sphere of the given radius. */
 export const position = (
   i: Pick<Individual, 'lat' | 'lon'>,
   radius = 2.33,
@@ -127,7 +154,11 @@ export const position = (
   ];
 };
 
-/** Best-effort short id (`ind-07` -> 7) for the numeric ids the UI/3D layer expects. */
+// ═══════════════════════════════════════════
+// ID UTILITIES
+// ═══════════════════════════════════════════
+
+/** Short numeric id from remoteId (`ind-07` → 7) for UI/3D. */
 export const numericId = (remoteId: string): number => {
   const digits = remoteId.match(/(\d+)$/)?.[1];
   if (digits) return parseInt(digits, 10);
@@ -138,6 +169,11 @@ export const numericId = (remoteId: string): number => {
   return Math.abs(hash);
 };
 
+// ═══════════════════════════════════════════
+// SNAPSHOT → UI MAPPING
+// ═══════════════════════════════════════════
+
+/** Maps DecisionAction API value to a UI action. */
 const mapAction = (individual: RemoteIndividual): Action => {
   if (!individual.alive) return 'starve';
   if (individual.starvationTicks > 0) return 'starve';
@@ -149,6 +185,7 @@ const mapAction = (individual: RemoteIndividual): Action => {
   return 'accumulate';
 };
 
+/** Action reason text for the inspector. */
 const reasonFor = (individual: RemoteIndividual): string => {
   if (!individual.alive) {
     return 'Особь угасла: ресурс исчерпан или структура разрушена.';
@@ -160,15 +197,19 @@ const reasonFor = (individual: RemoteIndividual): string => {
 };
 
 /**
- * The live backend reports efficiency as a 0..1 fraction while the swagger
- * example shows whole percents — accept either rather than render "7980 %".
+ * API returns efficiency as 0..1 or percent — accept both so we do not
+ * render values like "7980 %".
  */
 const efficiencyPercent = (raw: number) => {
   const percent = raw;
   return Math.min(100, Math.max(0, percent));
 };
 
-/** Per-body, cross-tick state the backend does not report — see file header. */
+// ═══════════════════════════════════════════
+// ADAPTER STATE (CARRY)
+// ═══════════════════════════════════════════
+
+/** Cross-tick adapter state not present in the API — see file header. */
 export type AdapterCarry = {
   bootstrapped: boolean;
   deadSince: Map<number, number>;
@@ -183,6 +224,7 @@ export type AdapterCarry = {
   effect: Simulation['effect'];
 };
 
+/** Empty carry state for a new experiment or reset. */
 export const createAdapterCarry = (): AdapterCarry => ({
   bootstrapped: false,
   deadSince: new Map(),
@@ -197,6 +239,11 @@ export const createAdapterCarry = (): AdapterCarry => ({
   effect: null,
 });
 
+// ═══════════════════════════════════════════
+// EVENT SYNC
+// ═══════════════════════════════════════════
+
+/** Prepends an event to the log (limit 100). */
 const pushEvent = (
   carry: AdapterCarry,
   tick: number,
@@ -207,7 +254,7 @@ const pushEvent = (
   if (carry.events.length > 100) carry.events.length = 100;
 };
 
-/** Diffs `snapshot` against what `carry` last saw and logs real transitions. */
+/** Diffs the snapshot against carry and logs real transitions. */
 const syncEvents = (snapshot: StateSnapshot, carry: AdapterCarry) => {
   const { tick } = snapshot;
   const individuals = snapshot.individuals ?? [];
@@ -265,7 +312,11 @@ const syncEvents = (snapshot: StateSnapshot, carry: AdapterCarry) => {
   carry.aliveIds = nowAlive;
 };
 
-/** Turns a raw backend snapshot into the `Simulation` shape the UI expects. */
+// ═══════════════════════════════════════════
+// SNAPSHOT ADAPTER
+// ═══════════════════════════════════════════
+
+/** Converts a raw API snapshot into the UI `Simulation` shape. */
 export const snapshotToSimulation = (
   body: GlobeBodyId,
   seed: number,
@@ -290,8 +341,8 @@ export const snapshotToSimulation = (
   }
 
   const individuals: Individual[] = [];
-  // The swagger schema omits `signals`/`inTransit` that the live API sends, so
-  // treat every collection as optional rather than trusting either contract.
+  // Swagger omits `signals`/`inTransit` that the live API sends —
+  // treat all collections as optional.
   for (const remote of snapshot.individuals ?? []) {
     const id = numericId(remote.id);
     if (remote.alive) {
@@ -376,7 +427,11 @@ export const snapshotToSimulation = (
   };
 };
 
-/** Records an intervention the client just sent (server doesn't echo a running log). */
+// ═══════════════════════════════════════════
+// PUBLIC HELPERS
+// ═══════════════════════════════════════════
+
+/** Records a client-sent intervention (server does not keep a log). */
 export const logIntervention = (
   carry: AdapterCarry,
   tick: number,
@@ -385,7 +440,7 @@ export const logIntervention = (
   carry.interventions.push({ tick, type });
 };
 
-/** Placeholder sim shown while the first API snapshot is in flight. */
+/** Simulation placeholder while the first API snapshot is in flight. */
 export const emptySimulation = (
   body: GlobeBodyId,
   seed = 2048,
@@ -408,8 +463,10 @@ export const emptySimulation = (
   splits: 0,
 });
 
+/** Individual remoteId by UI numeric id. */
 export const remoteIndividualId = (s: Simulation, id: number) =>
   s.individuals.find((i) => i.id === id)?.remoteId ?? null;
 
+/** Colony remoteId by UI numeric id. */
 export const remoteColonyId = (s: Simulation, id: number) =>
   s.colonies.find((c) => c.id === id)?.remoteId ?? null;

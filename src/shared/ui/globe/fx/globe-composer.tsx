@@ -1,3 +1,7 @@
+/** Globe postprocessing composer — bloom, noise, tier-aware params. */
+
+/** Globe postprocessing — bloom and film grain via EffectComposer. */
+
 import { type RefObject, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { useFrame, useThree } from '@react-three/fiber';
@@ -21,7 +25,15 @@ import {
 import { getComposerFrameBufferType } from '@/shared/lib/webgl/texture-types';
 import { GLOBE_DEFAULTS, type GlobeConfig } from '@/shared/ui/globe/config';
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const NOISE = 0.028;
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 interface GlobeFxProps {
   configRef: RefObject<GlobeConfig>;
@@ -33,6 +45,10 @@ type BloomParams = {
   smoothing: number;
   radius: number;
 };
+
+// ═══════════════════════════════════════════
+// UTILITIES — BLOOM
+// ═══════════════════════════════════════════
 
 const passEffects = (pass: EffectPass): Effect[] =>
   (pass as unknown as { effects: Effect[] }).effects;
@@ -73,6 +89,10 @@ const bloomParamsEqual = (a: BloomParams, b: BloomParams) =>
   a.smoothing === b.smoothing &&
   a.radius === b.radius;
 
+// ═══════════════════════════════════════════
+// COMPONENT — BLOOM SYNC
+// ═══════════════════════════════════════════
+
 const GlobeFxSync = ({ configRef }: GlobeFxProps) => {
   const { composer } = useContext(EffectComposerContext);
   const size = useThree((state) => state.size);
@@ -103,6 +123,10 @@ const GlobeFxSync = ({ configRef }: GlobeFxProps) => {
 
   return null;
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT — COMPOSER
+// ═══════════════════════════════════════════
 
 export const GlobeFx = ({ configRef }: GlobeFxProps) => {
   const gl = useThree((state) => state.gl);

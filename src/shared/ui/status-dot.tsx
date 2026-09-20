@@ -1,12 +1,22 @@
+/** Status indicator — colored dot (online/accent/muted). */
+
 import type { HTMLAttributes } from 'react';
 
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface StatusDotProps
   extends HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof statusDotVariants> {}
+
+// ═══════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════
 
 export const statusDotVariants = cva('inline-block rounded-full shrink-0', {
   variants: {
@@ -29,6 +39,10 @@ export const statusDotVariants = cva('inline-block rounded-full shrink-0', {
     size: 'md',
   },
 });
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const StatusDot = ({
   className,

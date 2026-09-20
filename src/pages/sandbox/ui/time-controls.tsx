@@ -5,6 +5,12 @@ import { TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 
+/** Time control panel: play/pause, step, speed, and seed. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface TimeControlsProps {
   running: boolean;
   speed: number;
@@ -16,7 +22,11 @@ interface TimeControlsProps {
   onSpeedChange: (speed: number) => void;
 }
 
-/** Only block Space when the user is clearly typing — not on every button. */
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Blocks Space only when typing in a field — not on every button. */
 const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
   return Boolean(
@@ -25,6 +35,10 @@ const isEditableTarget = (target: EventTarget | null) => {
     ),
   );
 };
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const TimeControls = ({
   running,
@@ -39,7 +53,8 @@ export const TimeControls = ({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Space' && event.key !== ' ') return;
-      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey)
+        return;
       if (isEditableTarget(event.target)) return;
       // Always preventDefault so a focused control doesn't also activate,
       // and we never double-toggle with the native button Space behavior.

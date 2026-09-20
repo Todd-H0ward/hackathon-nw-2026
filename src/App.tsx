@@ -5,6 +5,12 @@ import { PlanetTransitionOverlay } from '@/features/planet-transition';
 
 import { Providers } from './providers';
 
+/** Root app layout: providers, loading screen, and route outlet. */
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export const App = () => {
   return (
     <Providers>

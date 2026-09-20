@@ -1,3 +1,5 @@
+/** shadcn/ui Tabs wrapper — tabs with context and controlled/uncontrolled mode. */
+
 import {
   type ButtonHTMLAttributes,
   createContext,
@@ -8,6 +10,10 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 type TabsContextValue = {
   value: string;
@@ -29,12 +35,20 @@ interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
+// ═══════════════════════════════════════════
+// CONTEXT
+// ═══════════════════════════════════════════
+
 const TabsContext = createContext<TabsContextValue>({
   value: '',
   onChange: () => {},
 });
 
 const useTabsContext = () => useContext(TabsContext);
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Tabs = ({
   className,

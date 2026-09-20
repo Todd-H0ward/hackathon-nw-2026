@@ -10,9 +10,20 @@ import { getLabState } from '@/store';
 
 import { applySnapshot, labRuntime } from './lab-runtime';
 
+/** Research intervention API layer: send command and await confirmation. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const WAIT_ATTEMPTS = 16;
 const WAIT_INTERVAL_MS = 150;
 
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Delayed promise, abortable via AbortSignal. */
 const sleep = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
     if (signal?.aborted) {
@@ -30,6 +41,7 @@ const sleep = (ms: number, signal?: AbortSignal) =>
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
+/** Local effect (pulse/storm/scarcity) until the WS snapshot arrives. */
 const applyLocalEffect = (
   body: ReturnType<typeof getLabState>['body'],
   request: InterventionRequest,
@@ -64,6 +76,7 @@ const applyLocalEffect = (
   });
 };
 
+/** Announces intervention result via action-speech. */
 const announceIntervention = (request: InterventionRequest) => {
   const messages: Record<string, string> = {
     impulse: 'Импульс выполнен',
@@ -79,7 +92,11 @@ const announceIntervention = (request: InterventionRequest) => {
   announceAction(messages[request.type] ?? 'Действие выполнено');
 };
 
-/** Resolves only after the authoritative engine applies the command. */
+// ═══════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════
+
+/** Resolves only after the engine has applied the command. */
 export async function performIntervention(
   request: InterventionRequest,
   announce = true,

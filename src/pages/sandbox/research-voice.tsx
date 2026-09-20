@@ -23,6 +23,12 @@ import {
 import { applySnapshot } from './lab-runtime';
 import { performIntervention } from './research-api';
 
+/** Lab voice assistant: command recognition and response synthesis. */
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export const ResearchVoice = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -280,7 +286,7 @@ export const ResearchVoice = () => {
     startListening,
   ]);
 
-  // Закрытие по клику вне поповера
+  // Close on click outside the popover
   useEffect(() => {
     if (!isOpen) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -295,7 +301,7 @@ export const ResearchVoice = () => {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, [isOpen, handleClose]);
 
-  // Автозакрытие через 14 секунд после получения ответа при бездействии
+  // Auto-close 14s after response when idle
   useEffect(() => {
     if (status === 'idle' && robotResponse && isOpen) {
       const timer = setTimeout(() => {
@@ -339,10 +345,10 @@ export const ResearchVoice = () => {
         <Mic size={17} className={cn(listeningActive && 'animate-pulse')} />
       </button>
 
-      {/* Поповер ассистента */}
+      {/* Assistant popover */}
       {isOpen && (
         <div className="absolute bottom-0 left-12 z-50 w-72 rounded-xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur-3xl opacity-95 max-mobile:top-12 max-mobile:bottom-auto max-mobile:left-auto max-mobile:right-0 animate-in fade-in zoom-in-95 duration-150">
-          {/* Кнопка закрытия */}
+          {/* Close button */}
           <Button
             type="button"
             variant="ghost"
@@ -354,7 +360,7 @@ export const ResearchVoice = () => {
             <X size={13} />
           </Button>
 
-          {/* Волна посредине */}
+          {/* Wave in the middle */}
           <div
             className="my-3 flex items-center justify-center gap-2 select-none"
             aria-hidden="true"
@@ -431,7 +437,7 @@ export const ResearchVoice = () => {
             />
           </div>
 
-          {/* Текст статуса и ответа снизу */}
+          {/* Status and response text at bottom */}
           <div className="space-y-1.5 text-center">
             {isListening && (
               <p className="font-mono text-[10px] uppercase font-semibold text-primary tracking-wider animate-pulse">

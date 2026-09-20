@@ -1,3 +1,5 @@
+/** Planet carousel — ring layout, swipe/drag, screen pose for ferry. */
+
 import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
@@ -25,6 +27,10 @@ import { Starfield } from './starfield';
 import {
   resolveCarouselResolution,
 } from '@/shared/lib/perf/device-tier';
+
+// ═══════════════════════════════════════════
+// CONSTANTS — CAMERA / GL / CAROUSEL
+// ═══════════════════════════════════════════
 
 /** Far plane must clear drei Stars (~2× spherical radius). */
 const CAMERA = {
@@ -58,6 +64,10 @@ const POSE_DAMP = 6.0;
 /** If target X jumps farther than this, the ring wrapped — snap, don't lerp through center. */
 const WRAP_SNAP_X = SPACING * (RING_HALF - 0.25);
 
+// ═══════════════════════════════════════════
+// UTILITIES — RING MATH
+// ═══════════════════════════════════════════
+
 /** Shortest signed step on a ring of `length` items. */
 const shortestStep = (from: number, to: number, length: number) => {
   let diff = ((to - from) % length) + length;
@@ -72,6 +82,10 @@ const wrapCentered = (value: number, length: number) => {
   if (v > length / 2) v -= length;
   return v;
 };
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 type MeasureBody = (body: GlobeBodyId) => PlanetScreenPose | null;
 
@@ -95,6 +109,10 @@ interface CarouselSceneProps {
   measureRef: RefObject<MeasureBody | null>;
 }
 
+// ═══════════════════════════════════════════
+// COMPONENT — CAROUSEL 3D SCENE
+// ═══════════════════════════════════════════
+
 const CarouselScene = ({
   offsetRef,
   targetOffsetRef,
@@ -113,6 +131,7 @@ const CarouselScene = ({
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
   const gl = useThree((state) => state.gl);
 
+  // ── Screen pose: planet screen coords for ferry handoff ──
   // Screen pose of a planet — lets a page hand the exact on-screen globe to another canvas.
   measureRef.current = (body) => {
     const group = groupRefs.current[GLOBE_BODY_IDS.indexOf(body)];
@@ -136,6 +155,7 @@ const CarouselScene = ({
     };
   };
 
+  // ── Pose frame (priority −2): position/scale/snap + simEnabled flags ──
   // Priority −2: run before usePositionSim (−1) so enabled flags are fresh.
   useFrame((_, delta) => {
     offsetRef.current = MathUtils.damp(
@@ -312,6 +332,10 @@ export interface GlobeCarouselCanvasProps {
   paused?: boolean;
   className?: string;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT — CANVAS + GESTURES
+// ═══════════════════════════════════════════
 
 export const GlobeCarouselCanvas = ({
   activeBody,

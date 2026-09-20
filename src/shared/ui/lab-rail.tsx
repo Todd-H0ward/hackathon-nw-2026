@@ -1,3 +1,5 @@
+/** Vertical lab navigation rail (LabRail). */
+
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
@@ -21,6 +23,10 @@ import {
   useAudioPreferences,
 } from '@/shared/voice/action-speech';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 /** Lab backend / stream health shown on the rail status pip. */
 export type LabConnectionStatus =
   | 'online'
@@ -39,6 +45,18 @@ export interface LabRailProps {
   onOpenGuide?: () => void;
   onGoHome?: () => void;
 }
+
+interface RailLinkProps {
+  to: string;
+  end?: boolean;
+  label: string;
+  onClick?: () => void;
+  children: ReactNode;
+}
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 const CONNECTION_META: Record<
   LabConnectionStatus,
@@ -72,13 +90,9 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
       "bg-secondary text-foreground before:absolute before:-left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:rounded-full before:bg-primary before:content-[''] max-mobile:before:hidden",
   );
 
-interface RailLinkProps {
-  to: string;
-  end?: boolean;
-  label: string;
-  onClick?: () => void;
-  children: ReactNode;
-}
+// ═══════════════════════════════════════════
+// HELPER COMPONENT
+// ═══════════════════════════════════════════
 
 const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
   <NavLink
@@ -95,6 +109,10 @@ const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
     {children}
   </NavLink>
 );
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 /** Compact vertical navigation shared by lab pages and FAQ. */
 export const LabRail = ({

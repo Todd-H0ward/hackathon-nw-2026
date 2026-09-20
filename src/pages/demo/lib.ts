@@ -1,5 +1,11 @@
 import type { DecisionTrace, Individual } from '@/shared/api/xenochoice/types';
 
+/** Types, constants, and formatting for the "Choice Machine" demo. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type Action = 'STORE' | 'TRANSFER' | 'GROW' | 'DIVIDE';
 
 export type Frame = {
@@ -17,6 +23,10 @@ export type Frame = {
 };
 
 export type Episode = { seed: number; frames: Frame[] };
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 
 export const ACTIONS: Action[] = ['STORE', 'TRANSFER', 'GROW', 'DIVIDE'];
 
@@ -46,6 +56,10 @@ export const STAGES = ['Наблюдает', 'Сравнивает', 'Выбир
 
 export const CHAPTER_SECONDS = 18;
 
+// ═══════════════════════════════════════════
+// FORMATTING
+// ═══════════════════════════════════════════
+
 export const formatNum = (n: number | null | undefined, digits = 2) =>
   typeof n === 'number' && !Number.isNaN(n) ? n.toFixed(digits) : '—';
 
@@ -54,6 +68,11 @@ export const formatSigned = (n: number | null | undefined) =>
     ? `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(5)}`
     : '—';
 
+// ═══════════════════════════════════════════
+// NARRATION
+// ═══════════════════════════════════════════
+
+/** Voice-over text for the current episode stage. */
 export const narrationForStage = (frame: Frame, stage: number): string => {
   const { decision: d, before: b } = frame;
   if (stage === 0) {

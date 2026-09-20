@@ -29,6 +29,12 @@ import {
 } from '@/store';
 import { useLabStore } from '@/store/lab/store';
 
+/** Analytics for the current run: charts, metrics, and mode comparison. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const AnalyticsPage = () => {
   const tick = useLabSimTick();
   const stats = useLabSimDialogStats();

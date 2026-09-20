@@ -1,5 +1,12 @@
+// ═══════════════════════════════════════════
+// GPGPU EVOLVE — point-position sim step
+// ═══════════════════════════════════════════
+// Reads previous FBO (uPrev) and rest pose (uRest),
+// writes spin/jitter offset into ping-pong target.
+
 precision highp float;
 
+// ── Uniforms ──
 uniform sampler2D uPrev;
 uniform sampler2D uRest;
 uniform float uSize;
@@ -10,6 +17,10 @@ uniform float uJitter;
 varying vec2 vUv;
 
 const float TAU = 6.28318530718;
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
 
 vec2 snapSimUv(vec2 rawUv, float size) {
   return (floor(rawUv * size) + 0.5) / size;
@@ -32,6 +43,10 @@ mat3 rotationY(float angle) {
     s, 0.0, c
   );
 }
+
+// ═══════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════
 
 void main() {
   vec2 simUv = snapSimUv(vUv, uSize);

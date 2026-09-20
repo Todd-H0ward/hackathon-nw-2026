@@ -1,3 +1,9 @@
+/** data-tour anchors for lab step-by-step onboarding. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 export const TOUR_ANCHORS = {
   ROLE: 'role',
   NAV: 'nav',
@@ -13,7 +19,15 @@ export const TOUR_ANCHORS = {
   EXPORT: 'export',
 } as const;
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type TourAnchor = (typeof TOUR_ANCHORS)[keyof typeof TOUR_ANCHORS];
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 export const tourAnchorSelector = (anchor: TourAnchor) =>
   `[data-tour="${anchor}"]` as const;

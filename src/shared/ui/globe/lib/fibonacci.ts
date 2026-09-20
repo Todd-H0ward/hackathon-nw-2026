@@ -1,13 +1,28 @@
+/** Fibonacci sphere — N×N RGBA float grid for GPGPU seed. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const TAU = Math.PI * 2;
 
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+
 const fract = (value: number) => value - Math.floor(value);
 
+/** Pseudo-random particle phase from index and UV. */
 const particlePhase = (index: number, u: number, v: number) => {
   const part1 = Math.sin(index * 12.9898 + index * 0.37 * 78.233) * 43758.5453;
   const part2 = Math.sin(u * 39.346 + v * 11.135) * 24634.317;
   return fract(part1 + part2);
 };
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
 
 /** N×N RGBA float grid: xyz = unit direction, w = phase. */
 export const buildFibonacciField = (size: number) => {

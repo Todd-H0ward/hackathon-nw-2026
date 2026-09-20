@@ -8,6 +8,12 @@ import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import type { PlanetInfo } from './planet-info';
 
+/** Bottom planet dossier panel on the home page. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export type PlanetHoodStatus = 'ready' | 'loading' | 'error';
 
 interface PlanetHoodProps {
@@ -17,6 +23,10 @@ interface PlanetHoodProps {
   className?: string;
   onEnter: () => void;
 }
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const PlanetHood = ({
   activeBody,

@@ -1,30 +1,41 @@
 /**
- * Marker colors for surface life / viewport legend.
+ * Colors and legend for the surface life layer (sandbox viewport).
  * Keep in sync with `surface-life.tsx` and `research-scene.tsx`.
  */
+
+// ═══════════════════════════════════════════
+// COLORS
+// ═══════════════════════════════════════════
+
+/** Marker palette on the sphere. */
 export const SURFACE_MARKER = {
-  /** Fallback when colony has no color. */
+  /** Living individual without a colony color (fallback). */
   individual: '#70e0c4',
-  /** Default colony builder / legend sample. */
+  /** Colony sample in the legend / builder. */
   colonySample: '#81d6b9',
-  /** Action `divide`. */
+  /** Individual performing DIVIDE. */
   divide: '#ffffff',
   /** Energy below {@link LOW_ENERGY_THRESHOLD}. */
   lowEnergy: '#ff805e',
-  /** Dead individual (death fade). */
+  /** Dead individual (fade-out). */
   dead: '#ff5d66',
-  /** In-transit resource packet. */
+  /** Resource packet in transit (head on arc). */
   packet: '#ffffff',
-  /** Colony draft drop pin. */
+  /** Draft pin for a new colony. */
   draft: '#ffcd70',
 } as const;
 
-/** Individuals below this energy use {@link SURFACE_MARKER.lowEnergy}. */
+/** EU threshold: below this the marker shows low energy. */
 export const LOW_ENERGY_THRESHOLD = 18;
 
+// ═══════════════════════════════════════════
+// LEGEND
+// ═══════════════════════════════════════════
+
+/** Icon kind in the map legend panel. */
 export type ViewportLegendKind = 'diamond' | 'line' | 'packet' | 'pin';
 
-/** Legend rows for the sandbox viewport modal. */
+/** Viewport legend rows (toolbar "?" button). */
 export const VIEWPORT_LEGEND: ReadonlyArray<{
   key: string;
   label: string;
@@ -35,7 +46,7 @@ export const VIEWPORT_LEGEND: ReadonlyArray<{
   {
     key: 'individual',
     label: 'Особь',
-    hint: 'Живая особь в цвете своей колонии',
+    hint: 'Живая особь в цвете своей колонии (кристалл-октаэдр)',
     kind: 'diamond',
     color: SURFACE_MARKER.colonySample,
   },
@@ -63,7 +74,7 @@ export const VIEWPORT_LEGEND: ReadonlyArray<{
   {
     key: 'link',
     label: 'Связь / контур',
-    hint: 'Контур колонии и связи между особями (кнопка «Связи»)',
+    hint: 'Контур колонии и дуги между особями (кнопка «Связи»)',
     kind: 'line',
     color: SURFACE_MARKER.colonySample,
   },

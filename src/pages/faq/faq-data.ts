@@ -1,5 +1,11 @@
 import type { FaqCategory } from './types';
 
+/** Static XenoChoice reference content. */
+
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+
 export const FAQ_CATEGORIES: FaqCategory[] = [
   {
     id: 'quickstart',

@@ -13,6 +13,12 @@ import { useLabStore } from '@/store/lab/store';
 import { applySnapshot, resetLabRuntime } from './lab-runtime';
 import { performIntervention } from './research-api';
 
+/** Research panel: recording, import, event log, and link network setup. */
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
+
 export const ResearchPanel = () => {
   const sim = useLabSimStable();
   const id = useLabStore((s) => s.experimentIds[s.body]);

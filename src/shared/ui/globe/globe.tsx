@@ -1,3 +1,5 @@
+/** 3D globe — haze + GPGPU spark + bloom FX, texture hot-swap. */
+
 import { type RefObject, useEffect, useRef } from 'react';
 
 import { useTexture } from '@react-three/drei';
@@ -19,6 +21,10 @@ import { syncHazeUniforms, syncSparkUniforms } from './lib/sync-uniforms';
 import './materials/haze';
 import './materials/spark';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 export interface GlobeProps {
   config?: GlobeConfig;
   colorUrl?: string;
@@ -31,7 +37,15 @@ export interface GlobeProps {
   liveConfigRef?: RefObject<GlobeConfig>;
 }
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Globe = ({
   config = GLOBE_DEFAULTS,
@@ -50,6 +64,8 @@ export const Globe = ({
   motion.current.jitter = live.current.JITTER;
 
   const colorTex = useTexture(colorUrl);
+
+  // ── Dispose: release previous color texture on hot-swap ──
   // Drop previous color map from GPU + drei/suspend cache when the body
   // hot-swaps (sandbox). Skip unmount dispose — ferry + carousel share URLs.
   const prevColor = useRef<{ url: string; tex: Texture } | null>(null);
@@ -70,6 +86,7 @@ export const Globe = ({
     motionRef: motion,
   });
 
+  // ── Uniforms: sync haze/spark every frame ──
   useFrame(() => {
     // Side / hidden carousel planets: skip uniform churn while GPGPU is frozen.
     if (simEnabledRef && !simEnabledRef.current) return;

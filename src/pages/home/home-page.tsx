@@ -20,6 +20,12 @@ import {
 
 import { fallbackPlanetInfo, worldsToPlanetInfoMap } from './planet-info';
 
+/** Home: planet carousel, dossier, and lab entry. */
+
+// ═══════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════
+
 export const HomePage = () => {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState<GlobeBodyId>(() => {
@@ -67,12 +73,20 @@ export const HomePage = () => {
       hoodStatus === 'error' ? 'error' : 'loading',
     );
 
+  // ═══════════════════════════════════════════
+  // HANDLERS
+  // ═══════════════════════════════════════════
+
   const enterLab = () => {
     getLabState().setBody(activeSlide);
     const pose = poseMeasureRef.current?.(activeSlide);
     if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
     else navigate(STATIC_ROUTES.SANDBOX);
   };
+
+  // ═══════════════════════════════════════════
+  // EFFECTS
+  // ═══════════════════════════════════════════
 
   useEffect(() => {
     const prefetch = () => {

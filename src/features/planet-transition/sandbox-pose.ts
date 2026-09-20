@@ -1,16 +1,30 @@
+// ═══════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════
+
 import type { PlanetScreenPose } from '@/shared/ui/globe';
+
+// ═══════════════════════════════════════════
+// SANDBOX POSE REGISTRY
+// ═══════════════════════════════════════════
 
 type PoseResolver = () => PlanetScreenPose | null;
 
 let sandboxPose: PoseResolver | null = null;
-/** Last successful measure — used when leaving analytics/atlas (viewport unmounted). */
+
+/** Last successful measurement — kept when leaving analytics/atlas (viewport unmounted). */
 let cachedPose: PlanetScreenPose | null = null;
 
-/** PlanetViewport registers its live screen pose for reverse home transitions. */
+/** PlanetViewport registers the live screen pose for the reverse home transition. */
 export const registerSandboxPose = (resolve: PoseResolver | null) => {
   sandboxPose = resolve;
 };
 
+// ═══════════════════════════════════════════
+// POSE READ
+// ═══════════════════════════════════════════
+
+/** Returns the live pose or the last cached one. */
 export const readSandboxPose = (): PlanetScreenPose | null => {
   const live = sandboxPose?.() ?? null;
   if (live) cachedPose = live;

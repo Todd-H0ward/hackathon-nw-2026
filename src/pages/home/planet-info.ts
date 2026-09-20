@@ -1,7 +1,13 @@
 import type { World } from '@/shared/api/xenochoice';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 
-/** Physical property row for the home-page planet dossier. */
+/** Planet dossier catalog for the home page. */
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+/** Physical parameter row in a planet dossier. */
 export type PlanetStat = {
   label: string;
   value: string;
@@ -15,8 +21,12 @@ export type PlanetInfo = {
   stats: PlanetStat[];
 };
 
-/** Catalog keyed by body; a missing entry means `/worlds` has not provided it. */
+/** Catalog by body id; missing entry means `/worlds` has not responded yet. */
 export type PlanetInfoCatalog = Partial<Record<GlobeBodyId, PlanetInfo>>;
+
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
 
 const FALLBACK_NAMES: Record<GlobeBodyId, string> = {
   earth: 'Земля',
@@ -33,9 +43,13 @@ const PLACEHOLDER_STATS: PlanetStat[] = [
   { label: 'Шум', value: '—' },
 ];
 
+// ═══════════════════════════════════════════
+// CATALOG
+// ═══════════════════════════════════════════
+
 /**
- * Offline / loading dossier so the home CTA never disappears when `/worlds`
- * is slow or down. Lab still opens with the selected body.
+ * Offline/loading dossier — home CTA stays visible when
+ * `/worlds` is slow or unavailable.
  */
 export const fallbackPlanetInfo = (
   body: GlobeBodyId,
@@ -50,6 +64,10 @@ export const fallbackPlanetInfo = (
   stats: PLACEHOLDER_STATS,
 });
 
+// ═══════════════════════════════════════════
+// FORMATTING
+// ═══════════════════════════════════════════
+
 const formatTemp = (celsius: number) => {
   const rounded = Math.round(celsius);
   return rounded > 0 ? `+${rounded}` : String(rounded);
@@ -60,7 +78,7 @@ const formatNumber = (n: number, digits = 2) => {
   return n.toFixed(digits).replace(/\.?0+$/, '');
 };
 
-/** Dossier built from a live `/worlds` entry — NASA reference plus scenario. */
+/** Dossier from a `/worlds` entry — NASA reference plus scenario. */
 export const worldToPlanetInfo = (world: World): PlanetInfo => ({
   id: world.id,
   name: world.name,

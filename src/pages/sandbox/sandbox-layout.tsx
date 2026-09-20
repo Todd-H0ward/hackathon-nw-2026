@@ -45,8 +45,18 @@ import { LabDialog, LabFirstRunDialog, LabStatus } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabBootstrap } from './use-lab-bootstrap';
 
+/** Sandbox layout: shell, sidebar, dialogs, transitions, and first-run tour. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 const shellClassName =
   'group/lab flex h-dvh overflow-hidden bg-background text-foreground text-xs max-mobile:flex-col motion-reduce:[&_*]:scroll-auto motion-reduce:[&_*]:!transition-none';
+
+// ═══════════════════════════════════════════
+// COMPONENT (SHELL)
+// ═══════════════════════════════════════════
 
 const SandboxShell = () => {
   useLabBootstrap();
@@ -205,9 +215,7 @@ const SandboxShell = () => {
         connectionStatus={connectionStatus}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
-        onOpenGuide={() =>
-          navigate(`${STATIC_ROUTES.FAQ}?article=overview`)
-        }
+        onOpenGuide={() => navigate(`${STATIC_ROUTES.FAQ}?article=overview`)}
         onGoHome={goHome}
       />
 
@@ -264,6 +272,10 @@ const SandboxShell = () => {
     </motion.div>
   );
 };
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
 
 export const SandboxLayout = () => (
   <ToastProvider duration={3500}>

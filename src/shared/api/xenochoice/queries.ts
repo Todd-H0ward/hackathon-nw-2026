@@ -1,3 +1,5 @@
+/** React Query hooks and utilities for XenoChoice Sandbox API. */
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import * as api from './endpoints';
@@ -10,8 +12,16 @@ import type {
   ReplayRequest,
 } from './types';
 
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 /** How often the REST fallback re-reads the snapshot while the WS is down. */
 const STATE_POLL_MS = 2000;
+
+// ═══════════════════════════════════════════
+// HOOKS
+// ═══════════════════════════════════════════
 
 /**
  * Reference data for Earth/Mars/Venus — static per session, safe to cache long.
@@ -72,6 +82,10 @@ export const useReplayExperiment = () =>
     }: ReplayRequest & { experimentId: string }) =>
       api.replayExperiment(experimentId, request),
   });
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
 /** Not a hook — triggers a browser download rather than rendering data. */
 export const downloadExperimentExport = async (

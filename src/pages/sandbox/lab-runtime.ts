@@ -9,37 +9,50 @@ import {
 } from '@/features/ecosystem';
 import { DEFAULT_SEED, getLabState } from '@/store';
 
+/** Module-level lab state outside React — snapshot adapter, debounced settings, play/pause. */
+
+// ═══════════════════════════════════════════
+// HELPERS (INIT)
+// ═══════════════════════════════════════════
+
 const initialCarries = () =>
   Object.fromEntries(
     GLOBE_BODY_IDS.map((id) => [id, createAdapterCarry()]),
   ) as Record<GlobeBodyId, AdapterCarry>;
 
+// ═══════════════════════════════════════════
+// RUNTIME STORE
+// ═══════════════════════════════════════════
+
 /**
- * Per-planet bookkeeping that is deliberately not React state: nothing here is
- * rendered, and the snapshot adapter mutates it on every frame. Keeping it out
- * of the store also keeps the store free of values that change 10× per second
- * without anyone subscribing to them.
+ * Per-planet state, intentionally outside React: nothing re-renders,
+ * the adapter mutates carry each frame. Keeping it out of the store
+ * avoids 10 Hz updates with no subscribers.
  */
 export const labRuntime = {
-  /** Cross-tick adapter state (death fade, event log, accumulated history). */
+  /** Inter-tick adapter state (death fade, journal, history). */
   carries: initialCarries(),
   pendingSettings: {} as Partial<Record<GlobeBodyId, Partial<Settings>>>,
   /** Guards against a second create request for the same planet. */
   creating: {} as Partial<Record<GlobeBodyId, boolean>>,
-  /** Reverse lookup so a late snapshot is never applied to the wrong planet. */
+  /** Reverse lookup — late snapshot cannot land on the wrong planet. */
   bodyByExperiment: {} as Record<string, GlobeBodyId>,
   seedByBody: {} as Partial<Record<GlobeBodyId, number>>,
-  /** Pending debounced intervention per setting. */
+  /** Pending debounced setting change. */
   settingsTimers: {} as Partial<Record<string, ReturnType<typeof setTimeout>>>,
   /**
-   * Play/pause in flight — ignore duplicate clicks until the command settles.
-   * `awaitingStatus` keeps WS snapshots from regressing the button mid-flight.
+   * In-flight play/pause — ignore duplicates until the command responds.
+   * `awaitingStatus` prevents WS snapshots from reverting the button.
    */
   playToggleInflight: false,
   awaitingStatus: null as null | 'running' | 'paused',
 };
 
-/** Drops accumulated adapter state so a fresh experiment starts from zero. */
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/** Resets accumulated adapter state for a new experiment. */
 export const resetLabRuntime = (body: GlobeBodyId, seed: number) => {
   delete labRuntime.pendingSettings[body];
   labRuntime.carries[body] = createAdapterCarry();
@@ -48,7 +61,7 @@ export const resetLabRuntime = (body: GlobeBodyId, seed: number) => {
   labRuntime.playToggleInflight = false;
 };
 
-/** Registers (or forgets) the experiment that owns a planet. */
+/** Registers (or forgets) the experiment owning a planet. */
 export const rememberExperiment = (
   body: GlobeBodyId,
   experimentId: string | null,
@@ -68,7 +81,7 @@ export const rememberExperiment = (
   setExperimentIds(next);
 };
 
-/** Adapts a backend snapshot and publishes it to the store. */
+/** Adapts a backend snapshot and publishes simulation to the store. */
 export const applySnapshot = (body: GlobeBodyId, snapshot: StateSnapshot) => {
   const { setSim, selectFallback } = getLabState();
   const seed = labRuntime.seedByBody[body] ?? DEFAULT_SEED;
@@ -93,8 +106,10 @@ export const applySnapshot = (body: GlobeBodyId, snapshot: StateSnapshot) => {
   if (getLabState().body === body) selectFallback(sim.colonies[0]?.id ?? null);
 };
 
+/** Clamps seed to the 1–999999 range. */
 export const clampSeed = (raw: string) =>
   Math.max(1, Math.min(999999, Math.floor(Number(raw) || DEFAULT_SEED)));
 
+/** Extracts an error message or returns the fallback. */
 export const errorMessage = (error: unknown, fallback: string) =>
   error instanceof Error && error.message ? error.message : fallback;

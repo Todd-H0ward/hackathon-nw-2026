@@ -1,3 +1,9 @@
+/** Barrel export for XenoChoice Sandbox API v2. */
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+
 export {
   XENOCHOICE_BASE_URL,
   xenoApi,

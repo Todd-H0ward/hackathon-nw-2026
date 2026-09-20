@@ -1,3 +1,9 @@
+/** App routes — static and dynamic. */
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
 export const STATIC_ROUTES = {
   HOME: '/',
   SANDBOX: '/sandbox',

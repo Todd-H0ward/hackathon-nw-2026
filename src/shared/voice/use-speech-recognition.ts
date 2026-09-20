@@ -1,4 +1,10 @@
+/** Web Speech API hook — single-phrase recognition in Russian. */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
 
 type UseSpeechRecognitionOptions = {
   lang?: string;
@@ -13,15 +19,19 @@ type UseSpeechRecognitionReturn = {
   stopListening: () => void;
 };
 
-/** Тип конструктора SpeechRecognition (включает webkit-вариант) */
+/** SpeechRecognition constructor type (includes webkit variant) */
 type SpeechRecognitionConstructor = new () => SpeechRecognition;
 
-/** Расширенный window с webkit-вариантом */
+/** Extended window with webkit variant */
 type WindowWithSpeechRecognition = Window &
   typeof globalThis & {
     SpeechRecognition?: SpeechRecognitionConstructor;
     webkitSpeechRecognition?: SpeechRecognitionConstructor;
   };
+
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
 
 export const useSpeechRecognition = ({
   lang = 'ru-RU',
@@ -31,7 +41,7 @@ export const useSpeechRecognition = ({
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // Проверяем поддержку браузером
+  // Check browser support
   const isSupported =
     typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
@@ -42,7 +52,7 @@ export const useSpeechRecognition = ({
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
 
-  // Создаём инстанс один раз
+  // Create instance once
   useEffect(() => {
     if (!isSupported) return;
 
@@ -54,8 +64,8 @@ export const useSpeechRecognition = ({
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = lang;
-    recognition.continuous = false; // останавливаться после одной фразы
-    recognition.interimResults = false; // ждать финального результата
+    recognition.continuous = false; // stop after one phrase
+    recognition.interimResults = false; // wait for final result
     recognition.maxAlternatives = 1;
 
     let delivered = false;
@@ -104,7 +114,7 @@ export const useSpeechRecognition = ({
       recognitionRef.current.start();
       setIsListening(true);
     } catch {
-      // Игнорируем ошибку если уже запущен
+      // Ignore error if already started
     }
   }, [isListening]);
 

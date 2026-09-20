@@ -2,9 +2,13 @@ import { useEffect, useRef } from 'react';
 
 import { getLabState, useLabBooting, useLabSetModal } from '@/store';
 
+// ═══════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════
+
 /**
- * Opens the extinction dialog when living population drops from >0 to 0
- * during a real run (not boot, reset placeholder, or recording playback).
+ * Opens the extinction dialog when live population drops from >0 to 0
+ * during an actual run (not boot, reset placeholder, or recording).
  */
 export const usePopulationEnd = (aliveCount: number, tick: number) => {
   const setModal = useLabSetModal();

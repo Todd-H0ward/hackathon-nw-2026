@@ -1,8 +1,26 @@
+/** shadcn/ui Card wrapper — container with header/content/footer. */
+
 import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib/utils';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
 interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+
+interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+
+interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+
+interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+
+interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+
+// ═══════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════
 
 export const Card = ({ className, ...props }: CardProps) => {
   return (
@@ -17,8 +35,6 @@ export const Card = ({ className, ...props }: CardProps) => {
   );
 };
 
-interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
-
 export const CardHeader = ({ className, ...props }: CardHeaderProps) => {
   return (
     <div
@@ -32,8 +48,6 @@ export const CardHeader = ({ className, ...props }: CardHeaderProps) => {
   );
 };
 
-interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
-
 export const CardTitle = ({ className, ...props }: CardTitleProps) => {
   return (
     <h3
@@ -44,8 +58,6 @@ export const CardTitle = ({ className, ...props }: CardTitleProps) => {
   );
 };
 
-interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
-
 export const CardContent = ({ className, ...props }: CardContentProps) => {
   return (
     <div
@@ -55,8 +67,6 @@ export const CardContent = ({ className, ...props }: CardContentProps) => {
     />
   );
 };
-
-interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
 
 export const CardFooter = ({ className, ...props }: CardFooterProps) => {
   return (
