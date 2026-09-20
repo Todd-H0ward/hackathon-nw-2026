@@ -1,3 +1,4 @@
+import { TOUR_ANCHORS } from '@/shared/constants';
 import { MetricCard } from '@/shared/ui';
 
 type MetricPoint = {
@@ -45,7 +46,10 @@ export const MetricGrid = ({ current, history }: MetricGridProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-0 bg-card max-mobile:grid-cols-2">
+    <div
+      className="grid grid-cols-4 gap-0 bg-card max-mobile:grid-cols-2"
+      data-tour={TOUR_ANCHORS.METRICS}
+    >
       {items.map((item) => (
         <MetricCard
           key={item.title}

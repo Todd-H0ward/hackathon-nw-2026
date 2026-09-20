@@ -5,7 +5,7 @@ import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import { emptySimulation, type Simulation } from '@/features/ecosystem';
 
-export type LabModal = 'guide' | 'reset' | 'replay' | null;
+export type LabModal = 'reset' | 'replay' | null;
 
 export const DEFAULT_SEED = 2048;
 
