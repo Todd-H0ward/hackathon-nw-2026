@@ -12,12 +12,16 @@ export {
 } from './card';
 export { Dialog, DialogClose, DialogDescription, DialogTitle } from './dialog';
 export { Input, inputVariants } from './input';
+export type { LabRailProps } from './lab-rail';
+export { LabRail } from './lab-rail';
 export type { SparklinePoint } from './metric-card';
 export { MetricCard } from './metric-card';
 export { NavButton, navButtonVariants } from './nav-button';
 export { Select } from './select';
 export { Separator } from './separator';
 export { Slider } from './slider';
+export type { SparklineProps } from './sparkline';
+export { Sparkline } from './sparkline';
 export { StatusDot, statusDotVariants } from './status-dot';
 export { Switch } from './switch';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';

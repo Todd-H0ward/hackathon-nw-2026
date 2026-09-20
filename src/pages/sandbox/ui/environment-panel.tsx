@@ -9,9 +9,7 @@ import {
   Waves,
 } from 'lucide-react';
 
-import { WORLD_THUMB } from '@/pages/sandbox/lib';
-
-import { TOUR_ANCHORS } from '@/shared/constants';
+import { TOUR_ANCHORS, WORLD_THUMB } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Slider, Switch } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';

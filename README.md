@@ -27,14 +27,18 @@ XENOCHOICE_ORIGIN=http://127.0.0.1:8081 pnpm dev
 ## Устройство
 
 - `pages/home` — выбор мира, 3D-карусель, вход.
-- `pages/sandbox` — лаборатория, атлас, аналитика, конструктор, просмотр записи.
+- `pages/sandbox` — лаборатория, конструктор, просмотр записи; layout для sibling-страниц.
+- `pages/demo` — рассказ о машине выбора.
+- `pages/analytics` — метрики текущего прогона.
+- `pages/atlas` — обзор миров и экспериментов.
 - `pages/faq` — документация и справочник параметров.
 - `features/ecosystem` — адаптация серверных снимков и слой жизни на глобусе.
 - `features/planet-transition` — ferry планеты между home и sandbox.
 - `features/lab-tour` — spotlight-онбординг лаборатории (Driver.js).
 - `store/lab` — состояние UI и опыты по планетам.
 - `shared/api/xenochoice` — API v2, типы, REST и WebSocket.
-- `shared/ui/globe` — планета, bloom, карусель.
+- `shared/ui` — UI-kit, LabRail, Sparkline, глобус.
+- `shared/constants` — маршруты, storage keys, WORLD_THUMB.
 - `shared/voice` — распознавание, команды и озвучка действий.
 
 API v2 — camelCase, отдельный Axios-клиент. WebSocket обновляет UI до 10 раз/с, при обрыве — переподключение и REST polling. Голос зависит от браузера и разрешений; для основного сценария не обязателен.

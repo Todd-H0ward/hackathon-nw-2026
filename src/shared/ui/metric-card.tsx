@@ -23,9 +23,8 @@ interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Inline 68×20 spark for the card footer. Deliberately not exported: the lab's
- * full-width chart is a separate component (`pages/sandbox/ui/sparkline.tsx`)
- * with its own geometry, and two exported `Sparkline`s collided by name.
+ * Inline 68×20 spark for the card footer. Deliberately not exported: the shared
+ * full-width chart is `shared/ui/sparkline.tsx` with its own geometry.
  */
 const MetricSparkline = ({
   data,

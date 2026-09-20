@@ -9,3 +9,4 @@ export {
   type TourAnchor,
   tourAnchorSelector,
 } from './tour-anchors';
+export { WORLD_LOCATIVE, WORLD_THUMB, worldCaseName } from './worlds';

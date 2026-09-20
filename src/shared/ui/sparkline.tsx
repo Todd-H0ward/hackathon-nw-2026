@@ -1,6 +1,6 @@
 import { cn } from '@/shared/lib/utils';
 
-interface SparklineProps {
+export interface SparklineProps {
   values: number[];
   color?: string;
   className?: string;

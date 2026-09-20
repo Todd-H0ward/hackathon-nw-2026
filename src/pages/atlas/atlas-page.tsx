@@ -3,16 +3,20 @@ import { useNavigate } from 'react-router';
 
 import { ArrowRight, Waves } from 'lucide-react';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES, WORLD_THUMB } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
+import { announceAction } from '@/shared/voice/action-speech';
 
 import { activeColonies, living, useWorldCatalog } from '@/features/ecosystem';
-import { useLabBody, useLabSims } from '@/store';
-
-import { WORLD_THUMB } from './lib';
-import { useLabActions } from './use-lab-actions';
+import {
+  useLabBody,
+  useLabSetBody,
+  useLabSetSeed,
+  useLabSetSelected,
+  useLabSims,
+} from '@/store';
 
 interface FactProps {
   label: string;
@@ -32,13 +36,20 @@ const Fact = ({ label, children }: FactProps) => (
 
 export const AtlasPage = () => {
   const navigate = useNavigate();
-  const actions = useLabActions();
   const worlds = useWorldCatalog();
   const body = useLabBody();
   const sims = useLabSims();
+  const setBody = useLabSetBody();
+  const setSelected = useLabSetSelected();
+  const setSeed = useLabSetSeed();
 
   const open = (id: GlobeBodyId) => {
-    if (id !== body) actions.selectWorld(id);
+    if (id !== body) {
+      setBody(id);
+      setSelected(null);
+      setSeed(String(sims[id].seed));
+      announceAction(`Планета: ${worlds.catalog[id]?.name ?? id}`);
+    }
     navigate(STATIC_ROUTES.SANDBOX);
   };
 

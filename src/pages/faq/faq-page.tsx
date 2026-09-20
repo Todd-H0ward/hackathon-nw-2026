@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
-import { LabRail } from '@/pages/sandbox/ui';
-
 import { STATIC_ROUTES } from '@/shared/constants';
+import { LabRail } from '@/shared/ui';
 
 import { exportArticleJson } from './lib';
 import { FaqArticleView, FaqHeader, FaqSidebar, SearchResultsView } from './ui';

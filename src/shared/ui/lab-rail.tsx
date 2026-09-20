@@ -9,6 +9,7 @@ import {
   Globe2,
   GraduationCap,
   Microscope,
+  Presentation,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -20,10 +21,10 @@ import {
   useAudioPreferences,
 } from '@/shared/voice/action-speech';
 
-import { ResearchVoice } from '../research-voice';
-
 export interface LabRailProps {
   seed?: number;
+  /** Optional voice control (sandbox). FAQ omits this. */
+  voiceSlot?: ReactNode;
   onExport?: () => void;
   onStartTour?: () => void;
   onOpenGuide?: () => void;
@@ -64,9 +65,10 @@ const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
   </NavLink>
 );
 
-/** Compact vertical navigation for the lab — replaces the page header. */
+/** Compact vertical navigation shared by lab pages and FAQ. */
 export const LabRail = ({
   seed,
+  voiceSlot,
   onExport,
   onStartTour,
   onOpenGuide,
@@ -108,6 +110,9 @@ export const LabRail = ({
       >
         <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
           <Microscope size={17} />
+        </RailLink>
+        <RailLink to={STATIC_ROUTES.DEMO} label="Демо-режим">
+          <Presentation size={18} />
         </RailLink>
         <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
           <Activity size={17} />
@@ -159,7 +164,7 @@ export const LabRail = ({
         <CircleHelp size={17} />
       </RailLink>
 
-      <ResearchVoice />
+      {voiceSlot}
 
       <button
         type="button"

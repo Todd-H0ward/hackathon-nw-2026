@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
@@ -36,20 +36,31 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: STATIC_ROUTES.DEMO_SEGMENT,
+            lazy: async () => {
+              const { DemoPage } = await import('@/pages/demo');
+              return { Component: DemoPage };
+            },
+          },
+          {
             path: STATIC_ROUTES.ANALYTICS,
             lazy: async () => {
-              const { AnalyticsPage } = await import('@/pages/sandbox');
+              const { AnalyticsPage } = await import('@/pages/analytics');
               return { Component: AnalyticsPage };
             },
           },
           {
             path: STATIC_ROUTES.ATLAS,
             lazy: async () => {
-              const { AtlasPage } = await import('@/pages/sandbox');
+              const { AtlasPage } = await import('@/pages/atlas');
               return { Component: AtlasPage };
             },
           },
         ],
+      },
+      {
+        path: '/demo',
+        element: <Navigate to={STATIC_ROUTES.DEMO} replace />,
       },
       {
         path: STATIC_ROUTES.FAQ,
