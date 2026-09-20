@@ -1,6 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Focus, Layers3, Maximize2, Radio, Zap } from 'lucide-react';
+import {
+  CircleHelp,
+  Focus,
+  Layers3,
+  Maximize2,
+  Radio,
+  Zap,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { TOUR_ANCHORS } from '@/shared/constants';
@@ -28,6 +35,7 @@ import {
 
 import { ResearchScene } from '../research-scene';
 import { SceneBoundary } from './scene-boundary';
+import { ViewportLegendPanel } from './viewport-legend';
 
 interface PlanetViewportProps {
   body: GlobeBodyId;
@@ -92,6 +100,7 @@ export const PlanetViewport = ({
   const sectionRef = useRef<HTMLElement>(null);
   const transitionPhase = useTransitionPhase();
   const transitionDirection = useTransitionDirection();
+  const [legendOpen, setLegendOpen] = useState(false);
   // The planet is still in flight — show ours once it lands.
   const sceneHidden =
     transitionPhase === 'launch' ||
@@ -218,6 +227,17 @@ export const PlanetViewport = ({
         <button
           type="button"
           className={toolClass}
+          title="Легенда карты"
+          aria-label="Легенда карты"
+          aria-expanded={legendOpen}
+          aria-pressed={legendOpen}
+          onClick={() => setLegendOpen((open) => !open)}
+        >
+          <CircleHelp size={17} />
+        </button>
+        <button
+          type="button"
+          className={toolClass}
           title="Исходный ракурс"
           aria-label="Исходный ракурс"
           onClick={onResetCamera}
@@ -235,27 +255,13 @@ export const PlanetViewport = ({
           <Maximize2 size={17} />
         </button>
       </div>
-      <div className="pointer-events-none absolute bottom-[46px] left-4 grid gap-1.5 font-mono text-[7px] tracking-[1.1px] text-muted-foreground/60">
+      <ViewportLegendPanel
+        open={legendOpen}
+        onClose={() => setLegendOpen(false)}
+      />
+      <div className="pointer-events-none absolute bottom-4 left-4 grid gap-1.5 font-mono text-[7px] tracking-[1.1px] text-muted-foreground/60">
         <span>ПОВОРОТ — ПЕРЕТАСКИВАНИЕ</span>
         <span>МАСШТАБ — КОЛЕСО МЫШИ</span>
-      </div>
-      <div className="pointer-events-none absolute bottom-4 left-4 flex gap-3.5 text-[8px] text-muted-foreground max-laptop:gap-[9px] max-mobile:text-[7px]">
-        <span className="flex items-center gap-[5px]">
-          <i className="size-[5px] rotate-45 block bg-[#81d6b9]" />
-          Особь
-        </span>
-        <span className="flex items-center gap-[5px]">
-          <i className="size-[5px] rotate-45 block bg-[#f6f4d9]" />
-          Рождение
-        </span>
-        <span className="flex items-center gap-[5px]">
-          <i className="size-[5px] rotate-45 block bg-[#ed7c76]" />
-          Угасание
-        </span>
-        <span className="flex items-center gap-[5px]">
-          <span className="h-px w-2.5 bg-muted-foreground" />
-          Связь
-        </span>
       </div>
       {sim.effect && (
         <div
