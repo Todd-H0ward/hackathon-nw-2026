@@ -1,5 +1,6 @@
 import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 
+import { TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui';
 
@@ -24,7 +25,10 @@ export const TimeControls = ({
   onOpenReset,
   onSpeedChange,
 }: TimeControlsProps) => (
-  <div className="flex items-center justify-between gap-2 border-y border-border bg-card px-3 py-2 max-mobile:p-2">
+  <div
+    data-tour={TOUR_ANCHORS.TIME_CONTROLS}
+    className="flex items-center justify-between gap-2 border-y border-border bg-card px-3 py-2 max-mobile:p-2"
+  >
     <div className="flex items-center gap-[5px] max-mobile:gap-0.5">
       <Button
         type="button"

@@ -4,6 +4,7 @@ import { ChevronRight, GitBranch, Leaf, Plus } from 'lucide-react';
 
 import { pad } from '@/pages/sandbox/lib';
 
+import { TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 
 import {
@@ -43,71 +44,74 @@ export const ColoniesPanel = ({
   onAddColony,
 }: ColoniesPanelProps) => (
   <aside className="min-h-0 overflow-y-auto border-l border-border bg-card px-3 py-3.5 [scrollbar-width:thin] group-data-[expanded=true]/lab:!hidden max-tablet:col-span-full max-tablet:grid max-tablet:grid-cols-2 max-tablet:gap-x-6 max-tablet:gap-y-2.5 max-tablet:border-t max-tablet:border-l-0 max-mobile:gap-x-[15px]">
-    <div
-      className={cn(
-        'mb-2 flex items-center gap-2 text-muted-foreground',
-        'max-tablet:col-span-full max-tablet:mb-0',
-      )}
-    >
-      <span className="font-mono text-[9px]">03</span>
-      <h2 className="m-0 flex-1 text-[11px] font-medium text-foreground">
-        Живые сообщества
-      </h2>
-      <span className="rounded-[3px] border border-xeno-green/30 px-1.5 py-0.5 font-mono text-[9px] text-xeno-green">
-        {colonies.length}
-      </span>
-    </div>
-    <div className="grid max-h-[210px] gap-1.5 overflow-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] max-tablet:col-start-1 max-tablet:max-h-[200px]">
-      {colonies.length ? (
-        colonies.map((c) => {
-          const population = members(sim, c.id);
-          const energy =
-            population.reduce((v, i) => v + i.energy, 0) / population.length;
-          return (
-            <button
-              type="button"
-              key={c.id}
-              onClick={() => onSelect(c.id)}
-              className={cn(
-                'flex items-center gap-2 rounded-md border border-border bg-background px-2 py-2 text-left text-muted-foreground transition-colors hover:bg-secondary max-mobile:gap-1.5 max-mobile:px-1.5',
-                selected === c.id && 'border-primary/40 bg-secondary',
-              )}
-              style={{ '--colony-color': c.color } as CSSProperties}
-            >
-              <span className="grid size-7 place-items-center rounded-[5px] bg-secondary text-[var(--colony-color)] max-mobile:hidden">
-                <GitBranch size={16} />
-              </span>
-              <span className="flex-1">
-                <b className="block text-[11px] font-[450] text-foreground max-mobile:text-[10px]">
-                  {c.name}
-                </b>
-                <small className="mt-1 block text-[8px] text-muted-foreground max-mobile:text-[7px]">
-                  {population.length} особей ·{' '}
-                  {c.primary ? 'первичная' : 'дочерняя'}
-                </small>
-                <span className="mt-2 block h-0.5 w-full bg-border">
-                  <i
-                    className="block bg-[var(--colony-color)] h-full opacity-70"
-                    style={{ width: `${energy}%` }}
-                  />
+    <div data-tour={TOUR_ANCHORS.COLONIES} className="max-tablet:col-span-full">
+      <div
+        className={cn(
+          'mb-2 flex items-center gap-2 text-muted-foreground',
+          'max-tablet:mb-0',
+        )}
+      >
+        <span className="font-mono text-[9px]">03</span>
+        <h2 className="m-0 flex-1 text-[11px] font-medium text-foreground">
+          Живые сообщества
+        </h2>
+        <span className="rounded-[3px] border border-xeno-green/30 px-1.5 py-0.5 font-mono text-[9px] text-xeno-green">
+          {colonies.length}
+        </span>
+      </div>
+      <div className="grid max-h-[210px] gap-1.5 overflow-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] max-tablet:col-start-1 max-tablet:max-h-[200px]">
+        {colonies.length ? (
+          colonies.map((c) => {
+            const population = members(sim, c.id);
+            const energy =
+              population.reduce((v, i) => v + i.energy, 0) / population.length;
+            return (
+              <button
+                type="button"
+                key={c.id}
+                onClick={() => onSelect(c.id)}
+                className={cn(
+                  'flex items-center gap-2 rounded-md border border-border bg-background px-2 py-2 text-left text-muted-foreground transition-colors hover:bg-secondary max-mobile:gap-1.5 max-mobile:px-1.5',
+                  selected === c.id && 'border-primary/40 bg-secondary',
+                )}
+                style={{ '--colony-color': c.color } as CSSProperties}
+              >
+                <span className="grid size-7 place-items-center rounded-[5px] bg-secondary text-[var(--colony-color)] max-mobile:hidden">
+                  <GitBranch size={16} />
                 </span>
-              </span>
-              <ChevronRight size={14} />
-            </button>
-          );
-        })
-      ) : (
-        <div className="px-2.5 py-5 text-center text-muted-foreground">
-          <Leaf size={23} className="mx-auto mb-2.5" />
-          <b className="block text-xs font-normal">Среда без жизни</b>
-          <p className="text-[10px] leading-[1.8] mt-2">
-            Внесите новые зародыши или восстановите исходный эксперимент.
-          </p>
-        </div>
-      )}
+                <span className="flex-1">
+                  <b className="block text-[11px] font-[450] text-foreground max-mobile:text-[10px]">
+                    {c.name}
+                  </b>
+                  <small className="mt-1 block text-[8px] text-muted-foreground max-mobile:text-[7px]">
+                    {population.length} особей ·{' '}
+                    {c.primary ? 'первичная' : 'дочерняя'}
+                  </small>
+                  <span className="mt-2 block h-0.5 w-full bg-border">
+                    <i
+                      className="block bg-[var(--colony-color)] h-full opacity-70"
+                      style={{ width: `${energy}%` }}
+                    />
+                  </span>
+                </span>
+                <ChevronRight size={14} />
+              </button>
+            );
+          })
+        ) : (
+          <div className="px-2.5 py-5 text-center text-muted-foreground">
+            <Leaf size={23} className="mx-auto mb-2.5" />
+            <b className="block text-xs font-normal">Среда без жизни</b>
+            <p className="text-[10px] leading-[1.8] mt-2">
+              Внесите новые зародыши или восстановите исходный эксперимент.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
     <button
       type="button"
+      data-tour={TOUR_ANCHORS.ADD_COLONY}
       className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-xeno-green/40 bg-xeno-green/5 p-2 text-[10px] text-xeno-green transition-colors hover:bg-xeno-green/10 disabled:opacity-50 max-tablet:col-start-1 max-tablet:mt-0"
       onClick={onAddColony}
       disabled={aliveCount >= maxPopulation || colonies.length >= maxColonies}
@@ -115,7 +119,11 @@ export const ColoniesPanel = ({
       <Plus size={15} />
       Внести зародыши
     </button>
-    <div className="mt-3.5 border-t border-border pt-3.5 max-tablet:col-start-2 max-tablet:row-span-2 max-tablet:row-start-2 max-tablet:m-0 max-tablet:border-0 max-tablet:p-0">
+    <div
+      data-tour={TOUR_ANCHORS.INSPECTOR}
+      className="mt-3.5 border-t border-border pt-3.5 max-tablet:col-start-2 max-tablet:row-span-2 max-tablet:row-start-2 max-tablet:m-0 max-tablet:border-0 max-tablet:p-0"
+    >
+      {' '}
       <div className="font-mono text-[8px] tracking-[1.45px] text-muted-foreground max-mobile:text-[7px]">
         ИНСПЕКТОР <span className="mx-[7px] opacity-50">/</span>{' '}
         {colony ? `C—${pad(colony.id)}` : 'ВЫБЕРИТЕ КОЛОНИЮ'}

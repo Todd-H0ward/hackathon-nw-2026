@@ -7,12 +7,13 @@ import {
   Atom,
   CircleHelp,
   Globe2,
+  GraduationCap,
   Microscope,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES, TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import {
   announceAction,
@@ -24,12 +25,12 @@ import { ResearchVoice } from '../research-voice';
 interface LabRailProps {
   seed: number;
   onExport: () => void;
-  onOpenGuide: () => void;
+  onStartTour: () => void;
   onGoHome: () => void;
 }
 
 const itemClass =
-  'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary';
+  'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -62,7 +63,7 @@ const RailLink = ({ to, end, label, children }: RailLinkProps) => (
 export const LabRail = ({
   seed,
   onExport,
-  onOpenGuide,
+  onStartTour,
   onGoHome,
 }: LabRailProps) => {
   const audio = useAudioPreferences();
@@ -73,6 +74,7 @@ export const LabRail = ({
     >
       <button
         type="button"
+        data-tour={TOUR_ANCHORS.ROLE}
         onClick={onGoHome}
         className={cn(
           itemClass,
@@ -84,20 +86,26 @@ export const LabRail = ({
         <Atom size={20} />
       </button>
 
-      <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
-        <Microscope size={17} />
-      </RailLink>
-      <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
-        <Activity size={17} />
-      </RailLink>
-      <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
-        <Globe2 size={17} />
-      </RailLink>
+      <div
+        data-tour={TOUR_ANCHORS.NAV}
+        className="flex flex-col items-center gap-1.5 max-mobile:flex-row max-mobile:gap-1.5"
+      >
+        <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
+          <Microscope size={17} />
+        </RailLink>
+        <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
+          <Activity size={17} />
+        </RailLink>
+        <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
+          <Globe2 size={17} />
+        </RailLink>
+      </div>
 
       <div className="flex-1" />
 
       <button
         type="button"
+        data-tour={TOUR_ANCHORS.EXPORT}
         className={itemClass}
         title={`Экспорт эксперимента · seed ${seed}`}
         aria-label="Экспорт эксперимента"
@@ -108,9 +116,21 @@ export const LabRail = ({
       <button
         type="button"
         className={itemClass}
-        title="О модели и роли исследователя"
-        aria-label="О модели и роли исследователя"
-        onClick={onOpenGuide}
+        title="Обучение: обзор лаборатории"
+        aria-label="Обучение: обзор лаборатории"
+        onClick={() => {
+          announceAction('Обучение');
+          onStartTour();
+        }}
+      >
+        <GraduationCap size={17} />
+      </button>
+      <button
+        type="button"
+        className={itemClass}
+        title="FAQ — скоро"
+        aria-label="FAQ — скоро"
+        disabled
       >
         <CircleHelp size={17} />
       </button>

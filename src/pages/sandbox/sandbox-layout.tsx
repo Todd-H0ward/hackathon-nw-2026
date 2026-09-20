@@ -1,5 +1,11 @@
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 
 import { motion, useReducedMotion } from 'motion/react';
 
@@ -7,8 +13,10 @@ import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem';
+import { useLabTour } from '@/features/lab-tour';
 import { readSandboxPose } from '@/features/planet-transition';
 import {
+  getLabState,
   getTransitionState,
   useLabBody,
   useLabBooting,
@@ -37,6 +45,7 @@ const SandboxShell = () => {
   useLabBootstrap();
 
   const navigate = useNavigate();
+  const location = useLocation();
   const launchTransition = useTransitionLaunch();
   const reduceMotion = useReducedMotion();
   const phase = useTransitionPhase();
@@ -57,6 +66,23 @@ const SandboxShell = () => {
   const streamStatus = useLabStreamStatus();
 
   const world = worlds.catalog[body];
+  const editorActive = location.pathname === STATIC_ROUTES.SANDBOX;
+
+  const pauseIfRunning = useCallback(() => {
+    const { body: current, sims } = getLabState();
+    if (sims[current]?.status === 'running') {
+      actions.toggleRunning();
+    }
+  }, [actions.toggleRunning]);
+
+  const { startTour } = useLabTour({
+    ready: Boolean(world) && !worlds.isLoading,
+    editorActive,
+    booting,
+    phase,
+    modalOpen: modal !== null,
+    onPause: pauseIfRunning,
+  });
 
   const [arriving] = useState(
     () =>
@@ -109,7 +135,7 @@ const SandboxShell = () => {
       <LabRail
         seed={sim.seed}
         onExport={actions.exportExperiment}
-        onOpenGuide={() => setModal('guide')}
+        onStartTour={startTour}
         onGoHome={goHome}
       />
 
