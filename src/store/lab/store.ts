@@ -87,7 +87,18 @@ export const useLabStore = create<LabStore>((set) => ({
 
   setBody: (body) => set({ body }),
   setSim: (body, sim) =>
-    set((state) => ({ sims: { ...state.sims, [body]: sim } })),
+    set((state) => {
+      const prev = state.sims[body];
+      if (
+        prev &&
+        prev.tick === sim.tick &&
+        prev.checksum === sim.checksum &&
+        prev.status === sim.status
+      ) {
+        return state;
+      }
+      return { sims: { ...state.sims, [body]: sim } };
+    }),
   patchSim: (body, patch) =>
     set((state) => ({
       sims: { ...state.sims, [body]: { ...state.sims[body], ...patch } },

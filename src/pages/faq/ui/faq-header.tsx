@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import { Check, ChevronRight, Menu, Search, Share2, X } from 'lucide-react';
 
 import { Button, Input } from '@/shared/ui';
@@ -21,15 +22,24 @@ export function FaqHeader({
   onToggleMobileSidebar,
 }: FaqHeaderProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef(0);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    void navigator.clipboard.writeText(window.location.href);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    window.clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <header className="flex h-[90px] flex-col justify-between border-b border-border bg-card/60 backdrop-blur-md px-4 py-3 shrink-0">
+    <header className="flex h-22.5 flex-col justify-between border-b border-border bg-card/60 backdrop-blur-md px-4 py-3 shrink-0">
       {/* Верхний ряд: кнопка мобильного меню, поиск и действия */}
       <div className="flex items-center justify-between gap-3">
         {/* Мобильная кнопка меню */}
@@ -37,6 +47,8 @@ export function FaqHeader({
           type="button"
           onClick={onToggleMobileSidebar}
           aria-label="Открыть меню документации"
+          aria-expanded={false}
+          aria-controls="faq-mobile-drawer"
           className="md:hidden flex size-8 items-center justify-center rounded-md border border-border bg-secondary text-foreground hover:bg-secondary/80 cursor-pointer shrink-0"
         >
           <Menu size={18} />
@@ -47,12 +59,15 @@ export function FaqHeader({
           <Search
             size={15}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            aria-hidden
           />
           <Input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Поиск по документации, формулам и API..."
-            className="h-8.5 pl-9 pr-8 text-xs bg-background/60 border-border focus-visible:border-primary"
+            aria-label="Поиск по документации"
+            type="search"
+            className="h-8.5 pl-9 pr-8 text-xs bg-background/60 border-border"
           />
           {searchQuery && (
             <button
@@ -106,7 +121,7 @@ export function FaqHeader({
               size={12}
               className="text-muted-foreground/60 shrink-0"
             />
-            <span className="rounded bg-secondary/40 px-2 py-0.5 truncate max-w-[140px] sm:max-w-none">
+            <span className="rounded bg-secondary/40 px-2 py-0.5 truncate max-w-35 sm:max-w-none">
               {activeCategory.title}
             </span>
           </>
@@ -118,7 +133,7 @@ export function FaqHeader({
               size={12}
               className="text-muted-foreground/60 shrink-0"
             />
-            <span className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary border border-primary/20 truncate max-w-[180px] sm:max-w-none">
+            <span className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary border border-primary/20 truncate max-w-45 sm:max-w-none">
               {activeArticle.title}
             </span>
           </>
