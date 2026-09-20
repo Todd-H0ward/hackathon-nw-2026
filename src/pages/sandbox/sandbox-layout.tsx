@@ -108,6 +108,8 @@ const SandboxShell = () => {
       actions.toggleRunning();
     }
   }, [actions.toggleRunning]);
+  const pauseIfRunningRef = useRef(pauseIfRunning);
+  pauseIfRunningRef.current = pauseIfRunning;
 
   const { startTour } = useLabTour({
     ready: Boolean(world) && !worlds.isLoading,
@@ -126,30 +128,30 @@ const SandboxShell = () => {
   );
   const [firstRunOpen, setFirstRunOpen] = useState(false);
   const [firstRunDone, setFirstRunDone] = useState(() => isLabTourSeen());
+  const firstRunTimerRef = useRef(0);
 
-  // First-visit gate: after ferry settles and the editor mounts, ask before
-  // dumping the user into dense chrome. Skip marks the tour as seen.
+  // First-visit gate. Do not depend on action callbacks — they change every
+  // render (useLabActions) and would clear this timer before it fires.
   useEffect(() => {
     if (firstRunDone || firstRunOpen || isLabTourSeen()) return;
-    if (!editorActive || !world || worlds.isLoading || booting) return;
+    if (!editorActive || !world || worlds.isLoading) return;
     if (phase !== 'idle' || modal !== null) return;
 
+    window.clearTimeout(firstRunTimerRef.current);
     const delayMs = arriving ? 1000 : 450;
-    const timer = window.setTimeout(() => {
+    firstRunTimerRef.current = window.setTimeout(() => {
       if (isLabTourSeen()) return;
-      pauseIfRunning();
+      pauseIfRunningRef.current();
       setFirstRunOpen(true);
     }, delayMs);
 
-    return () => window.clearTimeout(timer);
+    return () => window.clearTimeout(firstRunTimerRef.current);
   }, [
     arriving,
-    booting,
     editorActive,
     firstRunDone,
     firstRunOpen,
     modal,
-    pauseIfRunning,
     phase,
     world,
     worlds.isLoading,
