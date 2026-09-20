@@ -187,7 +187,7 @@ export const PlanetViewport = ({
       >
         {/* Defer WebGL until land/idle — avoid a third canvas during ferry. */}
         {!sceneHidden ? (
-          <SceneBoundary key={body}>
+          <SceneBoundary resetKey={body}>
             <GlobeCanvas
               body={body}
               cameraReset={cameraReset}

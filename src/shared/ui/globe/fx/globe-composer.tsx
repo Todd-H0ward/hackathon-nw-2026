@@ -14,6 +14,7 @@ import {
   EffectPass,
 } from 'postprocessing';
 
+import { shouldEnableComposerNoise } from '@/shared/lib/perf/device-tier';
 import { getComposerFrameBufferType } from '@/shared/lib/webgl/texture-types';
 import { GLOBE_DEFAULTS, type GlobeConfig } from '@/shared/ui/globe/config';
 
@@ -101,6 +102,7 @@ export const GlobeFx = ({ configRef }: GlobeFxProps) => {
   const gl = useThree((state) => state.gl);
   const frameBufferType = useMemo(() => getComposerFrameBufferType(gl), [gl]);
   const d = GLOBE_DEFAULTS;
+  const enableNoise = shouldEnableComposerNoise();
 
   return (
     <EffectComposer frameBufferType={frameBufferType} multisampling={0}>
@@ -111,11 +113,13 @@ export const GlobeFx = ({ configRef }: GlobeFxProps) => {
         luminanceSmoothing={d.BLOOM_SMOOTHING}
         radius={d.BLOOM_RADIUS}
       />
-      <Noise
-        blendFunction={BlendFunction.SOFT_LIGHT}
-        opacity={NOISE}
-        premultiply
-      />
+      {enableNoise ? (
+        <Noise
+          blendFunction={BlendFunction.SOFT_LIGHT}
+          opacity={NOISE}
+          premultiply
+        />
+      ) : null}
       <GlobeFxSync configRef={configRef} />
     </EffectComposer>
   );

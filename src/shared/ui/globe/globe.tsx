@@ -59,6 +59,9 @@ export const Globe = ({
   });
 
   useFrame(() => {
+    // Side / hidden carousel planets: skip uniform churn while GPGPU is frozen.
+    if (simEnabledRef && !simEnabledRef.current) return;
+
     if (liveConfigRef?.current) live.current = liveConfigRef.current;
     motion.current.spin = live.current.SPIN;
     motion.current.jitter = live.current.JITTER;

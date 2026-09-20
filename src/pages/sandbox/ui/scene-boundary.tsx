@@ -11,13 +11,23 @@ interface SceneBoundaryState {
 }
 
 export class SceneBoundary extends Component<
-  SceneBoundaryProps,
+  SceneBoundaryProps & { resetKey?: string },
   SceneBoundaryState
 > {
   state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+
+  componentDidUpdate(prev: SceneBoundaryProps & { resetKey?: string }) {
+    if (
+      prev.resetKey !== this.props.resetKey &&
+      this.state.failed &&
+      this.props.resetKey !== undefined
+    ) {
+      this.setState({ failed: false });
+    }
   }
 
   render() {

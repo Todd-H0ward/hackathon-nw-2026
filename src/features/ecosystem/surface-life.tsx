@@ -406,6 +406,10 @@ export const SurfaceLife = ({
   const outward = useMemo(() => new Vector3(), []);
   const color = useMemo(() => new Color(), []);
   const visible = simulation.individuals;
+  const simRef = useRef(simulation);
+  const visibleRef = useRef(visible);
+  simRef.current = simulation;
+  visibleRef.current = visible;
 
   const colonyColorById = useMemo(() => {
     const map = new Map<number, string>();
@@ -446,9 +450,11 @@ export const SurfaceLife = ({
   useFrame(({ clock, camera }) => {
     const target = mesh.current;
     if (!target) return;
-    const tick = simulation.tick;
-    for (let index = 0; index < visible.length; index++) {
-      const individual = visible[index];
+    const individuals = visibleRef.current;
+    const tick = simRef.current.tick;
+
+    for (let index = 0; index < individuals.length; index++) {
+      const individual = individuals[index];
       // Write cartesian coords straight into the Object3D — no per-frame array.
       const cosLat = Math.cos(individual.lat);
       dummy.position.set(
@@ -483,6 +489,7 @@ export const SurfaceLife = ({
       dummy.updateMatrix();
       target.setMatrixAt(index, dummy.matrix);
     }
+    target.count = individuals.length;
     target.instanceMatrix.needsUpdate = true;
   });
 

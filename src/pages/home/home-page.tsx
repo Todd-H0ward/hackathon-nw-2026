@@ -44,6 +44,10 @@ export const HomePage = () => {
   const handingOffForward = phase === 'handoff' && direction === 'forward';
   // Keep home under the ferry until land so we don't flash a small carousel planet.
   const showHome = direction !== 'back' || phase === 'land' || phase === 'idle';
+  // Freeze carousel GL when visually gone — but keep it running on reverse so
+  // poseMeasureRef can arm the landing target.
+  const needsCarouselPose = direction === 'back' && phase !== 'idle';
+  const freezeCarousel = !needsCarouselPose && (handingOffForward || !showHome);
   const hideTransitionBody =
     !!transitionBody &&
     phase !== 'idle' &&
@@ -127,6 +131,7 @@ export const HomePage = () => {
         hiddenBody={hideTransitionBody ? transitionBody : null}
         catalog={catalog}
         poseMeasureRef={poseMeasureRef}
+        paused={freezeCarousel}
       />
       {activeInfo ? (
         <PlanetHood

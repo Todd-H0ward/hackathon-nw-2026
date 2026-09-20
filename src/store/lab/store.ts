@@ -79,7 +79,7 @@ export const useLabStore = create<LabStore>((set) => ({
   speed: 1,
   selected: null,
   showLinks: true,
-  showLabels: true,
+  showLabels: false,
   modal: null,
   cameraReset: 0,
   expanded: false,
