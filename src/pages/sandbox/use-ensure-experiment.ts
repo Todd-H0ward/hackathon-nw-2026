@@ -45,7 +45,7 @@ export const useEnsureExperiment = () => {
         resetLabRuntime(target, experiment.seed);
         rememberExperiment(target, experiment.id);
         applySnapshot(target, experiment.initialSnapshot);
-        setSeed(String(experiment.seed));
+        if (getLabState().body === target) setSeed(String(experiment.seed));
 
         await command.mutateAsync({
           experimentId: experiment.id,

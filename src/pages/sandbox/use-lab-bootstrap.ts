@@ -69,6 +69,8 @@ export const useLabBootstrap = () => {
       for (const timer of Object.values(labRuntime.settingsTimers)) {
         if (timer) clearTimeout(timer);
       }
+      labRuntime.settingsTimers = {};
+      labRuntime.pendingSettings = {};
     },
     [],
   );

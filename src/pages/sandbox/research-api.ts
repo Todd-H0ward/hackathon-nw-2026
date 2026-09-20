@@ -42,8 +42,11 @@ export async function performIntervention(
               ? 'storm'
               : 'scarcity';
         if (carry && sim) {
-          carry.effect = { kind, until: sim.tick + (request.duration || 60) };
-          logIntervention(carry, sim.tick, request.type);
+          carry.effect = {
+            kind,
+            until: accepted.tick + (request.duration || 60),
+          };
+          logIntervention(carry, accepted.tick, request.type);
           state.patchSim(body, {
             effect: carry.effect,
             interventions: [...carry.interventions],

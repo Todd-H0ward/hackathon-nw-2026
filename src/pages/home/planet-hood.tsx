@@ -1,4 +1,5 @@
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui';
 import { GLOBE_BODY_IDS, type GlobeBodyId } from '@/shared/ui/globe';
 
 import type { PlanetInfo } from './planet-info';
@@ -7,18 +8,21 @@ interface PlanetHoodProps {
   activeBody: GlobeBodyId;
   info: PlanetInfo;
   className?: string;
+  onEnter: () => void;
 }
 
 export const PlanetHood = ({
   activeBody,
   info,
   className,
+  onEnter,
 }: PlanetHoodProps) => (
   <section
     aria-label={`${info.name}: физические свойства`}
     className={cn(
       'pointer-events-none absolute inset-x-0 bottom-0 z-10',
       className,
+      onEnter,
     )}
   >
     <div className="bg-linear-to-t from-[#2a2b2e] from-35% via-[#2a2b2e]/92 via-70% to-transparent px-4 pt-20 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">
@@ -49,6 +53,13 @@ export const PlanetHood = ({
           </div>
         </div>
 
+        <Button
+          type="button"
+          onClick={onEnter}
+          className="pointer-events-auto self-start"
+        >
+          Открыть лабораторию
+        </Button>
         <dl
           key={`${info.id}-stats`}
           className="grid grid-cols-3 gap-x-4 gap-y-3"

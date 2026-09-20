@@ -30,9 +30,7 @@ export const labRuntime = {
   bodyByExperiment: {} as Record<string, GlobeBodyId>,
   seedByBody: {} as Partial<Record<GlobeBodyId, number>>,
   /** Pending debounced intervention per setting. */
-  settingsTimers: {} as Partial<
-    Record<keyof Settings, ReturnType<typeof setTimeout>>
-  >,
+  settingsTimers: {} as Partial<Record<string, ReturnType<typeof setTimeout>>>,
 };
 
 /** Drops accumulated adapter state so a fresh experiment starts from zero. */
@@ -76,7 +74,7 @@ export const applySnapshot = (body: GlobeBodyId, snapshot: StateSnapshot) => {
   if (!getLabState().recording)
     sim.settings = { ...sim.settings, ...labRuntime.pendingSettings[body] };
   setSim(body, sim);
-  selectFallback(sim.colonies[0]?.id ?? null);
+  if (getLabState().body === body) selectFallback(sim.colonies[0]?.id ?? null);
 };
 
 export const clampSeed = (raw: string) =>

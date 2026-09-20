@@ -156,10 +156,7 @@ export const useLabActions = () => {
   };
 
   /** Coalesces slider drags into one request per setting. */
-  const scheduleSetting = (
-    key: keyof Settings,
-    send: () => Promise<unknown>,
-  ) => {
+  const scheduleSetting = (key: string, send: () => Promise<unknown>) => {
     const timers = labRuntime.settingsTimers;
     const pending = timers[key];
     if (pending) clearTimeout(pending);
@@ -183,7 +180,12 @@ export const useLabActions = () => {
         ? { noise: Math.round(partial.noise) }
         : {}),
     };
-    const { body, sims, patchSim } = getLabState();
+    const { body, sims, patchSim, experimentIds } = getLabState();
+    const experimentId = experimentIds[body];
+    if (!experimentId) {
+      notify('Эксперимент ещё не готов');
+      return;
+    }
     const carry = labRuntime.carries[body];
     labRuntime.pendingSettings[body] = {
       ...labRuntime.pendingSettings[body],
@@ -192,9 +194,14 @@ export const useLabActions = () => {
     carry.settings = { ...sims[body].settings, ...sanitized };
     patchSim(body, { settings: carry.settings });
     for (const [key, value] of Object.entries(sanitized)) {
-      scheduleSetting(key as keyof Settings, async () => {
-        if (getLabState().body !== body || getLabState().recording) return;
+      scheduleSetting(`${body}:${key}`, async () => {
         try {
+          if (
+            getLabState().body !== body ||
+            getLabState().recording ||
+            getLabState().experimentIds[body] !== experimentId
+          )
+            return;
           await performIntervention({
             type:
               key === 'resource'
@@ -214,10 +221,17 @@ export const useLabActions = () => {
           });
         } finally {
           const pending = labRuntime.pendingSettings[body];
-          if (pending?.[key as keyof Settings] === value)
+          if (
+            getLabState().experimentIds[body] === experimentId &&
+            pending?.[key as keyof Settings] === value
+          )
             delete pending[key as keyof Settings];
           const snapshot = getLabState().sims[body].snapshot;
-          if (snapshot && !getLabState().recording)
+          if (
+            snapshot &&
+            !getLabState().recording &&
+            getLabState().experimentIds[body] === experimentId
+          )
             applySnapshot(body, snapshot);
         }
       });
@@ -266,7 +280,9 @@ export const useLabActions = () => {
 
   const resetExperiment = async () => {
     if (getLabState().recording) return;
-    const previous = getLabState().experimentIds[getLabState().body];
+    const { body, seed } = getLabState();
+    if (labRuntime.creating[body]) return;
+    const previous = getLabState().experimentIds[body];
     if (previous) {
       try {
         await xenoApiEndpoints.postCommand(previous, { command: 'pause' });
@@ -275,8 +291,13 @@ export const useLabActions = () => {
         return;
       }
     }
-    const { body, seed, setModal, setSim, setSelected, setSeed } =
-      getLabState();
+    if (
+      getLabState().body !== body ||
+      getLabState().recording ||
+      getLabState().experimentIds[body] !== previous
+    )
+      return;
+    const { setModal, setSim, setSelected, setSeed } = getLabState();
     const nextSeed = clampSeed(seed);
 
     setModal(null);
@@ -297,6 +318,7 @@ export const useLabActions = () => {
 
   const runReplay = () => {
     withExperiment(async (id) => {
+      const body = getLabState().body;
       try {
         await command.mutateAsync({ experimentId: id, command: 'pause' });
         // Freeze the comparison point only once the engine stopped advancing.
@@ -306,7 +328,9 @@ export const useLabActions = () => {
           targetTick: paused.tick,
         });
 
-        applySnapshot(getLabState().body, replayed);
+        if (getLabState().recording || getLabState().experimentIds[body] !== id)
+          return;
+        applySnapshot(body, replayed);
         notify(
           replayed.checksum === paused.checksum
             ? 'Совпадение 100%: эксперимент воспроизведён'

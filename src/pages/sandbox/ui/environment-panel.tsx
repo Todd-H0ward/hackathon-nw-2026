@@ -118,7 +118,9 @@ export const EnvironmentPanel = ({
           min={0}
           max={100}
           value={Math.round(sim.settings.resource)}
-          onChange={(e) => onSettings({ resource: Math.round(+e.target.value) })}
+          onChange={(e) =>
+            onSettings({ resource: Math.round(+e.target.value) })
+          }
           minLabel="Слабый"
           maxLabel="Интенсивный"
         />
