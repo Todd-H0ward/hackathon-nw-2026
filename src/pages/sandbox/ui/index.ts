@@ -2,6 +2,7 @@ export { ColoniesPanel } from './colonies-panel';
 export { EnvironmentPanel } from './environment-panel';
 export { InterventionBar } from './intervention-bar';
 export { LabDialog } from './lab-dialog';
+export { LabFirstRunDialog } from './lab-first-run-dialog';
 export { LabStatus } from './lab-status';
 export { MetricGrid } from './metric-grid';
 export { PlanetViewport } from './planet-viewport';

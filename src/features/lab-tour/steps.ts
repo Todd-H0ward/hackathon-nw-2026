@@ -9,6 +9,15 @@ export const LAB_TOUR_EDITOR_READY_SELECTOR = tourAnchorSelector(
 
 export const LAB_TOUR_STEPS: DriveStep[] = [
   {
+    popover: {
+      title: 'Обзор лаборатории',
+      description:
+        'Пройдём ключевые зоны: среда, поверхность, время, воздействия и колонии. Пробел запускает и ставит на паузу симуляцию.',
+      side: 'left',
+      align: 'center',
+    },
+  },
+  {
     element: tourAnchorSelector(TOUR_ANCHORS.ROLE),
     popover: {
       title: 'Не управляйте жизнью.<br />Создавайте условия.',
@@ -63,7 +72,7 @@ export const LAB_TOUR_STEPS: DriveStep[] = [
     popover: {
       title: 'Управление временем',
       description:
-        'Запуск, пауза, один такт и сброс эксперимента. Скорость меняет темп модельного времени.',
+        'Запуск, пауза (пробел), один такт и сброс эксперимента. Скорость меняет темп модельного времени.',
       side: 'top',
       align: 'start',
     },

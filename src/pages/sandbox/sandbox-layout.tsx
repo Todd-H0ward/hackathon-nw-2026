@@ -13,7 +13,11 @@ import { STATIC_ROUTES } from '@/shared/constants/routes';
 import { type LabConnectionStatus, LabRail, ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem';
-import { useLabTour } from '@/features/lab-tour';
+import {
+  isLabTourSeen,
+  markLabTourSeen,
+  useLabTour,
+} from '@/features/lab-tour';
 import { readSandboxPose } from '@/features/planet-transition';
 import {
   getLabState,
@@ -37,7 +41,7 @@ import {
 import { ColonyBuilder } from './colony-builder';
 import { ResearchPanel } from './research-panel';
 import { ResearchVoice } from './research-voice';
-import { LabDialog, LabStatus } from './ui';
+import { LabDialog, LabFirstRunDialog, LabStatus } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabBootstrap } from './use-lab-bootstrap';
 
@@ -112,6 +116,7 @@ const SandboxShell = () => {
     phase,
     modalOpen: modal !== null,
     onPause: pauseIfRunning,
+    autoStart: false,
   });
 
   const [arriving] = useState(
@@ -119,6 +124,36 @@ const SandboxShell = () => {
       getTransitionState().phase !== 'idle' &&
       getTransitionState().direction === 'forward',
   );
+  const [firstRunOpen, setFirstRunOpen] = useState(false);
+  const [firstRunDone, setFirstRunDone] = useState(() => isLabTourSeen());
+
+  // First-visit gate: after ferry settles and the editor mounts, ask before
+  // dumping the user into dense chrome. Skip marks the tour as seen.
+  useEffect(() => {
+    if (firstRunDone || firstRunOpen || isLabTourSeen()) return;
+    if (!editorActive || !world || worlds.isLoading || booting) return;
+    if (phase !== 'idle' || modal !== null) return;
+
+    const delayMs = arriving ? 1000 : 450;
+    const timer = window.setTimeout(() => {
+      if (isLabTourSeen()) return;
+      pauseIfRunning();
+      setFirstRunOpen(true);
+    }, delayMs);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    arriving,
+    booting,
+    editorActive,
+    firstRunDone,
+    firstRunOpen,
+    modal,
+    pauseIfRunning,
+    phase,
+    world,
+    worlds.isLoading,
+  ]);
   const leavingHome =
     direction === 'back' &&
     (phase === 'handoff' || phase === 'flight' || phase === 'land');
@@ -207,6 +242,21 @@ const SandboxShell = () => {
         onOpenDemo={() => {
           setModal(null);
           navigate(STATIC_ROUTES.DEMO);
+        }}
+      />
+
+      <LabFirstRunDialog
+        open={firstRunOpen}
+        onSkip={() => {
+          markLabTourSeen();
+          setFirstRunDone(true);
+          setFirstRunOpen(false);
+        }}
+        onStartTour={() => {
+          setFirstRunDone(true);
+          setFirstRunOpen(false);
+          // Let the dialog close before driver.js mounts its overlay.
+          window.requestAnimationFrame(() => startTour());
         }}
       />
     </motion.div>
