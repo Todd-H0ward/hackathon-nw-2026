@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+
 import { Mic, X } from 'lucide-react';
 
 import { xenoApiEndpoints as api } from '@/shared/api/xenochoice';
@@ -7,6 +8,7 @@ import { cn } from '@/shared/lib/utils';
 import { useSpeechRecognition, useSpeechSynthesis } from '@/shared/voice';
 import { useAudioPreferences } from '@/shared/voice/action-speech';
 import { parseResearchVoiceCommand } from '@/shared/voice/intents';
+
 import {
   getLabState,
   useDismissVoice,
@@ -212,16 +214,20 @@ export const ResearchVoice = () => {
     });
   };
 
-  const { isListening: speechListening, isSupported, startListening, stopListening } =
-    useSpeechRecognition({
-      onResult: (text) => void execute(text),
-      onError: (err) => {
-        locked.current = false;
-        setBusy(false);
-        useVoiceStore.getState().setError(err);
-        useVoiceStore.getState().setStatus('idle');
-      },
-    });
+  const {
+    isListening: speechListening,
+    isSupported,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition({
+    onResult: (text) => void execute(text),
+    onError: (err) => {
+      locked.current = false;
+      setBusy(false);
+      useVoiceStore.getState().setError(err);
+      useVoiceStore.getState().setStatus('idle');
+    },
+  });
 
   const isListening = speechListening || isListeningStatus;
   const isAnimating = isListening || isSpeaking || isProcessing;
@@ -264,7 +270,14 @@ export const ResearchVoice = () => {
     useVoiceStore.getState().setStatus('listening');
     setOpen(true);
     startListening();
-  }, [isOpen, isSupported, speechListening, cancel, handleClose, startListening]);
+  }, [
+    isOpen,
+    isSupported,
+    speechListening,
+    cancel,
+    handleClose,
+    startListening,
+  ]);
 
   // Закрытие по клику вне поповера
   useEffect(() => {

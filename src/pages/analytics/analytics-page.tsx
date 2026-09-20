@@ -8,6 +8,7 @@ import {
   type MetricsSnapshot,
   xenoApi,
 } from '@/shared/api/xenochoice';
+import { worldCaseName } from '@/shared/constants';
 import {
   Button,
   Card,
@@ -15,14 +16,12 @@ import {
   CardHeader,
   CardTitle,
   MetricCard,
+  Sparkline,
 } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem/use-world-catalog';
 import { useLabBody, useLabSetModal, useLabSim } from '@/store';
 import { useLabStore } from '@/store/lab/store';
-
-import { worldCaseName } from './lib';
-import { Sparkline } from './ui/sparkline';
 
 export const AnalyticsPage = () => {
   const sim = useLabSim();
@@ -117,7 +116,7 @@ export const AnalyticsPage = () => {
           От импульса к сообществу.
         </h1>
         <p className="mb-5 text-[11px] text-muted-foreground">
-          Изменения на {worldCaseName(world.name)} · последние {visible.length}{' '}
+          Изменения на {worldCaseName(body)} · последние {visible.length}{' '}
           тактов
         </p>
 

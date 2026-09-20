@@ -10,7 +10,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, useReducedMotion } from 'motion/react';
 
 import { STATIC_ROUTES } from '@/shared/constants/routes';
-import { ToastProvider } from '@/shared/ui';
+import { LabRail, ToastProvider } from '@/shared/ui';
 
 import { useWorldCatalog } from '@/features/ecosystem';
 import { useLabTour } from '@/features/lab-tour';
@@ -34,7 +34,8 @@ import {
 
 import { ColonyBuilder } from './colony-builder';
 import { ResearchPanel } from './research-panel';
-import { LabDialog, LabRail, LabStatus } from './ui';
+import { ResearchVoice } from './research-voice';
+import { LabDialog, LabStatus } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabBootstrap } from './use-lab-bootstrap';
 
@@ -134,6 +135,7 @@ const SandboxShell = () => {
     >
       <LabRail
         seed={sim.seed}
+        voiceSlot={<ResearchVoice />}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
         onOpenGuide={() => navigate(STATIC_ROUTES.FAQ)}

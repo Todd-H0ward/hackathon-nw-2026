@@ -1,15 +1,6 @@
-import type { GlobeBodyId } from '@/shared/ui/globe';
-
 import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
 
 export type { LabModal } from '@/store';
-
-/** Planet texture as a round thumbnail background. */
-export const WORLD_THUMB: Record<GlobeBodyId, string> = {
-  earth: "bg-[url('/images/globe/earth_color.jpg')] bg-[position:35%_50%]",
-  mars: "bg-[url('/images/globe/mars_color.jpg')]",
-  venus: "bg-[url('/images/globe/venus_color.jpg')]",
-};
 
 export const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -32,10 +23,4 @@ export const downloadExperiment = (s: Simulation) => {
   a.download = `xenochoice-${s.body}-${s.seed}-${s.tick}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
-
-export const worldCaseName = (name: string) => {
-  if (name === 'Земля') return 'Земле';
-  if (name === 'Марс') return 'Марсе';
-  return 'Венере';
 };

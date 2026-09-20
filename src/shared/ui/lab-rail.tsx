@@ -21,11 +21,10 @@ import {
   useAudioPreferences,
 } from '@/shared/voice/action-speech';
 
-import { ResearchVoice } from '../research-voice';
-
 export interface LabRailProps {
   seed?: number;
-  showResearchVoice?: boolean;
+  /** Optional voice control (sandbox). FAQ omits this. */
+  voiceSlot?: ReactNode;
   onExport?: () => void;
   onStartTour?: () => void;
   onOpenGuide?: () => void;
@@ -66,10 +65,10 @@ const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
   </NavLink>
 );
 
-/** Compact vertical navigation for the lab — replaces the page header. */
+/** Compact vertical navigation shared by lab pages and FAQ. */
 export const LabRail = ({
   seed,
-  showResearchVoice = true,
+  voiceSlot,
   onExport,
   onStartTour,
   onOpenGuide,
@@ -165,7 +164,7 @@ export const LabRail = ({
         <CircleHelp size={17} />
       </RailLink>
 
-      {showResearchVoice ? <ResearchVoice /> : null}
+      {voiceSlot}
 
       <button
         type="button"
