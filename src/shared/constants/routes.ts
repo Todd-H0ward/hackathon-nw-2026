@@ -6,6 +6,7 @@ export const STATIC_ROUTES = {
   SANDBOX_ANALYTICS: '/sandbox/analytics',
   SANDBOX_ATLAS: '/sandbox/atlas',
   FAQ: '/faq',
+  DEMO: '/demo',
   ANALYTICS: 'analytics',
   ATLAS: 'atlas',
 } as const;

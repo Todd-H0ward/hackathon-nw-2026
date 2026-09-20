@@ -52,6 +52,13 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: STATIC_ROUTES.DEMO,
+        lazy: async () => {
+          const { DemoPage } = await import('@/pages/demo/demo-page');
+          return { Component: DemoPage };
+        },
+      },
+      {
         path: STATIC_ROUTES.FAQ,
         lazy: async () => {
           const { FaqPage } = await import('@/pages/faq');
