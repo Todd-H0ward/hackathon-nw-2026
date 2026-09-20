@@ -31,7 +31,7 @@ export type GlobeConfig = {
 export const GLOBE_BLOOM_DPR: [number, number] = [1, 1.5];
 
 /** Overlay canvas that shares the screen with the page globe during ferry. */
-export const GLOBE_TRANSITION_DPR = 1;
+export const GLOBE_TRANSITION_DPR: [number, number] = [1, 1.5];
 
 export const GLOBE_DEFAULTS: GlobeConfig = {
   RESOLUTION: 400,

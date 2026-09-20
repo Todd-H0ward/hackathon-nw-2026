@@ -5,6 +5,10 @@ export {
   GLOBE_MAPS,
   resolveGlobeConfig,
 } from './bodies';
+export {
+  HOME_CAROUSEL_LOOK,
+  HOME_CAROUSEL_RESOLUTION,
+} from './carousel-look';
 export type { GlobeConfig } from './config';
 export {
   GLOBE_BLOOM_DPR,
@@ -20,5 +24,6 @@ export type {
   PlanetHoverPayload,
 } from './globe-carousel-canvas';
 export { GlobeCarouselCanvas } from './globe-carousel-canvas';
+export { lerpGlobeConfig } from './lib/lerp-globe-config';
 export type { PlanetScreenPose } from './lib/screen-pose';
 export { projectedRadius } from './lib/screen-pose';

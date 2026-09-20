@@ -23,6 +23,10 @@ export interface GlobeProps {
   enableFx?: boolean;
   /** When set, GPGPU position evolve follows this flag (carousel visibility). */
   simEnabledRef?: RefObject<boolean>;
+  /**
+   * Live look overrides read each frame (ferry morph). Falls back to `config`.
+   */
+  liveConfigRef?: RefObject<GlobeConfig>;
 }
 
 const DEFAULT_COLOR = '/images/globe/earth_color.jpg';
@@ -32,12 +36,16 @@ export const Globe = ({
   colorUrl = DEFAULT_COLOR,
   enableFx = true,
   simEnabledRef,
+  liveConfigRef,
 }: GlobeProps) => {
   const hazeRef = useRef<Mesh>(null);
   const hazeMat = useRef<ShaderMaterial>(null);
   const sparkMat = useRef<ShaderMaterial>(null);
   const live = useRef(config);
-  live.current = config;
+  const motion = useRef({ spin: config.SPIN, jitter: config.JITTER });
+  live.current = liveConfigRef?.current ?? config;
+  motion.current.spin = live.current.SPIN;
+  motion.current.jitter = live.current.JITTER;
 
   const colorTex = useTexture(colorUrl);
 
@@ -47,9 +55,13 @@ export const Globe = ({
     spin: config.SPIN,
     jitter: config.JITTER,
     enabledRef: simEnabledRef,
+    motionRef: motion,
   });
 
   useFrame(() => {
+    if (liveConfigRef?.current) live.current = liveConfigRef.current;
+    motion.current.spin = live.current.SPIN;
+    motion.current.jitter = live.current.JITTER;
     const cfg = live.current;
     if (hazeMat.current && cfg.HAZE_OPACITY > 0)
       syncHazeUniforms(hazeMat.current, cfg);
