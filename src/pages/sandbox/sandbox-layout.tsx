@@ -25,7 +25,8 @@ import {
   useLabSeed,
   useLabSetModal,
   useLabSetSeed,
-  useLabSim,
+  useLabSimDialogStats,
+  useLabSimSeed,
   useLabStreamStatus,
   useTransitionDirection,
   useTransitionLaunch,
@@ -57,7 +58,8 @@ const SandboxShell = () => {
   const worlds = useWorldCatalog();
 
   const body = useLabBody();
-  const sim = useLabSim();
+  const simSeed = useLabSimSeed();
+  const dialogStats = useLabSimDialogStats();
   const seed = useLabSeed();
   const setSeed = useLabSetSeed();
   const modal = useLabModal();
@@ -134,7 +136,7 @@ const SandboxShell = () => {
       }
     >
       <LabRail
-        seed={sim.seed}
+        seed={simSeed}
         voiceSlot={<ResearchVoice />}
         onExport={actions.exportExperiment}
         onStartTour={startTour}
@@ -158,7 +160,7 @@ const SandboxShell = () => {
 
       <LabDialog
         modal={modal}
-        sim={sim}
+        stats={dialogStats}
         seed={seed}
         onSeedChange={setSeed}
         onClose={() => setModal(null)}
