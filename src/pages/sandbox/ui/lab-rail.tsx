@@ -5,15 +5,15 @@ import {
   Activity,
   ArrowDownToLine,
   Atom,
-  BookOpen,
   CircleHelp,
   Globe2,
+  GraduationCap,
   Microscope,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES, TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import {
   announceAction,
@@ -25,12 +25,13 @@ import { ResearchVoice } from '../research-voice';
 export interface LabRailProps {
   seed?: number;
   onExport?: () => void;
+  onStartTour?: () => void;
   onOpenGuide?: () => void;
   onGoHome?: () => void;
 }
 
 const itemClass =
-  'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary';
+  'relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -43,17 +44,21 @@ interface RailLinkProps {
   to: string;
   end?: boolean;
   label: string;
+  onClick?: () => void;
   children: ReactNode;
 }
 
-const RailLink = ({ to, end, label, children }: RailLinkProps) => (
+const RailLink = ({ to, end, label, onClick, children }: RailLinkProps) => (
   <NavLink
     to={to}
     end={end}
     className={navClass}
     title={label}
     aria-label={label}
-    onClick={() => announceAction(label)}
+    onClick={() => {
+      announceAction(label);
+      onClick?.();
+    }}
   >
     {children}
   </NavLink>
@@ -63,6 +68,7 @@ const RailLink = ({ to, end, label, children }: RailLinkProps) => (
 export const LabRail = ({
   seed,
   onExport,
+  onStartTour,
   onOpenGuide,
   onGoHome,
 }: LabRailProps) => {
@@ -84,6 +90,7 @@ export const LabRail = ({
     >
       <button
         type="button"
+        data-tour={TOUR_ANCHORS.ROLE}
         onClick={handleGoHome}
         className={cn(
           itemClass,
@@ -95,56 +102,68 @@ export const LabRail = ({
         <Atom size={20} />
       </button>
 
-      <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
-        <Microscope size={17} />
-      </RailLink>
-      <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
-        <Activity size={17} />
-      </RailLink>
-      <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
-        <Globe2 size={17} />
-      </RailLink>
-      <RailLink to={STATIC_ROUTES.FAQ} label="Справочник">
-        <BookOpen size={17} />
-      </RailLink>
+      <div
+        data-tour={TOUR_ANCHORS.NAV}
+        className="flex flex-col items-center gap-1.5 max-mobile:flex-row max-mobile:gap-1.5"
+      >
+        <RailLink to={STATIC_ROUTES.SANDBOX} end label="Лаборатория">
+          <Microscope size={17} />
+        </RailLink>
+        <RailLink to={STATIC_ROUTES.SANDBOX_ANALYTICS} label="Аналитика">
+          <Activity size={17} />
+        </RailLink>
+        <RailLink to={STATIC_ROUTES.SANDBOX_ATLAS} label="Атлас миров">
+          <Globe2 size={17} />
+        </RailLink>
+      </div>
 
       <div className="flex-1" />
 
       {onExport ? (
         <button
           type="button"
+          data-tour={TOUR_ANCHORS.EXPORT}
           className={cn(itemClass, 'cursor-pointer')}
           title={
             seed !== undefined
               ? `Экспорт эксперимента · seed ${seed}`
-              : 'Экспорт'
+              : 'Экспорт эксперимента'
           }
-          aria-label="Экспорт"
+          aria-label="Экспорт эксперимента"
           onClick={onExport}
         >
           <ArrowDownToLine size={17} />
         </button>
       ) : null}
+
+      {onStartTour ? (
+        <button
+          type="button"
+          className={cn(itemClass, 'cursor-pointer')}
+          title="Обучение: обзор лаборатории"
+          aria-label="Обучение: обзор лаборатории"
+          onClick={() => {
+            announceAction('Обучение');
+            onStartTour();
+          }}
+        >
+          <GraduationCap size={17} />
+        </button>
+      ) : null}
+
+      <RailLink
+        to={STATIC_ROUTES.FAQ}
+        label="Справочник и FAQ"
+        onClick={onOpenGuide}
+      >
+        <CircleHelp size={17} />
+      </RailLink>
+
+      <ResearchVoice />
+
       <button
         type="button"
         className={cn(itemClass, 'cursor-pointer')}
-        title="Справочник и FAQ"
-        aria-label="Справочник и FAQ"
-        onClick={() => {
-          announceAction('Справочник и FAQ');
-          if (onOpenGuide) {
-            onOpenGuide();
-          } else {
-            navigate(STATIC_ROUTES.FAQ);
-          }
-        }}
-      >
-        <CircleHelp size={17} />
-      </button>
-      <ResearchVoice />
-      <button
-        type="button"
-        className={itemClass}
         aria-label={
           audio.enabled
             ? 'Выключить озвучку действий'
@@ -163,6 +182,7 @@ export const LabRail = ({
       >
         {audio.enabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
       </button>
+
       <span
         className="mt-1.5 size-1.5 rounded-full bg-xeno-green shadow-[0_0_8px_var(--xeno-green)] max-mobile:mt-0 max-mobile:ml-2"
         title="Локальная модель"

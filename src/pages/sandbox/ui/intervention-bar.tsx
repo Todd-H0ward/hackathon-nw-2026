@@ -1,5 +1,6 @@
 import { ShieldAlert, Sparkles, Waves, Zap } from 'lucide-react';
 
+import { TOUR_ANCHORS } from '@/shared/constants';
 import { Button } from '@/shared/ui';
 
 interface InterventionBarProps {
@@ -13,7 +14,10 @@ export const InterventionBar = ({
   onStorm,
   onScarcity,
 }: InterventionBarProps) => (
-  <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2 max-laptop:flex-wrap max-mobile:gap-[7px]">
+  <div
+    data-tour={TOUR_ANCHORS.INTERVENTIONS}
+    className="flex items-center gap-2 border-b border-border bg-card px-3 py-2 max-laptop:flex-wrap max-mobile:gap-[7px]"
+  >
     <div className="mr-auto flex items-center gap-[7px] text-[9px] text-foreground max-laptop:mb-[3px] max-laptop:w-full [&_svg]:text-xeno-green">
       <Zap size={15} />
       <span>

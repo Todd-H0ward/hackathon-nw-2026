@@ -7,7 +7,7 @@ import {
   Input,
 } from '@/shared/ui';
 
-import { MODEL_VERSION, type Simulation } from '@/features/ecosystem';
+import type { Simulation } from '@/features/ecosystem';
 import type { LabModal } from '@/store';
 
 interface LabDialogProps {
@@ -37,56 +37,6 @@ export const LabDialog = ({
     className="max-w-[620px] border-border bg-popover"
   >
     <DialogClose aria-label="Закрыть">×</DialogClose>
-
-    {modal === 'guide' && (
-      <>
-        <p className="font-mono text-[9px] tracking-[1.45px] text-muted-foreground">
-          ИНСТРУМЕНТ ИССЛЕДОВАТЕЛЯ
-        </p>
-        <DialogTitle className="text-[28px] font-normal tracking-[-0.8px] leading-[1.3]">
-          Не управляйте жизнью.
-          <br />
-          Создавайте условия.
-        </DialogTitle>
-        <DialogDescription>
-          Вы — исследователь, а не участник голосования. Внесите первичные
-          структуры, измените доступный ресурс или вызовите возмущение. Затем
-          наблюдайте, какие решения помогают сообществам сохраняться.
-        </DialogDescription>
-        <ol className="my-5 grid gap-[13px] pl-[18px] text-xs leading-[1.8] text-muted-foreground">
-          <li>
-            <b className="font-medium text-foreground">Выберите среду.</b>{' '}
-            Реальные планеты имеют разные условия; коэффициенты жизни являются
-            допущениями модели.
-          </li>
-          <li>
-            <b className="font-medium text-foreground">
-              Запустите эксперимент.
-            </b>{' '}
-            Светящиеся кристаллы — не люди, а небиологические особи. Их цвет
-            обозначает колонию.
-          </li>
-          <li>
-            <b className="font-medium text-foreground">Измените условия.</b>{' '}
-            Импульс усиливает приток, возмущение повышает затраты, истощение
-            временно отключает ресурс.
-          </li>
-          <li>
-            <b className="font-medium text-foreground">Проверьте гипотезу.</b>{' '}
-            Изучите причины решений, рождения, смерти и отделение дочерних
-            колоний. Экспортируйте результаты.
-          </li>
-        </ol>
-        <div className="rounded-md border border-xeno-green/25 bg-xeno-green/5 p-3.5 text-[10px] leading-[1.9] text-muted-foreground">
-          Планета — реальная. Формы жизни — гипотетические. Модель{' '}
-          {MODEL_VERSION}. Все решения и метрики рассчитывает серверный движок.
-          Условия, действия и seed сохраняются в записи исследования.
-          <span className="mt-1.5 block font-mono text-[8px] tracking-[0.5px]">
-            XENOCHOICE / КОД МЫСЛИ 2026
-          </span>
-        </div>
-      </>
-    )}
 
     {modal === 'reset' && (
       <>

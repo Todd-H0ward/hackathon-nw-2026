@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Focus, Layers3, Maximize2, Radio, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 
+import { TOUR_ANCHORS } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
 import {
   GLOBE_DEFAULTS,
@@ -113,6 +114,7 @@ export const PlanetViewport = ({
   return (
     <section
       ref={sectionRef}
+      data-tour={TOUR_ANCHORS.VIEWPORT}
       className="relative min-h-[360px] flex-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_50%,color-mix(in_oklch,var(--world-color)_9%,transparent),transparent_62%)] max-mobile:min-h-[380px]"
       aria-label="Интерактивная планета с особями и колониями"
     >
