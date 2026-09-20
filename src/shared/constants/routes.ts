@@ -1,7 +1,5 @@
 export const STATIC_ROUTES = {
   HOME: '/',
-  ABOUT: '/about',
-  VOICE: '/voice',
   SANDBOX: '/sandbox',
   SANDBOX_DEMO: '/sandbox/demo',
   SANDBOX_ANALYTICS: '/sandbox/analytics',

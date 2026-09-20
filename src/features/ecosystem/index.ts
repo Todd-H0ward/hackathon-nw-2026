@@ -17,6 +17,7 @@ export {
   living,
   logIntervention,
   members,
+  numericId,
   position,
   remoteColonyId,
   remoteIndividualId,

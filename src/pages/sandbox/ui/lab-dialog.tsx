@@ -89,9 +89,14 @@ export const LabDialog = ({
           Будут воспроизведены seed {sim.seed}, {sim.tick} тактов и{' '}
           {sim.interventions.length} вмешательств.
         </DialogDescription>
-        <Button type="button" variant="primary" size="sm" onClick={onReplay}>
-          Воспроизвести и сравнить
-        </Button>
+        <div className="flex justify-end gap-2.5 mt-5">
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            Отмена
+          </Button>
+          <Button type="button" variant="primary" size="sm" onClick={onReplay}>
+            Воспроизвести и сравнить
+          </Button>
+        </div>
       </>
     )}
 

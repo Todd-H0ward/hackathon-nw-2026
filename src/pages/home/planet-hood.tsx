@@ -26,7 +26,6 @@ export const PlanetHood = ({
     className={cn(
       'pointer-events-none absolute inset-x-0 bottom-0 z-10',
       className,
-      onEnter,
     )}
   >
     <div className="bg-linear-to-t from-[#2a2b2e] from-35% via-[#2a2b2e]/92 via-70% to-transparent px-4 pt-20 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">

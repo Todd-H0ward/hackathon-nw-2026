@@ -46,10 +46,13 @@ export const STAGES = ['Наблюдает', 'Сравнивает', 'Выбир
 
 export const CHAPTER_SECONDS = 18;
 
-export const formatNum = (n: number, digits = 2) => n.toFixed(digits);
+export const formatNum = (n: number | null | undefined, digits = 2) =>
+  typeof n === 'number' && !Number.isNaN(n) ? n.toFixed(digits) : '—';
 
-export const formatSigned = (n: number) =>
-  `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(5)}`;
+export const formatSigned = (n: number | null | undefined) =>
+  typeof n === 'number' && !Number.isNaN(n)
+    ? `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(5)}`
+    : '—';
 
 export const narrationForStage = (frame: Frame, stage: number): string => {
   const { decision: d, before: b } = frame;
@@ -71,5 +74,6 @@ export const narrationForStage = (frame: Frame, stage: number): string => {
   if (d.selectedAction === 'STORE') {
     return 'Ни один доступный вариант не дал достаточного улучшения относительно сохранения. Машина остаётся на STORE: высокий балл сам по себе ещё не гарантирует переключение.';
   }
-  return `${ACTION_LABELS[d.selectedAction as Action]} — лучший доступный вариант, прошедший порог переключения. Преимущество перед STORE: ${formatNum(d.chosenScore - d.scores.STORE, 5)}, при пороге h = ${formatNum(b.genome.hThreshold, 5)}.${d.selectedTarget ? ` Получатель: ${d.selectedTarget}.` : ''}`;
+  const storeScore = d.scores?.STORE ?? 0;
+  return `${ACTION_LABELS[d.selectedAction as Action]} — лучший доступный вариант, прошедший порог переключения. Преимущество перед STORE: ${formatNum(d.chosenScore - storeScore, 5)}, при пороге h = ${formatNum(b.genome.hThreshold, 5)}.${d.selectedTarget ? ` Получатель: ${d.selectedTarget}.` : ''}`;
 };

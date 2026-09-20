@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
-import { useLabStore } from '@/store/lab/store';
 import { Button, Input, Select } from '@/shared/ui';
+
+import { numericId } from '@/features/ecosystem';
+import { useLabStore } from '@/store/lab/store';
 
 import { performIntervention } from './research-api';
 
@@ -49,18 +51,19 @@ export const ColonyBuilder = () => {
           hThreshold: 0.005,
         },
       });
+      const trimmedName = name.trim();
       const colony = snapshot.colonies.find(
-        (c) => !existing.has(c.id) && c.name === name && !c.parentColonyId,
+        (c) =>
+          !existing.has(c.id) &&
+          (c.name === trimmedName || c.name === name) &&
+          !c.parentColonyId,
       );
       if (!colony)
         throw new Error(
           'Колония не создана: проверьте лимиты популяции и сообществ',
         );
       useLabStore.getState().setColonyDraft(null);
-      if (colony)
-        useLabStore
-          .getState()
-          .setSelected(Number(colony.id.match(/\d+$/)?.[0]));
+      useLabStore.getState().setSelected(numericId(colony.id));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Не удалось создать колонию');
     } finally {
