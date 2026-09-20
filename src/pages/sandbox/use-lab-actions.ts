@@ -152,23 +152,23 @@ export const useLabActions = () => {
     const value = (next === 2 || next === 5 ? next : 1) as 1 | 2 | 5;
     if (getLabState().recording) return;
     getLabState().setSpeed(value);
-    withExperiment((id) =>
-      runCommand(
+    withExperiment((id) => {
+      void runCommand(
         id,
         { experimentId: id, command: 'setSpeed', speed: value },
         'Не удалось изменить скорость',
-      ),
-    );
+      );
+    });
   };
 
   const step = () => {
-    withExperiment((id) =>
-      runCommand(
+    withExperiment((id) => {
+      void runCommand(
         id,
         { experimentId: id, command: 'step' },
         'Не удалось выполнить такт',
-      ),
-    );
+      );
+    });
   };
 
   const selectWorld = (next: GlobeBodyId) => {
