@@ -32,6 +32,7 @@ export const syncSparkUniforms = (
   u.uSimSize.value = cfg.RESOLUTION;
   (u.uTint.value as Color).set(cfg.TINT);
   u.uEnvIntensity.value = cfg.ENV_FILL;
+  u.uBrightness.value = cfg.PARTICLE_BRIGHTNESS;
 
   if (positions) {
     u.uPositions.value = positions;

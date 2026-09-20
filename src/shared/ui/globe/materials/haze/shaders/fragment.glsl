@@ -43,6 +43,8 @@ void main() {
   intensity = max(intensity + (igm - 0.5) * (4.0 / 255.0), 0.0);
 
   float alpha = intensity * atmOpacity;
+  if (alpha < 0.004) discard;
+
   vec3 color = atmColor * intensity;
 
   float dither = fract(sin(dot(floor(gl_FragCoord.xy), vec2(12.9898, 78.233))) * 43758.5453123);

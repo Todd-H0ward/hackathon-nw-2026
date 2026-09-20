@@ -19,6 +19,7 @@ const SparkMaterial = shaderMaterial(
     uSimSize: 400,
     uTint: new Color('#f2f2f2'),
     uEnvIntensity: 0.35,
+    uBrightness: 1,
   },
   vertexShader,
   fragmentShader,

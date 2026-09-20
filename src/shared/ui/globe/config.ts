@@ -9,6 +9,7 @@ export type GlobeConfig = {
   DEPTH_RADIUS: number;
   TINT: string;
   ENV_FILL: number;
+  PARTICLE_BRIGHTNESS: number;
   SPIN: number;
   JITTER: number;
   HAZE_OPACITY: number;
@@ -44,6 +45,7 @@ export const GLOBE_DEFAULTS: GlobeConfig = {
   DEPTH_RADIUS: 1.15,
   TINT: '#f2f2f2',
   ENV_FILL: 0.3,
+  PARTICLE_BRIGHTNESS: 1,
   SPIN: 0,
   JITTER: 0,
   HAZE_OPACITY: 0.021,

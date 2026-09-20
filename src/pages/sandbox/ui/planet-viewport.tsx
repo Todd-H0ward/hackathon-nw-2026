@@ -6,6 +6,7 @@ import {
   Layers3,
   Maximize2,
   Radio,
+  Settings,
   Zap,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -36,6 +37,13 @@ import {
 import { ResearchScene } from '../research-scene';
 import { SceneBoundary } from './scene-boundary';
 import { ViewportLegendPanel } from './viewport-legend';
+import { ViewportSettingsDialog } from './viewport-settings-dialog';
+import {
+  PARTICLE_BRIGHTNESS_DEFAULT,
+  percentToBrightness,
+  readParticleBrightnessPercent,
+  writeParticleBrightnessPercent,
+} from './viewport-settings-storage';
 
 interface PlanetViewportProps {
   body: GlobeBodyId;
@@ -101,6 +109,10 @@ export const PlanetViewport = ({
   const transitionPhase = useTransitionPhase();
   const transitionDirection = useTransitionDirection();
   const [legendOpen, setLegendOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [brightnessPercent, setBrightnessPercent] = useState(
+    readParticleBrightnessPercent,
+  );
   // The planet is still in flight — show ours once it lands.
   const sceneHidden =
     transitionPhase === 'launch' ||
@@ -181,6 +193,7 @@ export const PlanetViewport = ({
               cameraReset={cameraReset}
               fill
               stars
+              particleBrightness={percentToBrightness(brightnessPercent)}
               interactive
             >
               {showSurface ? (
@@ -254,10 +267,34 @@ export const PlanetViewport = ({
         >
           <Maximize2 size={17} />
         </button>
+        <button
+          type="button"
+          className={toolClass}
+          title="Настройки сцены"
+          aria-label="Настройки сцены"
+          aria-expanded={settingsOpen}
+          aria-pressed={settingsOpen}
+          onClick={() => setSettingsOpen(true)}
+        >
+          <Settings size={17} />
+        </button>
       </div>
       <ViewportLegendPanel
         open={legendOpen}
         onClose={() => setLegendOpen(false)}
+      />
+      <ViewportSettingsDialog
+        open={settingsOpen}
+        brightnessPercent={brightnessPercent}
+        onBrightnessChange={(percent) => {
+          setBrightnessPercent(percent);
+          writeParticleBrightnessPercent(percent);
+        }}
+        onClose={() => setSettingsOpen(false)}
+        onReset={() => {
+          setBrightnessPercent(PARTICLE_BRIGHTNESS_DEFAULT);
+          writeParticleBrightnessPercent(PARTICLE_BRIGHTNESS_DEFAULT);
+        }}
       />
       <div className="pointer-events-none absolute bottom-4 left-4 grid gap-1.5 font-mono text-[7px] tracking-[1.1px] text-muted-foreground/60">
         <span>ПОВОРОТ — ПЕРЕТАСКИВАНИЕ</span>

@@ -61,6 +61,8 @@ export interface GlobeCanvasProps {
   fill?: boolean;
   /** Soft starfield background (typically with `fill`). */
   stars?: boolean;
+  /** Spark particle brightness multiplier (1 = default look). */
+  particleBrightness?: number;
   /** Remount orbit controls (e.g. after camera reset in lab). */
   cameraReset?: number;
   className?: string;
@@ -73,6 +75,7 @@ export const GlobeCanvas = ({
   interactive = false,
   fill = false,
   stars = false,
+  particleBrightness = GLOBE_DEFAULTS.PARTICLE_BRIGHTNESS,
   cameraReset = 0,
   className,
   children,
@@ -81,8 +84,12 @@ export const GlobeCanvas = ({
   const [pixelSize, setPixelSize] = useState(0);
 
   const config = useMemo(
-    () => resolveGlobeConfig(body, { RADIUS: radius }),
-    [body, radius],
+    () =>
+      resolveGlobeConfig(body, {
+        RADIUS: radius,
+        PARTICLE_BRIGHTNESS: particleBrightness,
+      }),
+    [body, particleBrightness, radius],
   );
   const maps = useMemo(() => GLOBE_MAPS[body], [body]);
 

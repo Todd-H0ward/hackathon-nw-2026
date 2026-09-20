@@ -78,6 +78,8 @@ export const Globe = ({
           <hazeMaterial
             ref={hazeMat}
             transparent
+            depthWrite={false}
+            depthTest
             toneMapped={false}
             blending={AdditiveBlending}
             side={BackSide}
