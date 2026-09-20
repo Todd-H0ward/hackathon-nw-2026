@@ -167,6 +167,15 @@ const SandboxShell = () => {
           void actions.resetExperiment();
         }}
         onReplay={actions.runReplay}
+        onRestart={() => setModal('reset')}
+        onAddColony={() => {
+          setModal(null);
+          actions.addColony();
+        }}
+        onOpenDemo={() => {
+          setModal(null);
+          navigate(STATIC_ROUTES.DEMO);
+        }}
       />
     </motion.div>
   );

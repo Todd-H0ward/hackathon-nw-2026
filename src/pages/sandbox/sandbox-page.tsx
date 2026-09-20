@@ -25,6 +25,7 @@ import {
 } from './ui';
 import { useLabActions } from './use-lab-actions';
 import { useLabDerived } from './use-lab-derived';
+import { usePopulationEnd } from './use-population-end';
 
 export const SandboxPage = () => {
   const actions = useLabActions();
@@ -41,6 +42,8 @@ export const SandboxPage = () => {
     metrics,
     history,
   } = useLabDerived();
+
+  usePopulationEnd(alive.length, sim.tick);
 
   const setSelected = useLabSetSelected();
   const setModal = useLabSetModal();
