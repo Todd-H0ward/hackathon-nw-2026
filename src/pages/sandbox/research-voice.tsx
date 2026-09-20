@@ -5,6 +5,7 @@ import { Mic, X } from 'lucide-react';
 
 import { xenoApiEndpoints as api } from '@/shared/api/xenochoice';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui';
 import { useSpeechRecognition, useSpeechSynthesis } from '@/shared/voice';
 import { useAudioPreferences } from '@/shared/voice/action-speech';
 import { parseResearchVoiceCommand } from '@/shared/voice/intents';
@@ -342,14 +343,16 @@ export const ResearchVoice = () => {
       {isOpen && (
         <div className="absolute bottom-0 left-12 z-50 w-72 rounded-xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur-3xl opacity-95 max-mobile:top-12 max-mobile:bottom-auto max-mobile:left-auto max-mobile:right-0 animate-in fade-in zoom-in-95 duration-150">
           {/* Кнопка закрытия */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={handleClose}
-            className="absolute top-2 right-2 text-muted-foreground/60 hover:text-foreground transition-colors p-1 rounded-sm"
+            className="absolute top-2 right-2 text-muted-foreground/60 hover:text-foreground"
             title="Закрыть"
           >
             <X size={13} />
-          </button>
+          </Button>
 
           {/* Волна посредине */}
           <div

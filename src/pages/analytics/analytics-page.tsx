@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
   MetricCard,
+  Select,
   Sparkline,
 } from '@/shared/ui';
 
@@ -126,11 +127,10 @@ export const AnalyticsPage = () => {
           <MetricCard label="Угасших особей" value={sim.deaths} />
         </div>
 
-        <label className="mb-3 block">
-          График{' '}
-          <select
+        <div className="mb-3 max-w-xs">
+          <Select
+            label="График"
             aria-label="Выбрать график"
-            className="rounded border p-2"
             value={metric}
             onChange={(e) => setParams({ metric: e.target.value })}
           >
@@ -140,8 +140,8 @@ export const AnalyticsPage = () => {
                 {d.name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </div>
         <div className="mb-5 grid grid-cols-2 gap-3 max-tablet:grid-cols-1">
           {charts.map((item) => (
             <Card key={item.name} className="border-border bg-card">
@@ -171,14 +171,14 @@ export const AnalyticsPage = () => {
         </p>
 
         <div className="mb-4 rounded border p-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={busy || !id}
             onClick={() => void compare()}
-            className="rounded border px-3 py-2"
           >
             {busy ? 'Сравниваем…' : 'Сравнить 3 режима · 300 тактов'}
-          </button>
+          </Button>
           <p className="my-2 text-xs text-muted-foreground">
             Одинаковые мир, seed и воздействия до такта 300; переключения режима
             исключены. Исходный опыт не изменяется.

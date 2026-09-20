@@ -5,7 +5,7 @@ import { ArrowRight, Waves } from 'lucide-react';
 
 import { STATIC_ROUTES, WORLD_THUMB } from '@/shared/constants';
 import { cn } from '@/shared/lib/utils';
-import { Button } from '@/shared/ui';
+import { Badge, Button } from '@/shared/ui';
 import type { GlobeBodyId } from '@/shared/ui/globe';
 import { announceAction } from '@/shared/voice/action-speech';
 
@@ -93,9 +93,7 @@ export const AtlasPage = () => {
                       {world.code} · {world.english}
                     </span>
                     {current ? (
-                      <span className="rounded-[3px] border border-primary/40 px-1.5 font-mono text-[8px] leading-[14px] tracking-[1px] text-primary">
-                        ТЕКУЩИЙ
-                      </span>
+                      <Badge variant="accent">ТЕКУЩИЙ</Badge>
                     ) : null}
                   </div>
                   <h2 className="mt-1 text-[18px] font-[450] tracking-[-0.3px]">

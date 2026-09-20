@@ -43,16 +43,18 @@ export function FaqHeader({
       {/* Верхний ряд: кнопка мобильного меню, поиск и действия */}
       <div className="flex items-center justify-between gap-3">
         {/* Мобильная кнопка меню */}
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon-sm"
           onClick={onToggleMobileSidebar}
           aria-label="Открыть меню документации"
           aria-expanded={false}
           aria-controls="faq-mobile-drawer"
-          className="md:hidden flex size-8 items-center justify-center rounded-md border border-border bg-secondary text-foreground hover:bg-secondary/80 cursor-pointer shrink-0"
+          className="md:hidden size-8 shrink-0 bg-secondary"
         >
           <Menu size={18} />
-        </button>
+        </Button>
 
         {/* Поисковая строка */}
         <div className="relative flex-1 max-w-md">

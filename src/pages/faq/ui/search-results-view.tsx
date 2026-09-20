@@ -1,5 +1,7 @@
 import { FileText, Search } from 'lucide-react';
 
+import { Button } from '@/shared/ui';
+
 import type { FaqArticle } from '../types';
 
 interface SearchResultsViewProps {
@@ -34,13 +36,15 @@ export function SearchResultsView({
           <p className="text-sm">
             Ничего не найдено. Попробуйте изменить формулировку запроса.
           </p>
-          <button
+          <Button
             type="button"
+            variant="link"
+            size="sm"
             onClick={onResetSearch}
-            className="text-xs text-primary hover:underline cursor-pointer"
+            className="text-xs h-auto p-0"
           >
             Сбросить поиск
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-3">
