@@ -97,6 +97,7 @@ export type Individual = {
 };
 
 export type Colony = {
+  parentColonyId?: string;
   id: string;
   worldId: WorldId;
   name: string;

@@ -114,21 +114,23 @@ export const EnvironmentPanel = ({
       <div className="grid gap-4 max-mobile:col-span-full max-mobile:grid-cols-2">
         <Slider
           label="Приток ресурса"
-          outputValue={`${sim.settings.resource}%`}
+          outputValue={`${Math.round(sim.settings.resource)}%`}
           min={0}
           max={100}
-          value={sim.settings.resource}
-          onChange={(e) => onSettings({ resource: +e.target.value })}
+          value={Math.round(sim.settings.resource)}
+          onChange={(e) =>
+            onSettings({ resource: Math.round(+e.target.value) })
+          }
           minLabel="Слабый"
           maxLabel="Интенсивный"
         />
         <Slider
           label="Шум среды"
-          outputValue={`${sim.settings.noise}%`}
+          outputValue={`${Math.round(sim.settings.noise)}%`}
           min={0}
           max={100}
-          value={sim.settings.noise}
-          onChange={(e) => onSettings({ noise: +e.target.value })}
+          value={Math.round(sim.settings.noise)}
+          onChange={(e) => onSettings({ noise: Math.round(+e.target.value) })}
           minLabel="Стабильность"
           maxLabel="Возмущения"
         />

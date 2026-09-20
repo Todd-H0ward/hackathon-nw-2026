@@ -11,6 +11,11 @@ export const router = createBrowserRouter([
   {
     path: STATIC_ROUTES.HOME,
     element: <App />,
+    hydrateFallbackElement: (
+      <div role="status" style={{ padding: 24 }}>
+        Загрузка лаборатории…
+      </div>
+    ),
     children: [
       {
         index: true,

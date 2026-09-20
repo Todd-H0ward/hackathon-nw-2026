@@ -8,6 +8,7 @@ import {
 
 import { useWorldCatalog } from '@/features/ecosystem';
 import { getLabState, useLabBody, useLabExperimentId } from '@/store';
+import { useLabStore } from '@/store/lab/store';
 
 import { applySnapshot, clampSeed, labRuntime } from './lab-runtime';
 import { useEnsureExperiment } from './use-ensure-experiment';
@@ -21,15 +22,16 @@ import { useEnsureExperiment } from './use-ensure-experiment';
  */
 export const useLabBootstrap = () => {
   const body = useLabBody();
+  const recording = useLabStore((s) => s.recording !== null);
   const experimentId = useLabExperimentId();
   const worlds = useWorldCatalog();
   const ensureExperiment = useEnsureExperiment();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: bootstrap runs on a planet switch or once worlds load; the seed is read as its latest value on purpose.
   useEffect(() => {
-    if (!worlds.isSuccess) return;
+    if (!worlds.isSuccess || recording) return;
     void ensureExperiment(body, clampSeed(getLabState().seed));
-  }, [body, worlds.isSuccess]);
+  }, [body, worlds.isSuccess, recording]);
 
   const handleSnapshot = useCallback(
     (snapshot: StateSnapshot, sourceExperimentId: string) => {
@@ -43,7 +45,7 @@ export const useLabBootstrap = () => {
 
   const streamStatus = useExperimentStream(
     experimentId,
-    experimentId !== null,
+    experimentId !== null && !recording,
     handleSnapshot,
   );
 
@@ -67,6 +69,8 @@ export const useLabBootstrap = () => {
       for (const timer of Object.values(labRuntime.settingsTimers)) {
         if (timer) clearTimeout(timer);
       }
+      labRuntime.settingsTimers = {};
+      labRuntime.pendingSettings = {};
     },
     [],
   );

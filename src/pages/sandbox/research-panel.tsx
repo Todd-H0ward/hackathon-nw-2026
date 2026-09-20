@@ -10,7 +10,6 @@ import { useLabStore } from '@/store/lab/store';
 
 import { applySnapshot, resetLabRuntime } from './lab-runtime';
 import { performIntervention } from './research-api';
-import { ResearchVoice } from './research-voice';
 
 export const ResearchPanel = () => {
   const sim = useLabStore((s) => s.sims[s.body]);
@@ -20,6 +19,17 @@ export const ResearchPanel = () => {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const serial = useRef(0);
+  const scrubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const importer = useRef<AbortController | null>(null);
+  const [importProgress, setImportProgress] = useState('');
+  useEffect(
+    () => () => {
+      importer.current?.abort();
+      if (scrubTimer.current) clearTimeout(scrubTimer.current);
+      serial.current++;
+    },
+    [],
+  );
   const file = useRef<HTMLInputElement>(null);
   const snap = sim.snapshot;
   const seek = async (tick: number) => {
@@ -38,6 +48,11 @@ export const ResearchPanel = () => {
         .getState()
         .setRecording({ ...(useLabStore.getState().recording ?? rec), tick });
     } catch (e) {
+      if (
+        ticket !== serial.current ||
+        useLabStore.getState().recording?.id !== rec.id
+      )
+        return;
       setError(String(e));
       useLabStore.getState().setRecording({ ...rec, playing: false });
     }
@@ -51,16 +66,24 @@ export const ResearchPanel = () => {
         useLabStore.getState().setRecording({ ...recording, playing: false });
       else
         void seekRef.current(Math.min(recording.maxTick, recording.tick + 5));
-    }, 350);
+    }, 1000);
     return () => clearTimeout(timer);
   }, [recording]);
   const startRecording = async (imported?: unknown) => {
     setBusy(true);
     setError('');
+    importer.current = new AbortController();
     try {
       if (id) await api.postCommand(id, { command: 'pause' });
       const exp = imported
-        ? await api.importExperiment(imported)
+        ? await api.importExperiment(
+            imported,
+            (job) =>
+              setImportProgress(
+                `Восстановление записи: ${job.tick} / ${job.total} тактов`,
+              ),
+            importer.current.signal,
+          )
         : id
           ? await api.getExperiment(id)
           : null;
@@ -78,17 +101,21 @@ export const ResearchPanel = () => {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка импорта');
     } finally {
+      setImportProgress('');
+      importer.current = null;
       setBusy(false);
     }
   };
   const exit = async () => {
     serial.current++;
+    if (scrubTimer.current) clearTimeout(scrubTimer.current);
     useLabStore.getState().setRecording(null);
     const current = useLabStore.getState();
     const liveId = current.experimentIds[current.body];
     if (liveId) {
-      resetLabRuntime(current.body, sim.seed);
-      applySnapshot(current.body, await api.getExperimentState(liveId));
+      const live = await api.getExperiment(liveId);
+      resetLabRuntime(current.body, live.seed);
+      if (live.latestSnapshot) applySnapshot(current.body, live.latestSnapshot);
     }
   };
   const command = async (fn: () => Promise<unknown>) => {
@@ -180,7 +207,10 @@ export const ResearchPanel = () => {
         >
           CSV
         </button>
-        <label className="flex items-center gap-1">
+        <label
+          className="flex items-center gap-1"
+          title="Реакция: фиксированные правила. Адаптация: решения с памятью. Эволюция: решения с памятью и наследуемыми мутациями при делении."
+        >
           Режим
           <select
             aria-label="Режим решений"
@@ -202,7 +232,15 @@ export const ResearchPanel = () => {
             <option value="evolutionary">Эволюция</option>
           </select>
         </label>
-        <ResearchVoice />
+
+        {importProgress && (
+          <span role="status">
+            {importProgress}{' '}
+            <button type="button" onClick={() => importer.current?.abort()}>
+              Отменить импорт
+            </button>
+          </span>
+        )}
         {recording && (
           <div className="flex w-full items-center gap-3 border-t pt-2">
             <b>ЗАПИСЬ</b>
@@ -227,7 +265,9 @@ export const ResearchPanel = () => {
                 useLabStore
                   .getState()
                   .setRecording({ ...recording, playing: false });
-                void seek(Number(e.target.value));
+                const tick = Number(e.target.value);
+                if (scrubTimer.current) clearTimeout(scrubTimer.current);
+                scrubTimer.current = setTimeout(() => void seek(tick), 250);
               }}
             />
             <span>

@@ -23,19 +23,19 @@ const initialCarries = () =>
 export const labRuntime = {
   /** Cross-tick adapter state (death fade, event log, accumulated history). */
   carries: initialCarries(),
+  pendingSettings: {} as Partial<Record<GlobeBodyId, Partial<Settings>>>,
   /** Guards against a second create request for the same planet. */
   creating: {} as Partial<Record<GlobeBodyId, boolean>>,
   /** Reverse lookup so a late snapshot is never applied to the wrong planet. */
   bodyByExperiment: {} as Record<string, GlobeBodyId>,
   seedByBody: {} as Partial<Record<GlobeBodyId, number>>,
   /** Pending debounced intervention per setting. */
-  settingsTimers: {} as Partial<
-    Record<keyof Settings, ReturnType<typeof setTimeout>>
-  >,
+  settingsTimers: {} as Partial<Record<string, ReturnType<typeof setTimeout>>>,
 };
 
 /** Drops accumulated adapter state so a fresh experiment starts from zero. */
 export const resetLabRuntime = (body: GlobeBodyId, seed: number) => {
+  delete labRuntime.pendingSettings[body];
   labRuntime.carries[body] = createAdapterCarry();
   labRuntime.seedByBody[body] = seed;
 };
@@ -71,8 +71,10 @@ export const applySnapshot = (body: GlobeBodyId, snapshot: StateSnapshot) => {
     labRuntime.carries[body],
   );
 
+  if (!getLabState().recording)
+    sim.settings = { ...sim.settings, ...labRuntime.pendingSettings[body] };
   setSim(body, sim);
-  selectFallback(sim.colonies[0]?.id ?? null);
+  if (getLabState().body === body) selectFallback(sim.colonies[0]?.id ?? null);
 };
 
 export const clampSeed = (raw: string) =>

@@ -277,8 +277,8 @@ export const snapshotToSimulation = (
   }
   syncEvents(snapshot, carry);
   carry.settings = {
-    resource: snapshot.flow * 50,
-    noise: snapshot.noise * 100,
+    resource: Math.round(snapshot.flow * 50),
+    noise: Math.round(snapshot.noise * 100),
     mutation: snapshot.mode === 'evolutionary',
   };
   carry.interventions = (snapshot.interventions ?? [])
@@ -323,7 +323,7 @@ export const snapshotToSimulation = (
     (c: RemoteColony) => ({
       id: numericId(c.id),
       remoteId: c.id,
-      primary: c.formedAtTick === 0,
+      primary: !c.parentColonyId,
       born: c.formedAtTick,
       name: c.name,
       color: c.color,

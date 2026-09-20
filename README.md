@@ -1,75 +1,55 @@
-# NW Step Hackathon — frontend template
+# XenoChoice — интерфейс лаборатории
 
-Vite + React 19 + TypeScript + React Router + TanStack Query + Axios + Tailwind 4 + shadcn (Base UI) + Biome.
+React 19, TypeScript, Vite, Three.js / React Three Fiber, Zustand, TanStack Query, Axios и Tailwind. Интерфейс показывает состояние реального Go-движка через REST и WebSocket.
 
-## Quick start
+## Локальный запуск
 
-```bash
+```sh
 pnpm install
 cp .env-example .env
-pnpm dev
+XENOCHOICE_ORIGIN=http://127.0.0.1:8081 pnpm dev
 ```
 
-## Scripts
+В соседнем `backend` запустите `go run ./cmd/lab`. Значение `VITE_XENOCHOICE_API_URL=/api/v2` направляет запросы через Vite proxy; `XENOCHOICE_ORIGIN` задаётся в окружении команды. Без него proxy использует порт 8080 полного сервера. Абсолютный API URL требует подходящих CORS и схемы HTTPS.
 
-| Command        | Description                          |
-|----------------|--------------------------------------|
-| `pnpm dev`     | Start Vite dev server                |
-| `pnpm build`   | Typecheck and production build       |
-| `pnpm preview` | Preview production build             |
-| `pnpm lint`    | Run Biome linter                     |
-| `pnpm format`  | Format and autofix with Biome        |
-| `pnpm check`   | Biome check + TypeScript project refs|
+## Пользовательский сценарий
 
-## Project structure
+1. Выбрать планету и нажать «Открыть лабораторию» или саму планету.
+2. Эксперимент автоматически создаётся в эволюционном режиме и запускается.
+3. Поставить на паузу, изменить приток/шум, внести импульс, возмущение или истощение.
+4. Создать колонию: положение, число особей, энергия, структура, стратегия и мощность связей. Топология создаётся автоматически; существующие связи можно настраивать.
+5. Наблюдать особей, объяснения решений, потомков, метрики и журнал; сравнить режимы в аналитике.
+6. Экспортировать JSON/CSV; импортировать запись, перематывать её и вернуться к живому опыту.
 
-```
-src/
-  App.tsx, router.tsx, providers.tsx, main.tsx   # app shell
-  contexts/     # React contexts, one folder per domain
-  store/        # Zustand stores: <domain>/{store,selectors,index}.ts
-  features/     # domain modules with their own UI and logic
-  pages/        # route pages; page-only components in <page>/ui/
-  shared/
-    api/        # Axios instances + endpoints
-    constants/  # routes, etc.
-    lib/        # utilities (cn, webgl helpers, …)
-    types/      # shared types
-    ui/         # design-system primitives + the globe widget
-```
+При воздействии на паузе интерфейс выполняет такт для применения команды. Просмотр записи не изменяет исходный опыт. Сравнение ограничено интервалом: воздействие после конца интервала не учитывается.
 
-Path alias: `@/*` → `src/*`.
+## Устройство
 
-### Where does a new component go?
+- `pages/home`: выбор мира, 3D-карусель и вход.
+- `pages/sandbox`: лаборатория, атлас, аналитика, конструктор и просмотр записи.
+- `features/ecosystem`: адаптация серверных снимков для интерфейса.
+- `store/lab`: состояние интерфейса и отдельные опыты для планет.
+- `shared/api/xenochoice`: клиент API v2, типы, запросы и WebSocket.
+- `shared/ui/globe`: планета и 3D-слой наблюдения.
+- `shared/voice`: браузерное распознавание, команды и озвучка.
 
-| Reused across pages, no domain knowledge | `shared/ui/` |
-|------------------------------------------|--------------|
-| Belongs to a domain, used on 2+ pages    | `features/<domain>/` |
-| Used by exactly one page                 | `pages/<page>/ui/` |
+API v2 использует camelCase и отдельный Axios-клиент. Generic-клиент `shared/api/api.ts` с преобразованием snake_case не используется для симуляции. WebSocket обновляет UI максимум 10 раз/с, при разрыве есть переподключение и REST polling. Полные графики доступны через серверную историю; журнал UI ограничен.
 
-There is deliberately no `src/components/`: it used to be a fourth location with
-no rule, which is how the same `Sparkline` ended up implemented twice.
+Голос зависит от возможностей браузера, системных голосов, разрешения микрофона и безопасного контекста. Перед защитой проверяйте на конкретной машине. Голос не требуется для основного сценария.
 
-## Environment
+## Проверки и сборка
 
-| Variable         | Description              |
-|------------------|--------------------------|
-| `VITE_API_URL`   | API base URL for Axios   |
-
-`GET /me` is available via `useCurrentUser` / `getCurrentUser`. Wire it into `UserProvider` when you need session bootstrap.
-
-## UI
-
-Add shadcn components with:
-
-```bash
-pnpm dlx shadcn@latest add <component>
+```sh
+pnpm check
+pnpm build
 ```
 
-Components land in `src/shared/ui`.
+Если оболочка pnpm недоступна, при уже установленных зависимостях эквивалентные проверки:
 
-## Stack notes
+```sh
+./node_modules/.bin/biome check .
+./node_modules/.bin/tsc -b
+./node_modules/.bin/vite build
+```
 
-- Imports are organized by Biome (`assist.source.organizeImports`).
-- Axios converts snake_case ↔ camelCase on request/response.
-- React Query defaults: `staleTime` 60s, limited retries, no refetch on focus.
+Сборка остаётся сравнительно тяжёлой из-за 3D. `nginx.conf` проксирует `/api/` и WebSocket в backend на 8080, а клиентские маршруты возвращает через `index.html`. Переменные VITE встраиваются во время сборки. Деплой и HTTPS нужно проверять отдельно от локальной сборки.

@@ -56,15 +56,53 @@ export const exportExperiment = async (
 };
 
 export const replayExperiment = (id: string, request: ReplayRequest) =>
-  unwrap<StateSnapshot>(xenoApi.post(`/experiments/${id}/replay`, request));
+  unwrap<StateSnapshot>(
+    xenoApi.post(`/experiments/${id}/replay`, request, { timeout: 120_000 }),
+  );
 
-export const importExperiment = (bundle: unknown) =>
-  unwrap<Experiment>(xenoApi.post('/experiments/import', bundle));
+export type ImportProgress = {
+  id: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  tick: number;
+  total: number;
+  experimentId?: string;
+  error?: string;
+};
+export const importExperiment = async (
+  bundle: unknown,
+  progress?: (job: ImportProgress) => void,
+  signal?: AbortSignal,
+) => {
+  const job = await unwrap<ImportProgress>(
+    xenoApi.post('/experiments/import', bundle, { signal }),
+  );
+  try {
+    let current = job;
+    while (current.status === 'running') {
+      progress?.(current);
+      if (signal?.aborted) throw new Error('Импорт отменён');
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      current = await unwrap<ImportProgress>(
+        xenoApi.get(`/imports/${job.id}`, { signal }),
+      );
+    }
+    progress?.(current);
+    if (current.status !== 'completed' || !current.experimentId)
+      throw new Error(current.error || 'Не удалось восстановить запись');
+    return await getExperiment(current.experimentId);
+  } catch (error) {
+    await xenoApi.delete(`/imports/${job.id}`).catch(() => undefined);
+    throw error;
+  }
+};
 export const getExperiment = (id: string) =>
   unwrap<Experiment>(xenoApi.get(`/experiments/${id}`));
 export const previewExperiment = (id: string, tick: number) =>
   unwrap<StateSnapshot>(
-    xenoApi.get(`/experiments/${id}/preview`, { params: { tick } }),
+    xenoApi.get(`/experiments/${id}/preview`, {
+      params: { tick },
+      timeout: 120_000,
+    }),
   );
 export const deleteExperiment = (id: string) =>
   xenoApi.delete(`/experiments/${id}`);

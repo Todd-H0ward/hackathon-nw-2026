@@ -11,6 +11,7 @@ import { STATIC_ROUTES } from '@/shared/constants/routes';
 import type { GlobeBodyId, PlanetScreenPose } from '@/shared/ui/globe';
 
 import {
+  getLabState,
   getTransitionState,
   useTransitionBody,
   useTransitionDirection,
@@ -117,7 +118,16 @@ export const HomePage = () => {
         poseMeasureRef={poseMeasureRef}
       />
       {activeInfo ? (
-        <PlanetHood activeBody={activeSlide} info={activeInfo} />
+        <PlanetHood
+          activeBody={activeSlide}
+          info={activeInfo}
+          onEnter={() => {
+            getLabState().setBody(activeSlide);
+            const pose = poseMeasureRef.current?.(activeSlide);
+            if (pose) getTransitionState().launch(activeSlide, pose, 'forward');
+            else navigate(STATIC_ROUTES.SANDBOX);
+          }}
+        />
       ) : null}
     </motion.div>
   );
